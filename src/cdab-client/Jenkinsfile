@@ -1,7 +1,7 @@
 pipeline {
   agent { node { label 'centos7-mono' } }
-  dir("src/cdab-client") {
     stages {
+      dir("src/cdab-client") {
       stage('Init') {
         steps {
           sh 'sudo yum -y install rpm-build redhat-rpm-config rpmdevtools yum-utils'
