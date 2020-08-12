@@ -1,5 +1,10 @@
 pipeline {
-  agent { node { label 'centos7-mono' } }
+  agent { 
+    node { 
+      label 'centos7-mono'
+      def workspace = pwd() 
+    } 
+  }
   stages {
     stage('Init') {
       steps {
