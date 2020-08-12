@@ -7,6 +7,8 @@ node {
         checkout scm
     }
 
-    load 'src/cdab-client/Jenkinsfile'
+    dir("src/cdab-client") {
+        load 'Jenkinsfile'
+    }
     // load 'Project2/Jenkinsfile'
 }
