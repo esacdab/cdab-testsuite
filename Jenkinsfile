@@ -3,7 +3,7 @@ pipeline {
   stages {
     stage('Install tools') {
       steps {
-        sh 'mkdir -p $WORKSPACE/build/{BUILD,RPMS,SOURCES,SPECS,SRPMS}'
+        sh 'sudo yum -y install rpm-build redhat-rpm-config rpmdevtools yum-utils'
       }
     }
     stage('Build CDAB Client') {
