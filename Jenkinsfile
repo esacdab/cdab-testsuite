@@ -47,7 +47,7 @@ pipeline {
                     echo 'Build package'
                     sh "rpmbuild --define \"_topdir ${pwd()}/build\" -ba --define '_branch ${env.BRANCH_NAME}' --define '_release ${env.release}' build/SPECS/cdab-client.spec"
                     sh "rpm -qpl ${pwd()}/build/RPMS/*/*.rpm"
-                    stash includes: '${pwd()}/build/RPMS/**/*.rpm', name: 'cdab-client-rpm'
+                    stash includes: 'build/RPMS/**/*.rpm', name: 'cdab-client-rpm'
                 }
             }
         }
