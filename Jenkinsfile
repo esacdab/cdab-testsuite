@@ -1,5 +1,5 @@
 pipeline {
-    agent docker
+    agent { node { label 'docker' } }
     stages {
         stage('Build CDAB client') {
             agent { 
