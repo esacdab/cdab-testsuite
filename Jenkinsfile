@@ -2,7 +2,12 @@ pipeline {
     agent none
     stages {
         stage('Build CDAB client') {
-            agent { docker { image 'mono:6.8' } }
+            agent { 
+                docker { 
+                    image 'mono:6.8' 
+                    args '-u root:sudo'
+                } 
+            }
             steps {
                 sh 'ls $WORKSPACE'
                 dir("src/cdab-client") {
