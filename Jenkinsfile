@@ -7,7 +7,7 @@ pipeline {
                 dir("src/cdab-client") {
                     echo 'Build CDAB client .NET application'
                     sh 'msbuild /t:build /Restore:true /p:Configuration=DEBUG'
-                    stash include: 'bin/**,App_Data/**,cdab-client', name: 'cdab-client-build'
+                    stash includes: 'bin/**,App_Data/**,cdab-client', name: 'cdab-client-build'
                 }
             }
         }
