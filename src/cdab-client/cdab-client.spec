@@ -1,21 +1,23 @@
+
+%define debug_package %{nil}
+%define __jar_repack  %{nil}
+
 Name:           cdab-client
 Url:            https://git.terradue.com/systems/cdab-cli
 License:        AGPLv3
 Group:          Productivity/Networking/Web/Servers
 Version:        1.3.1
 Release:        %{_release}
-Summary:        MetadataExtractorClient
+Summary:        Copernicus Sentinels Data Access Worldwide Benchmark Test Client
 BuildArch:      noarch
 Source:         /usr/bin/cdab-client
 Requires:       mono
 AutoReqProv:    no
-BuildRequires:  libtool
+# BuildRequires:  libtool
 
 
 %description
-MetadataExtractorClient
-
-%define debug_package %{nil}
+Copernicus Sentinels Data Access Worldwide Benchmark Test Client
 
 %prep
 
