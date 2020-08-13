@@ -45,8 +45,8 @@ pipeline {
                     echo 'Build package dependencies'
                     // sh "yum-builddep -y build/SPECS/cdab-client.spec"
                     echo 'Build package'
-                    sh "rpmbuild --define \"_topdir build\" -ba --define '_branch ${env.BRANCH_NAME}' --define '_release ${env.release}' build/SPECS/cdab-client.spec"
-                    sh "rpm -qpl build/RPMS/*/*.rpm"
+                    sh "rpmbuild --define \"_topdir ${pwd()}/build\" -ba --define '_branch ${env.BRANCH_NAME}' --define '_release ${env.release}' build/SPECS/cdab-client.spec"
+                    sh "rpm -qpl ${pwd()}/build/RPMS/*/*.rpm"
                 }
             }
         }
