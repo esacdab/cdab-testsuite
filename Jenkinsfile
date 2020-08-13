@@ -31,7 +31,7 @@ pipeline {
                     // unstash name: 'cdab-client-build'
                     sh 'mkdir -p build/{BUILD,RPMS,SOURCES,SPECS,SRPMS}'
                     sh 'cp cdab-client.spec build/SPECS/cdab-client.spec'
-                    sh 'spectool -g -R --directory build/SOURCES $WORKSPACE/build/SPECS/cdab-client.spec'
+                    sh 'spectool -g -R --directory build/SOURCES build/SPECS/cdab-client.spec'
                     sh 'cp -r bin build/SOURCES/'
                     sh 'cp -r App_Data build/SOURCES/'
                     sh 'cp cdab-client build/SOURCES/'
