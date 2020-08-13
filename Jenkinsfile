@@ -47,13 +47,13 @@ pipeline {
                     echo 'Build package'
                     sh "rpmbuild --define \"_topdir ${pwd()}/build\" -ba --define '_branch ${env.BRANCH_NAME}' --define '_release ${env.release}' build/SPECS/cdab-client.spec"
                     sh "rpm -qpl ${pwd()}/build/RPMS/*/*.rpm"
+                    stash includes: '${pwd()}/build/RPMS/**/*.rpm', name: 'cdab-client-rpm'
                 }
             }
         }
         stage('Publish RPMs') {
             steps {
-                sh "pwd"
-                sh "ls src/cdab-client/build/RPMS/noarch/"
+                unstash name: 'cdab-client-rpm'
                 archiveArtifacts artifacts: 'src/cdab-client/build/RPMS/**/*.rpm', fingerprint: true
                 echo 'Deploying'
                 script {
