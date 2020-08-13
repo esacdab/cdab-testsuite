@@ -5,14 +5,14 @@ pipeline {
             agent { 
                 docker { 
                     image 'mono:6.8' 
-                    args '-u root:sudo'
+                    // args '-u root:sudo'
                 } 
             }
             steps {
                 dir("src/cdab-client") {
                     echo 'Build CDAB client .NET application'
                     sh 'msbuild /t:build /Restore:true /p:Configuration=DEBUG'
-                    stash includes: 'bin/**,App_Data/**,cdab-client', name: 'cdab-client-build'
+                    // stash includes: 'bin/**,App_Data/**,cdab-client', name: 'cdab-client-build'
                 }
             }
         }
@@ -20,12 +20,12 @@ pipeline {
             agent { 
                 docker { 
                     image 'alectolytic/rpmbuilder:centos-7' 
-                    args '-u root'
+                    // args '-u root'
                 } 
             }
             steps {
                 dir("src/cdab-client") {
-                    unstash name: 'cdab-client-build'
+                    // unstash name: 'cdab-client-build'
                     sh 'mkdir -p $WORKSPACE/build/{BUILD,RPMS,SOURCES,SPECS,SRPMS}'
                     sh 'cp cdab-client.spec $WORKSPACE/build/SPECS/cdab-client.spec'
                     sh 'spectool -g -R --directory $WORKSPACE/build/SOURCES $WORKSPACE/build/SPECS/cdab-client.spec'
