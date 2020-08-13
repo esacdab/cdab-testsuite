@@ -20,7 +20,7 @@ pipeline {
             agent { 
                 docker { 
                     image 'alectolytic/rpmbuilder:centos-7' 
-                    args '-u root:sudo'
+                    args '-u root'
                 } 
             }
             steps {
