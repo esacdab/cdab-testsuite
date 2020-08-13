@@ -4,6 +4,7 @@ pipeline {
         stage('Build CDAB client') {
             agent { docker { image 'mono:6.8' } }
             steps {
+                sh 'ls $WORKSPACE'
                 dir("src/cdab-client") {
                     echo 'Build CDAB client .NET application'
                     sh 'msbuild /t:build /Restore:true /p:Configuration=DEBUG'
