@@ -52,7 +52,7 @@ pipeline {
         }
         stage('Publish RPMs') {
             steps {
-                archiveArtifacts artifacts: 'src/cdab-client/build/RPMS/**/*.rpm', fingerprint: true
+                archiveArtifacts artifacts: '$WORKSPACE/src/**/build/RPMS/**/*.rpm', fingerprint: true
                 echo 'Deploying'
                 script {
                     // Obtain an Artifactory server instance, defined in Jenkins --> Manage:
