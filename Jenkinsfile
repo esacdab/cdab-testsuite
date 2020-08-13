@@ -47,14 +47,47 @@ pipeline {
                     echo 'Build package'
                     sh "rpmbuild --define \"_topdir ${pwd()}/build\" -ba --define '_branch ${env.BRANCH_NAME}' --define '_release ${env.release}' build/SPECS/cdab-client.spec"
                     sh "rpm -qpl ${pwd()}/build/RPMS/*/*.rpm"
-                    stash includes: 'build/RPMS/**/*.rpm', name: 'cdab-client-rpm'
                 }
+                stash includes: 'src/cdab-client/build/RPMS/**/*.rpm', name: 'cdab-client-rpm'
+            }
+        }
+        stage('Package CDAB Remote Client') {
+            agent { 
+                docker { 
+                    image 'alectolytic/rpmbuilder:centos-7' 
+                } 
+            }
+            steps {
+                dir("src/cdab-remote-client") {
+                    sh 'mkdir -p build/{BUILD,RPMS,SOURCES,SPECS,SRPMS}'
+                    sh 'cp cdab-remote-client.spec build/SPECS/cdab-remote-client.spec'
+                    sh 'spectool -g -R --directory build/SOURCES build/SPECS/cdab-remote-client.spec'
+                    sh 'cp -r bin build/SOURCES/'
+                    sh 'cp -r libexec build/SOURCES/'
+                    sh 'cp -r etc build/SOURCES/'
+                    script {
+                        def sdf = sh(returnStdout: true, script: 'date -u +%Y%m%dT%H%M%S').trim()
+                        if (env.BRANCH_NAME == 'master') {
+                            env.release = env.BUILD_NUMBER
+                        }
+                        else {
+                            env.release = 'SNAPSHOT' + sdf
+                        }
+                    }
+                    echo 'Build package dependencies'
+                    // sh "yum-builddep -y build/SPECS/cdab-client.spec"
+                    echo 'Build package'
+                    sh "rpmbuild --define \"_topdir ${pwd()}/build\" -ba --define '_branch ${env.BRANCH_NAME}' --define '_release ${env.release}' build/SPECS/cdab-remote-client.spec"
+                    sh "rpm -qpl ${pwd()}/build/RPMS/*/*.rpm"
+                }
+                stash includes: 'src/cdab-client/build/RPMS/**/*.rpm', name: 'cdab-remote-client-rpm'
             }
         }
         stage('Publish RPMs') {
             steps {
                 unstash name: 'cdab-client-rpm'
-                archiveArtifacts artifacts: 'src/cdab-client/build/RPMS/**/*.rpm', fingerprint: true
+                unstash name: 'cdab-remote-client-rpm'
+                archiveArtifacts artifacts: 'src/*/build/RPMS/**/*.rpm', fingerprint: true
                 echo 'Deploying'
                 script {
                     // Obtain an Artifactory server instance, defined in Jenkins --> Manage:
