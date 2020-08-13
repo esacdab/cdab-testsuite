@@ -53,7 +53,7 @@ pipeline {
         stage('Publish RPMs') {
             steps {
                 sh "pwd"
-                sh "ls src/cdab-client/build/RPMS/build/RPMS/noarch/"
+                sh "ls src/cdab-client/build/RPMS/noarch/"
                 archiveArtifacts artifacts: 'src/cdab-client/build/RPMS/**/*.rpm', fingerprint: true
                 echo 'Deploying'
                 script {
