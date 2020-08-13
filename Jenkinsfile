@@ -50,7 +50,7 @@ pipeline {
                 }
             }
         }
-        stage('Publish') {
+        stage('Publish RPMs') {
             steps {
                 archiveArtifacts artifacts: 'src/cdab-client/build/RPMS/**/*.rpm', fingerprint: true
                 echo 'Deploying'
