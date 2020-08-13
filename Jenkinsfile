@@ -8,11 +8,13 @@ pipeline {
                     // args '-u root:sudo'
                 } 
             }
+            environment {
+                HOME = '$WORKSPACE'
+            }
             steps {
                 dir("src/cdab-client") {
                     echo 'Build CDAB client .NET application'
-                    sh 'msbuild /t:restore /p:RestoreConfigFile=NuGet.Config'
-                    sh 'msbuild /t:build /p:Configuration=DEBUG'
+                    sh 'msbuild /t:build /Restore:true /p:Configuration=DEBUG'
                     // stash includes: 'bin/**,App_Data/**,cdab-client', name: 'cdab-client-build'
                 }
             }
