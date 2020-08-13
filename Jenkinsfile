@@ -1,8 +1,8 @@
 pipeline {
     agent none
     stages {
-        agent { docker { image 'mono:6.8' } }
         stage('Build CDAB client') {
+            agent { docker { image 'mono:6.8' } }
             steps {
                 dir("src/cdab-client") {
                     echo 'Build CDAB client .NET application'
