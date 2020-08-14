@@ -1,9 +1,15 @@
-def descriptor = readYaml file: 'build.yml'
-def mType=getTypeOfVersion(env.BRANCH_NAME)
+
 
 pipeline {
     agent any
     stages {
+        stage('Init'){
+            steps{
+                script {
+                    def descriptor = readDescriptor()
+                }
+            }
+        }
         stage('Build CDAB client') {
             agent { 
                 docker { 
@@ -109,6 +115,7 @@ pipeline {
                     server.publishBuildInfo buildInfo
                 }
                 script {
+                    def mType=getTypeOfVersion(env.BRANCH_NAME)
                     testsuite.push('${mType}${dockerNewVersion}')
                     testsuite.push('${mType}latest')
                 }
@@ -124,4 +131,8 @@ def getTypeOfVersion(branchName) {
     return ""
   
   return "dev"
+}
+
+def readDescriptor (){
+    return readYaml file: 'build.yml'
 }
