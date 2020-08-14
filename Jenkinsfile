@@ -94,8 +94,8 @@ pipeline {
                 unstash name: 'cdab-client-rpm'
                 unstash name: 'cdab-remote-client-rpm'
                 sh "ls src/*/build/RPMS/*/"
-                sh "mv src/cdab-client/build/RPMS/noarch/cdab-client-*.rpm docker/"
-                sh "mv src/cdab-remote-client/build/RPMS/noarch/cdab-remote-client-*.rpm docker/"
+                sh "mv src/cdab-client/build/RPMS/noarch/cdab-client-*.rpm ${WORKSPACE}/docker/"
+                sh "mv src/cdab-remote-client/build/RPMS/noarch/cdab-remote-client-*.rpm ${WORKSPACE}/docker/"
                 script {
                     def cdabclientrpm = findFiles(glob: "cdab-client-*.rpm")
                     def cdabremoteclientrpm = findFiles(glob: "cdab-remote-client-*.rpm")
