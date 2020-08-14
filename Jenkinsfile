@@ -134,5 +134,5 @@ def getTypeOfVersion(branchName) {
 }
 
 def readDescriptor (){
-    return readYaml file: 'build.yml'
+    return readYaml(file: 'build.yml')
 }
