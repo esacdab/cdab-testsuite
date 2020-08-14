@@ -82,25 +82,10 @@ pipeline {
             }
         }
         stage('Publish RPMs') {
-            agent { node { label "artifactory" } }
             steps {
                 unstash name: 'cdab-client-rpm'
                 unstash name: 'cdab-remote-client-rpm'
                 archiveArtifacts artifacts: 'src/*/build/RPMS/**/*.rpm', fingerprint: true
-                echo 'Deploying'
-                script {
-                    // Obtain an Artifactory server instance, defined in Jenkins --> Manage:
-                    def server = Artifactory.server 'repository.terradue.com'
-
-                    // Read the upload specs:
-                    def uploadSpec = readFile 'artifactdeploy.json'
-
-                    // Upload files to Artifactory:
-                    def buildInfo = server.upload spec: uploadSpec
-
-                    // Publish the merged build-info to Artifactory
-                    server.publishBuildInfo buildInfo
-                }
             }
         }
 
