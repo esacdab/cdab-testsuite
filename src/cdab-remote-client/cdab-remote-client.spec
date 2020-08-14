@@ -12,7 +12,7 @@ Version:        1.22
 Release:        %{_release}
 Summary:        Copernicus Sentinels Data Access Worldwide Benchmark Test Remote Client
 BuildArch:      noarch
-Source:         /var/opt/cdab-remote-client/bin/cdab-remote-client1
+Source:         /usr/bin/cdab-remote-client
 Requires:       bash, coreutils, centos-release-scl, rh-python36
 AutoReqProv:    no
 
@@ -25,8 +25,8 @@ Copernicus Sentinels Data Access Worldwide Benchmark Test Remote Client
 
 
 %install
-mkdir -p %{buildroot}/var/opt/cdab-remote-client/bin
-cp %{_sourcedir}/bin/cdab-remote-client %{buildroot}/var/opt/cdab-remote-client/bin/cdab-remote-client
+mkdir -p %{buildroot}/usr/bin
+cp %{_sourcedir}/bin/cdab-remote-client %{buildroot}/usr/bin/
 mkdir -p %{buildroot}/var/opt/cdab-remote-client/libexec
 cp -r %{_sourcedir}/libexec %{buildroot}/var/opt/cdab-remote-client/libexec
 mkdir -p %{buildroot}/var/opt/cdab-remote-client/etc
@@ -41,7 +41,6 @@ SUCCESS=0
 /opt/rh/rh-python36/root/usr/bin/pip install google-api-python-client boto3
 
 # Add symlink to cdab-remote-client
-ln -s /var/opt/cdab-remote-client/bin/cdab-remote-client /usr/bin/cdab-remote-client
 [ ! -f /var/opt/cdab-remote-client/etc/config.yaml ] && cp /var/opt/cdab-remote-client/etc/config.yaml.sample /var/opt/cdab-remote-client/etc/config.yaml
 
 /opt/rh/rh-python36/root/usr/bin/pip install --upgrade pip
@@ -57,5 +56,6 @@ rm -rf %{buildroot}
 
 %files
 /var/opt/cdab-remote-client/*
+/usr/bin/cdab-remote-client
 
 %changelog
