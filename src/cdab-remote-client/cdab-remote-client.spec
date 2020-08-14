@@ -41,6 +41,7 @@ SUCCESS=0
 
 # Add symlink to cdab-remote-client
 ln -s /var/opt/cdab-remote-client/bin/cdab-remote-client /usr/bin/cdab-remote-client
+[ ! -f /var/opt/cdab-remote-client/etc/config.yaml ] && cp /var/opt/cdab-remote-client/etc/config.yaml.sample /var/opt/cdab-remote-client/etc/config.yaml
 
 /opt/rh/rh-python36/root/usr/bin/pip install --upgrade pip
 
