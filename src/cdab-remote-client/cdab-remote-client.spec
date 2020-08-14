@@ -4,7 +4,7 @@
 %define _python_bytecompile_errors_terminate_build 0
 %global __os_install_post %(echo '%{__os_install_post}' | sed -e 's!/usr/lib[^[:space:]]*/brp-python-bytecompile[[:space:]].*$!!g')
 
-Name:           cdab-remote-client1
+Name:           cdab-remote-client
 Url:            https://github.com/Terradue/cdab-testsuite
 License:        AGPLv3
 Group:          Productivity/Networking/Web/Servers
@@ -12,7 +12,7 @@ Version:        1.22
 Release:        %{_release}
 Summary:        Copernicus Sentinels Data Access Worldwide Benchmark Test Remote Client
 BuildArch:      noarch
-Source:         /var/opt/cdab-remote-client/bin/cdab-remote-client
+Source:         /var/opt/cdab-remote-client/bin/cdab-remote-client1
 Requires:       bash, coreutils, centos-release-scl, rh-python36
 AutoReqProv:    no
 

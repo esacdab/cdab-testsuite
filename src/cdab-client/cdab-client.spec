@@ -13,7 +13,6 @@ BuildArch:      noarch
 Source:         /usr/bin/cdab-client
 Requires:       mono
 AutoReqProv:    no
-# BuildRequires:  libtool
 
 
 %description
