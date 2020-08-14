@@ -3,7 +3,7 @@
 %define __jar_repack  %{nil}
 
 Name:           cdab-client
-Url:            https://git.terradue.com/systems/cdab-cli
+Url:            https://github.com/Terradue/cdab-testsuite
 License:        AGPLv3
 Group:          Productivity/Networking/Web/Servers
 Version:        1.3.1

@@ -42,8 +42,6 @@ pipeline {
                             env.release = 'SNAPSHOT' + sdf
                         }
                     }
-                    echo 'Build package dependencies'
-                    // sh "yum-builddep -y build/SPECS/cdab-client.spec"
                     echo 'Build package'
                     sh "rpmbuild --define \"_topdir ${pwd()}/build\" -ba --define '_branch ${env.BRANCH_NAME}' --define '_release ${env.release}' build/SPECS/cdab-client.spec"
                     sh "rpm -qpl ${pwd()}/build/RPMS/*/*.rpm"
@@ -74,8 +72,6 @@ pipeline {
                             env.release = 'SNAPSHOT' + sdf
                         }
                     }
-                    echo 'Build package dependencies'
-                    // sh "yum-builddep -y build/SPECS/cdab-client.spec"
                     echo 'Build package'
                     sh "rpmbuild --define \"_topdir ${pwd()}/build\" -ba --define '_branch ${env.BRANCH_NAME}' --define '_release ${env.release}' build/SPECS/cdab-remote-client.spec"
                     sh "rpm -qpl ${pwd()}/build/RPMS/*/*.rpm"
