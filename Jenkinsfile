@@ -93,8 +93,8 @@ pipeline {
             steps {
                 unstash name: 'cdab-client-rpm'
                 unstash name: 'cdab-remote-client-rpm'
-                sh "ls src/cdab-client/RPMS/*/*/"
-                sh "mv src/cdab-client/RPMS/*/*/cdab-client-${env.release_cdab_client}.noarch.rpm docker/"
+                sh "ls src/cdab-client/build/RPMS/*/*/"
+                sh "mv src/cdab-client/build/RPMS/*/*/cdab-client-${env.release_cdab_client}.noarch.rpm docker/"
                 script {
                     def descriptor = readDescriptor()
                     def testsuite = docker.build(descriptor.docker_image_name, "--build-arg CDAB_RELEASE=${${descriptor.version}} --build-arg CDAB_CLIENT_RPM=cdab-client-${env.release_cdab_client}.noarch.rpm ./docker")
