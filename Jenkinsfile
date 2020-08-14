@@ -36,14 +36,14 @@ pipeline {
                     script {
                         def sdf = sh(returnStdout: true, script: 'date -u +%Y%m%dT%H%M%S').trim()
                         if (env.BRANCH_NAME == 'master') {
-                            env.release = env.BUILD_NUMBER
+                            env.release_cdab_client = env.BUILD_NUMBER
                         }
                         else {
-                            env.release = 'SNAPSHOT' + sdf
+                            env.release_cdab_client = 'SNAPSHOT' + sdf
                         }
                     }
                     echo 'Build package'
-                    sh "rpmbuild --define \"_topdir ${pwd()}/build\" -ba --define '_branch ${env.BRANCH_NAME}' --define '_release ${env.release}' build/SPECS/cdab-client.spec"
+                    sh "rpmbuild --define \"_topdir ${pwd()}/build\" -ba --define '_branch ${env.BRANCH_NAME}' --define '_release ${env.release_cdab_client}' build/SPECS/cdab-client.spec"
                     sh "rpm -qpl ${pwd()}/build/RPMS/*/*.rpm"
                 }
                 stash includes: 'src/cdab-client/build/RPMS/**/*.rpm', name: 'cdab-client-rpm'
@@ -82,7 +82,7 @@ pipeline {
         stage('Build Docker') {
             steps {
                 script {
-                    def testsuite = docker.build(descriptor.docker_image_name, "--build-arg CDAB_RELEASE=${dockerNewVersion} ./docker")
+                    def testsuite = docker.build(descriptor.docker_image_name, "--build-arg CDAB_RELEASE=${dockerNewVersion} --build-arg CDAB_CLIENT_RPM=cdab-client-${env.release_cdab_client}.noarch.rpm ./docker")
                 }
             }
         }

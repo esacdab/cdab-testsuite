@@ -115,13 +115,10 @@ RUN echo 'startretries=0' >> /etc/supervisord.d/binfmt.ini
 RUN echo  >> /etc/supervisord.d/binfmt.ini
 RUN echo 'binfmt_misc /proc/sys/fs/binfmt_misc binfmt_misc none' >>/etc/fstab
 
-# install opensearch-client
-ADD opensearch-client-1.8.24-SNAPSHOT20190315T095109.noarch.rpm /tmp/opensearch-client-1.8.24-SNAPSHOT20190315T095109.noarch.rpm
-RUN yum localinstall -y /tmp/opensearch-client-1.8.24-SNAPSHOT20190315T095109.noarch.rpm
-
 # install cdab-client
-ADD cdab-client-1.3.4-32.noarch.rpm /tmp/cdab-client-1.3.4-32.noarch.rpm
-RUN yum localinstall -y /tmp/cdab-client-1.3.4-32.noarch.rpm
+ARG CDAB_CLIENT_RPM
+ADD $CDAB_CLIENT_RPM /tmp/$CDAB_CLIENT_RPM
+RUN yum localinstall -y /tmp/$CDAB_CLIENT_RPM
 
 # install cdab-remote-client
 RUN yum install -y centos-release-scl
