@@ -97,8 +97,8 @@ pipeline {
                 sh "mv src/cdab-client/build/RPMS/noarch/cdab-client-*.rpm src/docker/"
                 sh "mv src/cdab-remote-client/build/RPMS/noarch/cdab-remote-client-*.rpm src/docker/"
                 script {
-                    def cdabclientrpm = findFiles(glob: "cdab-client-*.rpm")
-                    def cdabremoteclientrpm = findFiles(glob: "cdab-remote-client-*.rpm")
+                    def cdabclientrpm = findFiles(glob: "src/docker/cdab-client-*.rpm")
+                    def cdabremoteclientrpm = findFiles(glob: "src/docker/cdab-remote-client-*.rpm")
                     def descriptor = readDescriptor()
                     def testsuite = docker.build(descriptor.docker_image_name, "--build-arg CDAB_RELEASE=${descriptor.version} --build-arg CDAB_CLIENT_RPM=${cdabclientrpm[0].name} --build-arg CDAB_REMOTE_CLIENT_RPM=${cdabremoteclientrpm[0].name} ./src/docker")
                     def mType=getTypeOfVersion(env.BRANCH_NAME)
