@@ -1,3 +1,6 @@
+def descriptor = readYaml file: 'build.yml'
+def mType=getTypeOfVersion(env.BRANCH_NAME)
+
 pipeline {
     agent any
     stages {
