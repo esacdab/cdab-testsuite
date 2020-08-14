@@ -81,15 +81,7 @@ pipeline {
                 stash includes: 'src/cdab-remote-client/build/RPMS/**/*.rpm', name: 'cdab-remote-client-rpm'
             }
         }
-        stage('Build Docker') {
-            steps {
-                script {
-                    def descriptor = readDescriptor()
-                    def testsuite = docker.build(descriptor.docker_image_name, "--build-arg CDAB_RELEASE=${dockerNewVersion} --build-arg CDAB_CLIENT_RPM=cdab-client-${env.release_cdab_client}.noarch.rpm ./docker")
-                }
-            }
-        }
-        stage('Publish RPMs and Docker') {
+        stage('Build & Publish RPMs') {
             steps {
                 unstash name: 'cdab-client-rpm'
                 unstash name: 'cdab-remote-client-rpm'
@@ -108,9 +100,16 @@ pipeline {
                     // Publish the merged build-info to Artifactory
                     server.publishBuildInfo buildInfo
                 }
+            }
+        }
+
+        stage('Build & Publish Docker') {
+            steps {
                 script {
+                    def descriptor = readDescriptor()
+                    def testsuite = docker.build(descriptor.docker_image_name, "--build-arg CDAB_RELEASE=${${descriptor.version}} --build-arg CDAB_CLIENT_RPM=cdab-client-${env.release_cdab_client}.noarch.rpm ./docker")
                     def mType=getTypeOfVersion(env.BRANCH_NAME)
-                    testsuite.push('${mType}${dockerNewVersion}')
+                    testsuite.push('${mType}${${descriptor.version}}')
                     testsuite.push('${mType}latest')
                 }
             }
