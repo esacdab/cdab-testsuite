@@ -81,7 +81,9 @@ pipeline {
         }
         stage('Build Docker') {
             steps {
-                def testsuite = docker.build(descriptor.docker_image_name, "./docker") 
+                script {
+                    def testsuite = docker.build(descriptor.docker_image_name, "./docker")
+                }
             }
         }
         stage('Publish RPMs and Docker') {
@@ -103,8 +105,10 @@ pipeline {
                     // Publish the merged build-info to Artifactory
                     server.publishBuildInfo buildInfo
                 }
-                testsuite.push('${mType}${dockerNewVersion}')
-                testsuite.push('${mType}latest')
+                script {
+                    testsuite.push('${mType}${dockerNewVersion}')
+                    testsuite.push('${mType}latest')
+                }
             }
         }
     }
