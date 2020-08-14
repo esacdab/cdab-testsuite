@@ -4,7 +4,7 @@
 %define _python_bytecompile_errors_terminate_build 0
 %global __os_install_post %(echo '%{__os_install_post}' | sed -e 's!/usr/lib[^[:space:]]*/brp-python-bytecompile[[:space:]].*$!!g')
 
-Name:           cdab-remote-client
+Name:           cdab-remote-client1
 Url:            https://github.com/Terradue/cdab-testsuite
 License:        AGPLv3
 Group:          Productivity/Networking/Web/Servers
