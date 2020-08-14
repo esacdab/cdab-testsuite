@@ -121,9 +121,10 @@ ADD $CDAB_CLIENT_RPM /tmp/$CDAB_CLIENT_RPM
 RUN yum localinstall -y /tmp/$CDAB_CLIENT_RPM
 
 # install cdab-remote-client
+ARG CDAB_REMOTE_CLIENT_RPM
 RUN yum install -y centos-release-scl
-ADD cdab-remote-client-1.22-el7.noarch.rpm /tmp/cdab-remote-client-1.22-el7.noarch.rpm
-RUN yum localinstall -y /tmp/cdab-remote-client-1.22-el7.noarch.rpm
+ADD $CDAB_REMOTE_CLIENT_RPM /tmp/$CDAB_REMOTE_CLIENT_RPM
+RUN yum localinstall -y /tmp/$CDAB_REMOTE_CLIENT_RPM
 
 # Install Python
 RUN yum install -y \

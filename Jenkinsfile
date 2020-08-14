@@ -94,11 +94,11 @@ pipeline {
                 unstash name: 'cdab-client-rpm'
                 unstash name: 'cdab-remote-client-rpm'
                 sh "ls src/*/build/RPMS/*/"
-                sh "mv src/cdab-client/build/RPMS/*/cdab-client-${env.release_cdab_client}.noarch.rpm docker/"
-                sh "mv src/cdab-remote-client/build/RPMS/*/cdab-remote-client-${env.release_cdab_remote_client}.noarch.rpm docker/"
+                sh "mv src/cdab-client/build/RPMS/noarch/cdab-client-${env.release_cdab_client}.noarch.rpm docker/"
+                sh "mv src/cdab-remote-client/build/RPMS/noarch/cdab-remote-client-${env.release_cdab_remote_client}.noarch.rpm docker/"
                 script {
                     def descriptor = readDescriptor()
-                    def testsuite = docker.build(descriptor.docker_image_name, "--build-arg CDAB_RELEASE=${${descriptor.version}} --build-arg CDAB_CLIENT_RPM=cdab-client-${env.release_cdab_client}.noarch.rpm ./docker")
+                    def testsuite = docker.build(descriptor.docker_image_name, "--build-arg CDAB_RELEASE=${${descriptor.version}}  --build-arg CDAB_CLIENT_RPM=cdab-client-${env.release_cdab_client}.noarch.rpm --build-arg CDAB_REMOTE_CLIENT_RPM=cdab-client-${env.release_cdab_remote_client}.noarch.rpm ./docker")
                     def mType=getTypeOfVersion(env.BRANCH_NAME)
                     testsuite.push('${mType}${${descriptor.version}}')
                     testsuite.push('${mType}latest')
