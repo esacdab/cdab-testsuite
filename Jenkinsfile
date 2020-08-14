@@ -3,13 +3,6 @@
 pipeline {
     agent any
     stages {
-        stage('Init'){
-            steps{
-                script {
-                    def descriptor = readDescriptor()
-                }
-            }
-        }
         stage('Build CDAB client') {
             agent { 
                 docker { 
@@ -91,6 +84,7 @@ pipeline {
         stage('Build Docker') {
             steps {
                 script {
+                    def descriptor = readDescriptor()
                     def testsuite = docker.build(descriptor.docker_image_name, "--build-arg CDAB_RELEASE=${dockerNewVersion} --build-arg CDAB_CLIENT_RPM=cdab-client-${env.release_cdab_client}.noarch.rpm ./docker")
                 }
             }
