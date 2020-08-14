@@ -80,7 +80,7 @@ pipeline {
                     sh "rpmbuild --define \"_topdir ${pwd()}/build\" -ba --define '_branch ${env.BRANCH_NAME}' --define '_release ${env.release}' build/SPECS/cdab-remote-client.spec"
                     sh "rpm -qpl ${pwd()}/build/RPMS/*/*.rpm"
                 }
-                stash includes: 'src/cdab-client/build/RPMS/**/*.rpm', name: 'cdab-remote-client-rpm'
+                stash includes: 'src/cdab-remote-client/build/RPMS/**/*.rpm', name: 'cdab-remote-client-rpm'
             }
         }
         stage('Publish RPMs') {
