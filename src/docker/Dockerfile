@@ -15,7 +15,6 @@
 ##
 
 FROM centos:7
-MAINTAINER "Emmanuel Mathot" <emmanuel.mathot@terradue.com>
 
 # CDAB release and timestamp
 ARG CDAB_RELEASE

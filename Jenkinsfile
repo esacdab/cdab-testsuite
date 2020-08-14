@@ -82,7 +82,7 @@ pipeline {
         stage('Build Docker') {
             steps {
                 script {
-                    def testsuite = docker.build(descriptor.docker_image_name, "./docker")
+                    def testsuite = docker.build(descriptor.docker_image_name, "--build-arg CDAB_RELEASE=${dockerNewVersion} ./docker")
                 }
             }
         }

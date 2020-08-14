@@ -2,7 +2,6 @@
 %define debug_package %{nil}
 %define __jar_repack  %{nil}
 %define _python_bytecompile_errors_terminate_build 0
-%global __os_install_post %(echo '%{__os_install_post}' | sed -e 's!/usr/lib[^[:space:]]*/brp-python-bytecompile[[:space:]].*$!!g')
 
 Name:           cdab-remote-client
 Url:            https://github.com/Terradue/cdab-testsuite
