@@ -68,14 +68,14 @@ pipeline {
                     script {
                         def sdf = sh(returnStdout: true, script: 'date -u +%Y%m%dT%H%M%S').trim()
                         if (env.BRANCH_NAME == 'master') {
-                            env.release = env.BUILD_NUMBER
+                            env.release_cdab_remote_client = env.BUILD_NUMBER
                         }
                         else {
-                            env.release = 'SNAPSHOT' + sdf
+                            env.release_cdab_remote_client = 'SNAPSHOT' + sdf
                         }
                     }
                     echo 'Build package'
-                    sh "rpmbuild --define \"_topdir ${pwd()}/build\" -ba --define '_branch ${env.BRANCH_NAME}' --define '_release ${env.release}' build/SPECS/cdab-remote-client.spec"
+                    sh "rpmbuild --define \"_topdir ${pwd()}/build\" -ba --define '_branch ${env.BRANCH_NAME}' --define '_release ${env.release_cdab_remote_client}' build/SPECS/cdab-remote-client.spec"
                     sh "rpm -qpl ${pwd()}/build/RPMS/*/*.rpm"
                 }
                 stash includes: 'src/cdab-remote-client/build/RPMS/**/*.rpm', name: 'cdab-remote-client-rpm'
@@ -93,8 +93,9 @@ pipeline {
             steps {
                 unstash name: 'cdab-client-rpm'
                 unstash name: 'cdab-remote-client-rpm'
-                sh "ls src/cdab-client/build/RPMS/*/*/"
-                sh "mv src/cdab-client/build/RPMS/*/*/cdab-client-${env.release_cdab_client}.noarch.rpm docker/"
+                sh "ls src/*/build/RPMS/*/"
+                sh "mv src/cdab-client/build/RPMS/*/cdab-client-${env.release_cdab_client}.noarch.rpm docker/"
+                sh "mv src/cdab-remote-client/build/RPMS/*/cdab-remote-client-${env.release_cdab_remote_client}.noarch.rpm docker/"
                 script {
                     def descriptor = readDescriptor()
                     def testsuite = docker.build(descriptor.docker_image_name, "--build-arg CDAB_RELEASE=${${descriptor.version}} --build-arg CDAB_CLIENT_RPM=cdab-client-${env.release_cdab_client}.noarch.rpm ./docker")
