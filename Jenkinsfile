@@ -81,7 +81,8 @@ pipeline {
                 stash includes: 'src/cdab-remote-client/build/RPMS/**/*.rpm', name: 'cdab-remote-client-rpm'
             }
         }
-        stage('Build & Publish RPMs') {
+        stage('Publish RPMs') {
+            agent artifactory
             steps {
                 unstash name: 'cdab-client-rpm'
                 unstash name: 'cdab-remote-client-rpm'
