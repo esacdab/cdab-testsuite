@@ -14,12 +14,13 @@ import socket
 import sys
 import threading
 import time
+import uuid
 import xml.etree.ElementTree as ET
 import yaml
 
 class TestClient:
 
-    VERSION = "1.22"
+    VERSION = "1.24"
 
     errors = {
         ERR_CONFIG: 'Missing or invalid configuration',
@@ -127,7 +128,7 @@ class TestClient:
         TestClient.keep_vm = False
         TestClient.exit_at = None
         self.config_file = None
-        self.service_provider_config = None
+        self.service_provider_configs = None
         self.ca_certificates = []
         self.connect_retries = 30
         self.connect_interval = 0.5
@@ -335,19 +336,19 @@ class TestClient:
 
             # Set service provider parameters
             if 'service_providers' in full_config:
-                self.service_provider_config = full_config['service_providers']
+                self.service_provider_configs = full_config['service_providers']
             else:
                 exit_client(ERR_CONFIG, "Service provider configuration section not found")
 
-            if self.service_provider not in self.service_provider_config:
+            if self.service_provider not in self.service_provider_configs:
                 exit_client(ERR_CONFIG, "No configuration found for service provider '{0}'".format(self.service_provider))
 
-            self.provider_config = self.service_provider_config[self.service_provider]
+            self.service_provider_config = self.service_provider_configs[self.service_provider]
 
-            if 'compute' not in self.provider_config:
+            if 'compute' not in self.service_provider_config:
                 exit_client(ERR_CONFIG, "Service provider '{0}' does not contain a 'compute' configuration".format(self.service_provider))
 
-            self.compute_config = self.provider_config['compute']
+            self.compute_config = self.service_provider_config['compute']
 
             if not isinstance(self.compute_config, dict):
                 exit_client(ERR_CONFIG, "'compute' configuration for service provider '{0}' is empty or invalid".format(self.service_provider))
@@ -476,15 +477,15 @@ class TestClient:
 
             if self.target_endpoint is None or self.target_credentials is None:
 
-                if self.target_site not in self.service_provider_config:
+                if self.target_site not in self.service_provider_configs:
                     exit_client(ERR_CONFIG, "No configuration found for target '{0}'".format(self.target_site))
 
-                self.provider_config = self.service_provider_config[self.target_site]
+                self.target_site_config = self.service_provider_configs[self.target_site]
 
-                if 'data' not in self.provider_config:
+                if 'data' not in self.target_site_config:
                     exit_client(ERR_CONFIG, "Service provider '{0}' does not contain a 'data' configuration".format(self.target_site))
 
-                data_config = self.provider_config['data']
+                data_config = self.target_site_config['data']
 
                 if not isinstance(data_config, dict):
                     exit_client(ERR_CONFIG, "'data' configuration for service provider '{0}' is empty or invalid".format(self.target_site))
@@ -647,6 +648,9 @@ class TestClient:
 
         self.connector.prepare()
 
+        # Get random sequence for VM names to avoid conflicts
+        random_sequence = str(uuid.uuid4())[0:8]
+
         Logger.log(LogLevel.INFO, "Start of execution")
 
         self.start_time = datetime.datetime.utcnow()
@@ -660,16 +664,19 @@ class TestClient:
                 short_name = "#{0}".format(index + 1)
                 if self.total_vm_count == 1:
                     name = "Test run"
-                    suffix = ""
+                    suffix = "-{0}".format(random_sequence)
                 else:
                     name = "Parallel test run #{0}".format(index + 1)
                     if self.flavor_count > 1:
                         name += " (flavour: '{0}')".format(flavor)
-                    suffix = "-{0}".format(index + 1)
+                    suffix = "-{0}-{1}".format(random_sequence, index + 1)
                 if self.total_vm_count == 1 or Logger.mixed_logs:
                     stderr = sys.stderr
                 else:
                     stderr = io.StringIO()
+
+
+                
                 run = TestRun(index, suffix, short_name, name, flavor, self.compute_config['cost_monthly'][fi], self.compute_config['cost_hourly'][fi], self.compute_config['currency'], stderr)
                 runs.append(run)
                 index += 1
@@ -795,8 +802,14 @@ class TestClient:
         else:
             working_dir = "$HOME"
 
+        copy_file(self.compute_config, run, self.config_file, "config.yaml")
+        try:
+            self.connector.copy_additional_files(run)
+        except Exception as e:
+            Logger.log(LogLevel.WARN, str(e), run=run)
+
         if self.docker_run_command == 'CDAB_CLIENT_DEFAULT':
-            copy_file(self.compute_config, run, self.config_file, "config.yaml")
+
             Logger.log(LogLevel.INFO, "Running test scenario {0} (using cdab-client) ...".format(self.cdab_client_test_scenario), run=run)
 
             execute_remote_command(
@@ -1247,7 +1260,7 @@ class TestRun:
         self.volume_id = None
         self.volume_attached = False
         self.volume_device = None
-        self.junit_file = "junit-remote{0}.xml".format(suffix)
+        self.junit_file = "junit-remote-{0}.xml".format(suffix)
         self.cdab_json_file = "TestResult-remote{0}.json".format(suffix)
         self.create_start_time = None
         self.ssh_ready_time = None
