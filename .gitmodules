@@ -1,0 +1,3 @@
+[submodule "cdab-testsuite.wiki"]
+	path = cdab-testsuite.wiki
+	url = https://github.com/Terradue/cdab-testsuite.wiki.git
