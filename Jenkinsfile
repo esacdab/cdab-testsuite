@@ -102,7 +102,7 @@ pipeline {
                     def descriptor = readDescriptor()
                     def testsuite = docker.build(descriptor.docker_image_name, "--build-arg CDAB_RELEASE=${descriptor.version} --build-arg CDAB_CLIENT_RPM=${cdabclientrpm[0].name} --build-arg CDAB_REMOTE_CLIENT_RPM=${cdabremoteclientrpm[0].name} ./src/docker")
                     def mType=getTypeOfVersion(env.BRANCH_NAME)
-                    docker.withRegistry('https://hub.docker.com', 'dockerhub-emmanuelmathot') {
+                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-emmanuelmathot') {
                       testsuite.push('${mType}${${descriptor.version}}')
                       testsuite.push('${mType}latest')
                     }
