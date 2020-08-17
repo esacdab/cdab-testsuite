@@ -31,7 +31,7 @@ The CDAB Test Suite is built automatically providing different assets with each 
 
 ### General Command Line Access
 
-    docker run -it docker.terradue.com/centos7-testsite /bin/bash
+    docker run -it esacdab/testsuite /bin/bash
 
 ## Executing the Copernicus Data Access Benchmarking Tool and running Test Scenarios
 
