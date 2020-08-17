@@ -1,34 +1,10 @@
 [![Build Status](https://build.terradue.com/job/Terradue/job/cdab-testsuite/job/develop/badge/icon)](https://build.terradue.com/blue/organizations/jenkins/Terradue%2Fcdab-testsuite/activity?branch=develop)
 
-# CDAB Test Suite
+![CDAB logo](doc/images/cdab-logo.jpg)
 
-Copernicus Sentinels Data Access Worldwide Benchmark Test Suite is the software suite used to run Test Scenarios
+# CDAB Software Test Suite
 
-=======
-## Docker
-
-This repository contains **Dockerfile** of the Test Suite for benchmarking the Copernicus Data Access Services. See the supported target site in the section SupportedTargetSite
-
-
-### Base Docker Image
-
-* [docker.terradue.com/centos7-testsite](https://docker.terradue.com/artifactory/webapp/#/artifacts/browse/tree/General/dockerv2-local/centos7-testsite/latest)
-
-
-### Installation
-
-1. Install [Docker](https://www.docker.com/).
-
-2. Download [automated build](https://docker.terradue.com/centos7-testsite) from private [Terradue Docker Hub Registry](https://docker.terradue.com/): 
-
-    docker pull docker.terradue.com/centos7-testsite
-
-(alternatively, you can build an image from the included Dockerfile: 
-   
-    docker build -t="<your docker hub>/centos7-testsite"
-
-<a name="SupportedTargetSite"></a>
-## Supported target sites
+Copernicus Sentinels Data Access Worldwide Benchmark Test Suite is the software suite used to run Test Scenarios for bechmarking various targets.
 
 The current supported target sites are
 
@@ -44,7 +20,14 @@ The current supported target sites are
   * [Sobloo](https://sobloo.eu/)
 
 
-## General Usage
+## Getting started
+
+The CDAB Test Suite is built automatically providing different assets with each release:
+- Source code archive
+- Set of binaries for the clients as archives and RPM package
+- A docker image available publicly as [esacdab/testsuite](https://hub.docker.com/repository/docker/esacdab/testsuite)
+
+## Using the Docker image
 
 ### General Command Line Access
 
@@ -52,5 +35,4 @@ The current supported target sites are
 
 ## Executing the Copernicus Data Access Benchmarking Tool and running Test Scenarios
 
-The detailed information for executing the test scenarios are described in [the CDAB Test Client page](doc/CDABClient.md)
-
+The detailed information for executing the test scenarios are described in [the CDAB Test Suite wiki](https://github.com/Terradue/cdab-testsuite/wiki)
