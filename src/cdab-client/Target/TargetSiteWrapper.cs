@@ -13,11 +13,6 @@ using Terradue.OpenSearch.DataHub.Aws;
 using Terradue.OpenSearch.DataHub.GoogleCloud;
 
 
-using System.IO;
-using Terradue.Metadata.EarthObservation.OpenSearch.Extensions;
-using Terradue.OpenSearch.Result;
-using Terradue.ServiceModel.Ogc.Eop21;
-
 namespace cdabtesttools.Target
 {
     public class TargetSiteWrapper
@@ -123,7 +118,7 @@ namespace cdabtesttools.Target
 
             if (target_uri.Host == "catalogue.onda-dias.eu")
             {
-                return new TempOndaDiasWrapper(new Uri(string.Format("https://catalogue.onda-dias.eu/dias-catalogue")), (NetworkCredential)target_creds, targetSiteConfig.Storage.ToOpenStackStorageSettings());
+                return new OndaDiasWrapper(new Uri(string.Format("https://catalogue.onda-dias.eu/dias-catalogue")), (NetworkCredential)target_creds, targetSiteConfig.Storage.ToOpenStackStorageSettings());
             }
 
             if (target_uri.Host == "finder.creodias.eu")
@@ -194,86 +189,4 @@ namespace cdabtesttools.Target
             Wrapper.AuthenticateRequest(request);
         }
     }
-
-
-    public class TempOndaDiasWrapper : DHuSWrapper
-    {
-
-        private log4net.ILog log = log4net.LogManager.GetLogger
-            (System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-
-        public TempOndaDiasWrapper(Uri uri, NetworkCredential target_creds, OpenStackStorageSettings openStackStorageSettings) : base(uri, target_creds)
-        {
-            this.openStackStorageSettings = openStackStorageSettings;
-        }
-
-        private OpenStackStorageSettings openStackStorageSettings;
-        public override string Name => string.Format("ONDA DIAS ({0})", ServiceUrl);
-
-        public override IAssetAccess OrderProduct(IOpenSearchResultItem item)
-        {
-
-            HttpWebRequest request = CreateOrderRequest(item);
-            log.DebugFormat("Ordering : {0}...", request.RequestUri);
-            try
-            {
-                HttpWebResponse objResponse = (HttpWebResponse)request.GetResponse();
-                using (StreamReader sr =
-                   new StreamReader(objResponse.GetResponseStream()))
-                {
-                    log.Debug(sr.ReadToEnd());
-
-                    // Close and clean up the StreamReader
-                    sr.Close();
-                }
-            }
-            catch (WebException we)
-            {
-                log.WarnFormat("Order request return an error but this is normal according to ONDA support: {0}", we.Message);
-                using (StreamReader sr =
-                   new StreamReader(we.Response.GetResponseStream()))
-                {
-                    log.Debug(sr.ReadToEnd());
-
-                    // Close and clean up the StreamReader
-                    sr.Close();
-                }
-            }
-
-            return ProductOrderEnclosureAccess.Create(item.Id, new Uri(string.Format("https://catalogue.onda-dias.eu/dias-catalogue/Products('{0}')/$value", item.Id)), item);
-        }
-
-        private HttpWebRequest CreateOrderRequest(IOpenSearchResultItem item)
-        {
-            if (Settings.Credentials == null)
-                return null;
-            //setup some variables
-            string url = string.Format("https://catalogue.onda-dias.eu/dias-catalogue/Products({0})/Ens.Order", item.Id);
-            //setup some variables end
-
-            HttpWebRequest objRequest = (HttpWebRequest)WebRequest.Create(url);
-            objRequest.Method = "POST";
-            objRequest.Credentials = Settings.Credentials;
-
-            return objRequest;
-        }
-
-        public override IAssetAccess CheckOrder(string orderId, IOpenSearchResultItem item)
-        {
-            EarthObservationType eop = item.GetEarthObservationProfile() as EarthObservationType;
-
-            if (eop.EopMetaDataProperty.EarthObservationMetaData.statusSubType == StatusSubTypeValueEnumerationType.OFFLINE)
-                return null;
-
-            return GetEnclosureAccess(item);
-        }
-
-        public override IStorageClient CreateStorageClient()
-        {
-            if ( openStackStorageSettings == null )
-                throw new InvalidOperationException("No Openstack Settings found for this Sobloo wrapper.");
-            return new OpenStackStorageClient(openStackStorageSettings);
-        }
-    }
-
 }
