@@ -136,7 +136,15 @@ namespace cdabtesttools.Target
 
             if (target_uri.Host.Contains("sobloo.eu"))
             {
-                return new SoblooDiasWrapper(target_creds);
+                var soblooDiasWrapper = new SoblooDiasWrapper(target_creds);
+                soblooDiasWrapper.S3StorageSettings = new S3StorageSettings
+                {
+                    S3KeyId = targetSiteConfig.Storage.S3KeyId,
+                    S3SecretKey = targetSiteConfig.Storage.S3SecretKey,
+                    S3ServiceUrl = targetSiteConfig.Storage.S3ServiceUrl
+                };
+
+                return soblooDiasWrapper;
             }
 
             if (target_uri.Host == "api.daac.asf.alaska.edu")

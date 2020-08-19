@@ -56,7 +56,7 @@ namespace cdabtesttools.TestCases
 
                 foreach (var item in uploadedFiles)
                 {
-                    log.DebugFormat("Filo to download: {0}", item);
+                    log.DebugFormat("File to download: {0}", item);
                     if (item == null)
                         continue;
                     CreateDownloadTransferAndEnqueue(storageClient, item);

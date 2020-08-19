@@ -15,5 +15,11 @@ namespace cdabtesttools.Config
         public string ProjectName { get; set; }
 
         public string UserDomainName { get; set; }
+
+        public string S3KeyId { get; set; }
+
+        public string S3SecretKey { get; set; }
+
+        public string S3ServiceUrl { get; set; }
     }
 }
