@@ -88,8 +88,8 @@ namespace cdabtesttools.TestCases
         {
             string fileName = GenerateName(10) + ".dat";
             Random rng = new Random();
-            ulong totalSize = Convert.ToUInt64(rng.Next(50, 300) * 1024 * 1024);
-            if (Configuration.Current.Global.TestMode) totalSize = 10485760 * 2;
+            ulong totalSize = Convert.ToUInt64(rng.Next(50, 250) * 1024 * 1024);
+            if (Configuration.Current.Global.TestMode) totalSize = 20 * 1024 * 1024;
             var uploadRequest = storageClient.CreateUploadRequest(storageName, fileName, totalSize);
 
             if ( uploadRequest is HttpTransferRequest ){
@@ -218,7 +218,8 @@ namespace cdabtesttools.TestCases
             Stopwatch sw = new Stopwatch();
             sw.Start();
 
-            var uploadStreamTask = transferRequest.GetRequestStreamAsync().ContinueWith(streamTask =>
+            var uploadStreamTask = transferRequest.GetRequestStreamAsync();
+            uploadStreamTask.ContinueWith(streamTask =>
             {
                 respTime = sw.ElapsedMilliseconds;
                 Stream stream = streamTask.Result;
@@ -230,6 +231,9 @@ namespace cdabtesttools.TestCases
                 while (totalByteCounter < totalSize)
                 {
                     rng.NextBytes(buf);
+                    int length = buf.Length;
+                    if ( totalSize < totalByteCounter + length )
+                        length = Convert.ToInt32(totalSize - totalByteCounter);
                     stream.Write(buf, 0, buf.Length);
                     totalByteCounter += buf.Length;
                     intermediateCounter += buf.Length;
@@ -250,6 +254,7 @@ namespace cdabtesttools.TestCases
                         break;
                     }
                 }
+                stream.Close();
                 stopWatchUploadElaspedTime.Stop();
             });
 
@@ -282,13 +287,11 @@ namespace cdabtesttools.TestCases
             }
 
 
-            var uploadTask = transferRequest.GetResponseAsync().ContinueWith(async resp =>
+            var uploadTask = transferRequest.GetResponseAsync().ContinueWith(resp =>
             {
                 sw.Stop();
 
-                
-
-                using (ITransferResponse response = await resp)
+                using (ITransferResponse response = resp.Result)
                 {
 
                     log.InfoFormat("[{1}] > {3} Status Code {0} ({2}ms)", response.StatusCode, taskId, respTime, method);
