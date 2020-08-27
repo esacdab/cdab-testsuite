@@ -21,5 +21,9 @@ namespace cdabtesttools.Config
         public string S3SecretKey { get; set; }
 
         public string S3ServiceUrl { get; set; }
+
+        public int MinUploadSize { get; set; }
+
+        public int MaxUploadSize { get; set; }
     }
 }

@@ -34,8 +34,8 @@ namespace cdabtesttools.TestScenarios {
             string storageName = GenerateName(10).ToLower();
             List<string> uploadedFiles = new List<string>();
 
-            _testCases.Add(new TestCase701(log, target, storageName, uploadedFiles));
-            _testCases.Add(new TestCase702(log, target, storageName, uploadedFiles));
+            _testCases.Add(new TestCase701(log, target, load_factor, storageName, uploadedFiles));
+            _testCases.Add(new TestCase702(log, target, load_factor, storageName, uploadedFiles));
 
             return _testCases;
         }

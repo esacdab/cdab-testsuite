@@ -137,13 +137,7 @@ namespace cdabtesttools.Target
             if (target_uri.Host.Contains("sobloo.eu"))
             {
                 var soblooDiasWrapper = new SoblooDiasWrapper(target_creds);
-                soblooDiasWrapper.S3StorageSettings = new S3StorageSettings
-                {
-                    S3KeyId = targetSiteConfig.Storage.S3KeyId,
-                    S3SecretKey = targetSiteConfig.Storage.S3SecretKey,
-                    S3ServiceUrl = targetSiteConfig.Storage.S3ServiceUrl
-                };
-
+                soblooDiasWrapper.S3StorageSettings = targetSiteConfig.Storage.ToS3StorageSettings();
                 return soblooDiasWrapper;
             }
 
