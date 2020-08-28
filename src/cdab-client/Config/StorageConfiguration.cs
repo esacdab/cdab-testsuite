@@ -2,7 +2,10 @@ using System.Collections.Generic;
 
 namespace cdabtesttools.Config
 {
-    public class StorageGlobalConfiguration
+    /// <summary>
+    /// Data object class for the <em>service_providers.*.storage</em> nodes in the configuration YAML file.
+    /// </summary>
+    public class StorageConfiguration
     {
         public string AuthUrl { get; set; }
 

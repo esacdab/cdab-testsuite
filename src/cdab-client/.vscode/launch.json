@@ -5,6 +5,20 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Amazon TS07",
+            "type": "mono",
+            "request": "launch",
+            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "cwd": "${workspaceRoot}",
+            "args": [
+                "-v",
+                "-tsn=Local",
+                "-lf=1",
+                "-tn=AMAZON",
+                "TS07"
+            ]
+        },
+        {
             "name": "CreoDias TS07",
             "type": "mono",
             "request": "launch",
@@ -493,6 +507,7 @@
                 "-v",
                 "-tsn=Local",
                 "-tn=SOBLOO",
+                "-lf=3",
                 "TS07"
             ]
         },

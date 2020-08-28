@@ -10,36 +10,16 @@ namespace cdabtesttools.Data
     public class StringListChoice : IMissionFilter
     {
         private readonly string key;
-
-        [JsonIgnore]
-        public string Key
-        {
-            get
-            {
-                return key;
-            }
-        }
-
         private string fullName;
-
-        public string FullName
-        {
-            get
-            {
-                return fullName;
-            }
-        }
-
         private LabelString[] labelStrings;
 
+        [JsonIgnore]
+        public string Key => key;
+
+        public string FullName => fullName;
+
         [JsonProperty("options")]
-        public LabelString[] LabelStrings
-        {
-            get
-            {
-                return labelStrings;
-            }
-        }
+        public LabelString[] LabelStrings => labelStrings;
 
         public StringListChoice(string key, string fqdn, LabelString[] labelStrings)
         {

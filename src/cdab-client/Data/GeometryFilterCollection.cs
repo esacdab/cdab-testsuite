@@ -8,26 +8,12 @@ namespace cdabtesttools.Data
     public class GeometryFilterCollection
     {
         private string key;
-
-        public string Key
-        {
-            get
-            {
-                return key;
-            }
-        }
-
         private string ns;
         private IEnumerable<Feature> geometries;
 
-        public IEnumerable<Feature> Features
-        {
-            get
-            {
-                return geometries;
-            }
-        }
+        public string Key => key;
 
+        public IEnumerable<Feature> Features => geometries;
 
         public GeometryFilterCollection(string key, string ns, IEnumerable<Feature> geometries)
         {

@@ -15,6 +15,9 @@ using Terradue.OpenSearch.DataHub.GoogleCloud;
 
 namespace cdabtesttools.Target
 {
+    /// <summary>
+    /// Class providing functionality related to a target site.
+    /// </summary>
     public class TargetSiteWrapper
     {
 
@@ -25,6 +28,39 @@ namespace cdabtesttools.Target
         private Terradue.OpenSearch.Engine.OpenSearchEngine ose;
         private readonly TargetSiteConfiguration targetSiteConfig;
 
+        /// <summary>
+        /// Gets the type of this target site wrapper.
+        /// </summary>
+        /// <value>One of the values of the <see cref="cdabtesttools.Target.TargetType"/> enum.</value>
+        public TargetType Type
+        {
+            get
+            {
+                return target_type;
+            }
+        }
+
+        /// <summary>
+        /// Gets a label representing this target site.
+        /// </summary>
+        public string Label => string.Format("{2} {0} [{1}]", Type, Wrapper.Settings.ServiceUrl.Host, Name);
+
+        /// <summary>
+        /// Gets the name of this target site.
+        /// </summary>
+        public string Name { get; set; }
+
+        public OpenSearchEngine OpenSearchEngine => ose;
+
+        public IDataHubSourceWrapper Wrapper => wrapper;
+
+        public TargetSiteConfiguration TargetSiteConfig => targetSiteConfig;
+
+        /// <summary>
+        /// Creates a <see cref="cdabtesttools.Target.TargetSiteWrapper"/> instance.
+        /// </summary>
+        /// <param name="name">A name for the target site.</param>
+        /// <param name="targetSiteConfig">The object representing the target site node from the configuration YAML file.</param>
         public TargetSiteWrapper(string name, TargetSiteConfiguration targetSiteConfig)
         {
             Name = name;
@@ -34,24 +70,6 @@ namespace cdabtesttools.Target
             wrapper = CreateDataAccessWrapper(targetSiteConfig);
             target_type = InitType();
         }
-
-        public TargetType Type
-        {
-            get
-            {
-                return target_type;
-            }
-        }
-
-        public string Label => string.Format("{2} {0} [{1}]", Type, Wrapper.Settings.ServiceUrl.Host, Name);
-
-        public string Name { get; set; }
-
-        public OpenSearchEngine OpenSearchEngine => ose;
-
-        public IDataHubSourceWrapper Wrapper => wrapper;
-
-        public TargetSiteConfiguration TargetSiteConfig => targetSiteConfig;
 
         private TargetType InitType()
         {

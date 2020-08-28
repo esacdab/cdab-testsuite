@@ -7,19 +7,18 @@ namespace cdabtesttools.Data
 {
     public class FilterDefinition
     {
+        private readonly string key;
         private string fullName;
-
-        public string FullName
-        {
-            get
-            {
-                return fullName;
-            }
-        }
-
         private string value;
+        private string label;
+        private readonly System.Func<IOpenSearchResultCollection, bool> resultsValidator;
+        private System.Func<IOpenSearchResultItem, bool> validator1;
+
 
         public string Key => key;
+
+        public string FullName => fullName;
+
         public string Value
         {
             get
@@ -46,10 +45,6 @@ namespace cdabtesttools.Data
             }
         }
 
-        private string label;
-        private readonly System.Func<IOpenSearchResultCollection, bool> resultsValidator;
-        private readonly string key;
-
         [JsonIgnore]
         public System.Func<IOpenSearchResultCollection, bool> ResultsValidator
         {
@@ -58,8 +53,6 @@ namespace cdabtesttools.Data
                 return resultsValidator;
             }
         }
-
-        private System.Func<IOpenSearchResultItem, bool> validator1;
 
         [JsonIgnore]
         public System.Func<IOpenSearchResultItem, bool> ItemValidator

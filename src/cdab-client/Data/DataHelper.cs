@@ -13,11 +13,12 @@ using Terradue.OpenSearch.Result;
 
 namespace cdabtesttools.Data
 {
+    /// <summary>
+    /// Helper functions related to EO data discovery and search.
+    /// </summary>
     public static class DataHelper
     {
-
         private static ILog log = LogManager.GetLogger(typeof(DataHelper));
-
         private static WKTReader wktreader = new WKTReader();
 
         public static FiltersDefinition GenerateOfflineDataFiltersDefinition(int max, IEnumerable<Mission> missions, Dictionary<string, CatalogueSetConfiguration> catConfig)
@@ -89,12 +90,12 @@ namespace cdabtesttools.Data
         }
 
         /// <summary>
-        /// Create a list of cross filter definitions for a target site against a reference target site
+        /// Creates a list of cross filter definitions for a target site against a reference target site.
         /// </summary>
-        /// <param name="setName">Name of the catalogue set</param>
-        /// <param name="setConfiguration">Configuration set</param>
-        /// <param name="target">Target</param>
-        /// <returns>list of cross filter definitions</returns>
+        /// <param name="setName">The name of the catalogue set.</param>
+        /// <param name="setConfiguration">The configuration set</param>
+        /// <param name="target">The target</param>
+        /// <returns>A list of cross filter definitions.</returns>
         internal static IEnumerable<CrossCatalogueCoverageFiltersDefinition> GenerateCrossCatalogueCoverageFiltersDefinition(string setName, CatalogueSetConfiguration setConfiguration, TargetSiteWrapper target)
         {
             List<CrossCatalogueCoverageFiltersDefinition> bulkDataDefs = new List<CrossCatalogueCoverageFiltersDefinition>();
@@ -282,6 +283,7 @@ namespace cdabtesttools.Data
                 return key == "timeliness" || parameters[key].Contains("timeliness");
             });
         }
+
         private static IEnumerable<IEnumerable<FilterDefinition>> GenerateTimeRangeForMission(Mission mission)
         {
             var current = mission.Lifetime.Start;

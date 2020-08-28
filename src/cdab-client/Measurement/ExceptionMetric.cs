@@ -6,15 +6,15 @@ namespace cdabtesttools.Measurement
     {
         private Exception e;
 
-        public ExceptionMetric(Exception e)
-        {
-            this.e = e;
-        }
-
         public MetricName Name => MetricName.exception;
 
         public string Uom => "#";
 
         public Exception Exception { get => e; }
+
+        public ExceptionMetric(Exception e)
+        {
+            this.e = e;
+        }
     }
 }

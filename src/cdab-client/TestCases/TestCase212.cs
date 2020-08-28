@@ -20,7 +20,6 @@ namespace cdabtesttools.TestCases
 {
     internal class TestCase212 : TestCase202
     {
-
         public TestCase212(ILog log, TargetSiteWrapper target, int load_factor, IEnumerable<Data.Mission> missions, out List<IOpenSearchResultItem> foundItems) :
             base(log, target, load_factor, missions, out foundItems)
         {
