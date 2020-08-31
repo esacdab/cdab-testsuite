@@ -88,8 +88,13 @@ namespace cdabtesttools.TestCases
         {
             string fileName = GenerateName(10) + ".dat";
             
-            int minSize = target.TargetSiteConfig.Storage.MinUploadSize;
-            int maxSize = target.TargetSiteConfig.Storage.MaxUploadSize;
+            int minSize = 0;
+            int maxSize = 0;
+            if (target.TargetSiteConfig.Storage != null)
+            {
+                minSize = target.TargetSiteConfig.Storage.MinUploadSize;
+                maxSize = target.TargetSiteConfig.Storage.MaxUploadSize;
+            }
             if (minSize <= 0 || maxSize <= 0 || minSize > maxSize)
             {
                 minSize = 5;
@@ -102,7 +107,7 @@ namespace cdabtesttools.TestCases
             if (Configuration.Current.Global.TestMode) totalSize = 20 * 1024 * 1024;
             var uploadRequest = storageClient.CreateUploadRequest(storageName, fileName, totalSize);
 
-            if ( uploadRequest is HttpTransferRequest ){
+            if (uploadRequest is HttpTransferRequest) {
                 var httpUploadRequest = uploadRequest as HttpTransferRequest;
                 httpUploadRequest.HttpWebRequest.AllowWriteStreamBuffering = false;
                 httpUploadRequest.HttpWebRequest.ContentLength = Convert.ToInt64(totalSize);
