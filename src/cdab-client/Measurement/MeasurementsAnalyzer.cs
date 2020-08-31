@@ -9,6 +9,9 @@ using Terradue.OpenSearch.DataHub;
 
 namespace cdabtesttools.Measurement
 {
+    /// <summary>
+    /// Functionality to generate test results for the various test cases.
+    /// </summary>
     public static class MeasurementsAnalyzer
     {
         private static ILog log = LogManager.GetLogger(typeof(MeasurementsAnalyzer));
@@ -21,14 +24,14 @@ namespace cdabtesttools.Measurement
             if (testCase.Results.Count() == 0)
             {
                 return new TestCaseResult(testCase.Id, metrics, testCase.StartTime, testCase.EndTime);
-                DoubleMetric _errorRate2 = new DoubleMetric(MetricName.errorRate,
-                100,
-                 "%");
+                /*
+                DoubleMetric _errorRate2 = new DoubleMetric(MetricName.errorRate, 100, "%");
                 log.DebugFormat("Error Rate : {0}{1}", _errorRate2.Value, _errorRate2.Uom);
                 metrics.Add(_errorRate2);
                 var _tcr2 = new TestCaseResult(testCase.Id, metrics, testCase.StartTime, testCase.EndTime);
                 _tcr2.ClassName = testCase.GetType().ToString();
                 return _tcr2;
+                */
             }
 
             var results = testCase.Results.Where(r => r != null);
@@ -211,7 +214,7 @@ namespace cdabtesttools.Measurement
                 List<TimeSpan> offlineDataAvailabilityLatencies = new List<TimeSpan>();
                 foreach (var result in results)
                 {
-                    if ( result.Status != TestUnitResultStatus.Complete )
+                    if (result.Status != TestUnitResultStatus.Complete)
                         continue;
                     var _httpStatus = result.Metrics.Where(m => m.Name == MetricName.httpStatusCode).Cast<StringMetric>().Select(m => m.Value);
                     int statusCode = int.Parse(_httpStatus.First().Split(':').First());
@@ -497,12 +500,12 @@ namespace cdabtesttools.Measurement
                 wrongResultsCounts.Add(dataCollectionDivision, wrongResultsCount);
                 // exceptions.Add(dataCollectionDivision, exception);
 
-                if (exception == null)
+                try
                 {
                     opsAvgLatencies.Add(dataCollectionDivision, ((LongMetric)testUnit.Metrics.FirstOrDefault(m => m.Name == MetricName.avgDataOperationalLatency)).Value);
                     opsMaxLatencies.Add(dataCollectionDivision, ((LongMetric)testUnit.Metrics.FirstOrDefault(m => m.Name == MetricName.maxDataOperationalLatency)).Value);
                 }
-                else
+                catch
                 {
                     opsAvgLatencies.Add(dataCollectionDivision, -1);
                     opsMaxLatencies.Add(dataCollectionDivision, -1);

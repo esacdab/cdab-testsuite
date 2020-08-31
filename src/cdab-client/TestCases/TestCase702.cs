@@ -26,13 +26,12 @@ namespace cdabtesttools.TestCases
 {
     internal class TestCase702 : TestCase301
     {
-
         private string storageName;
         private readonly List<string> uploadedFiles;
 
         public string TestFile { get; set; }
 
-        public TestCase702(ILog log, TargetSiteWrapper target, string storageName, List<string> uploadedFiles) : base(log, target, null)
+        public TestCase702(ILog log, TargetSiteWrapper target, int load_factor, string storageName, List<string> uploadedFiles) : base(log, target, load_factor, null)
         {
             this.Id = "TC702";
             this.Title = "Single remote download from cloud storage";
@@ -56,7 +55,7 @@ namespace cdabtesttools.TestCases
 
                 foreach (var item in uploadedFiles)
                 {
-                    log.DebugFormat("Filo to download: {0}", item);
+                    log.DebugFormat("File to download: {0}", item);
                     if (item == null)
                         continue;
                     CreateDownloadTransferAndEnqueue(storageClient, item);
@@ -73,7 +72,6 @@ namespace cdabtesttools.TestCases
                         log.Debug(response.ReadToEnd());
                     }
                 }
-
             }
         }
 
@@ -105,6 +103,10 @@ namespace cdabtesttools.TestCases
 
                 var storageClient = target.Wrapper.CreateStorageClient();
                 storageClient.Prepare();
+                foreach (var item in uploadedFiles) {
+                    log.DebugFormat("Deleting file {0}...", item);
+                    storageClient.DeleteFile(storageName, item);
+                }
                 log.DebugFormat("Deleting storage {0}...", storageName);
                 storageClient.DeleteStorage(storageName, true);
                 log.DebugFormat("OK");
@@ -118,7 +120,5 @@ namespace cdabtesttools.TestCases
             }
 
         }
-
-
     }
 }

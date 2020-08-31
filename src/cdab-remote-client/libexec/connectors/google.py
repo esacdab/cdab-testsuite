@@ -13,7 +13,7 @@ class GoogleConnector:
     def __init__(self, client):
         self.client = client
         self.compute_config = self.client.compute_config
-        self.provider_config = self.client.provider_config
+        self.service_provider_config = self.client.service_provider_config
 
 
 
@@ -21,14 +21,14 @@ class GoogleConnector:
         error = False
 
         if 'account_file' not in self.compute_config or not self.compute_config['account_file']:
-            if 'account_file' in self.provider_config and self.provider_config['account_file']:
-                self.compute_config['account_file'] = self.provider_config['account_file']
+            if 'account_file' in self.service_provider_config and self.service_provider_config['account_file']:
+                self.compute_config['account_file'] = self.service_provider_config['account_file']
             elif 'auth_file' in self.compute_config and self.compute_config['auth_file']:
                 self.compute_config['account_file'] = self.compute_config['auth_file']
 
         if 'project_id' not in self.compute_config or not self.compute_config['project_id']:
-            if 'project_id' in self.provider_config and self.provider_config['project_id']:
-                self.compute_config['project_id'] = self.provider_config['project_id']
+            if 'project_id' in self.service_provider_config and self.service_provider_config['project_id']:
+                self.compute_config['project_id'] = self.service_provider_config['project_id']
             elif 'project_name' in self.compute_config and self.compute_config['project_name']:
                 self.compute_config['project_id'] = self.compute_config['project_name']
 
@@ -102,6 +102,16 @@ class GoogleConnector:
 
     def prepare(self):
         pass
+
+
+
+
+    def copy_additional_files(self, run):
+        dirname = os.path.dirname(self.compute_config['account_file'])
+        execute_remote_command(self.compute_config, run, "sudo mkdir -p {0}".format(dirname))
+        execute_remote_command(self.compute_config, run, "sudo chown {0} {1}".format(self.compute_config['remote_user'], dirname))
+        copy_file(self.compute_config, run, self.compute_config['account_file'], self.compute_config['account_file'])
+
     
 
         

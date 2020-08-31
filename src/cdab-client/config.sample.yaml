@@ -1620,55 +1620,6 @@ service_providers:
                     full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}timeliness"
                     value: "NTC"
                     label: "Non Time Critical"
- 
-    max_catalogue_thread: 5
-    max_download_thread: 2
-    # Large download size for Google
-    max_download_size: 54472397018
-    # Path to the Google Key Service Account File (https://console.developers.google.com/iam-admin/serviceaccounts)
-    account_file: /path/tothejsonserviceaccountfile.json
-    # Google Project ID 
-    project_id: CDAB
-    data:
-      url: https://storage.googleapis.com
-      # Here in the case of google, use the openhub credentials to make the search
-      credentials: scihubusername:scihubsecret
-      catalogue:
-        # Amazon Catalogue collections' set definition
-        sets:
-          # Amazon has only a subset of the Copernicus datasets
-          Google:
-            # Identifier of the cxatalogue set configured in the data section
-            reference_set_id: Google
-            # ... as a baseline (used in TC5O1, TC502, TC601 & TC602)...
-            type: baseline  # The catalogue collections' set of type baseline are referering to common baseline defined globally
-            # ... with ApiHub as a reference ...
-            reference_target_site: ApiHub
-            # ... and with the following parameters to filter out only baseline
-            parameters: # All Copernicus products are baseline. Just remove the very recent one to avoid newly ingested bias
-              - key: sensingStop
-                full_name: "{http://a9.com/-/opensearch/extensions/time/1.0/}end"
-                value: "[NOW-2D]"
-                label: "before 2 days ago"
-          # Amazon has a data offering... 
-          DataOffer:
-            # ... defined as locally managed (TC503)
-            type: local
-            # ... with ApiHub as a reference
-            reference_target_site: ApiHub
-            # collections' set definition
-            collections:
-              Sentinel2:
-                label: "Sentinel-2"
-                parameters:
-                  - key: missionName
-                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
-                    value: "Sentinel-2"
-                    label: "Sentinel-2"
-                  - key: sensingStop
-                    full_name: "{http://a9.com/-/opensearch/extensions/time/1.0/}end"
-                    value: "[NOW-2D]"
-                    label: "before 2 days ago"
 data:
   # This section defines all the logical sets of data
   sets:

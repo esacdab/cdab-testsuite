@@ -22,7 +22,6 @@ namespace cdabtesttools.TestCases
 {
     internal class TestCase501 : TestCase201
     {
-
         private ConcurrentQueue<CrossCatalogueCoverageFiltersDefinition> queryFiltersTuple;
 
         public TestCase501(ILog log, TargetSiteWrapper target, int load_factor, out List<IOpenSearchResultItem> foundItems) :

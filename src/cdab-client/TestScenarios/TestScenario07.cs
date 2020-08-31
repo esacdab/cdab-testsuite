@@ -8,13 +8,16 @@ using cdabtesttools.TestCases;
 using log4net;
 using Terradue.OpenSearch.Result;
 
-namespace cdabtesttools.TestScenarios {
-    internal class TestScenario07 : IScenario {
+namespace cdabtesttools.TestScenarios
+{
+    internal class TestScenario07 : IScenario
+    {
         private TargetSiteWrapper target;
         private int load_factor;
         private ILog log;
 
-        public TestScenario07(ILog log, TargetSiteWrapper target, int load_factor) {
+        public TestScenario07(ILog log, TargetSiteWrapper target, int load_factor)
+        {
             this.log = log;
             this.load_factor = load_factor;
             this.target = target;
@@ -24,18 +27,20 @@ namespace cdabtesttools.TestScenarios {
 
         public string Title => "Simple data upload to and download from cloud storage";
 
-        internal static bool CheckCompatibility(TargetSiteWrapper target) {
+        internal static bool CheckCompatibility(TargetSiteWrapper target)
+        {
             return target.Type == TargetType.DATAHUB || target.Type == TargetType.DIAS || target.Type == TargetType.ASF || target.Type == TargetType.THIRDPARTY;
         }
 
-        public IEnumerable<TestCase> CreateTestCases() {
+        public IEnumerable<TestCase> CreateTestCases()
+        {
             List<TestCase> _testCases = new List<TestCase>();
 
             string storageName = GenerateName(10).ToLower();
             List<string> uploadedFiles = new List<string>();
 
-            _testCases.Add(new TestCase701(log, target, storageName, uploadedFiles));
-            _testCases.Add(new TestCase702(log, target, storageName, uploadedFiles));
+            _testCases.Add(new TestCase701(log, target, load_factor, storageName, uploadedFiles));
+            _testCases.Add(new TestCase702(log, target, load_factor, storageName, uploadedFiles));
 
             return _testCases;
         }
@@ -58,9 +63,6 @@ namespace cdabtesttools.TestScenarios {
             }
 
             return Name;
-
-
         }
-
     }
 }

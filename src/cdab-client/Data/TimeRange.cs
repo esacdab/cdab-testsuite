@@ -6,46 +6,19 @@ namespace cdabtesttools.Data
     public class TimeRange
     {
         private string startFullName;
-
-        [JsonIgnore]
-        public string ParameterStartFullName
-        {
-            get
-            {
-                return startFullName;
-            }
-        }
-
         private string endFulllName;
-
-        [JsonIgnore]
-        public string ParameterEndFullName
-        {
-            get
-            {
-                return endFulllName;
-            }
-        }
-
         private DateTime start;
-
-        public DateTime Start
-        {
-            get
-            {
-                return start;
-            }
-        }
-
         private DateTime stop;
 
-        public DateTime Stop
-        {
-            get
-            {
-                return stop;
-            }
-        }
+        [JsonIgnore]
+        public string ParameterStartFullName => startFullName;
+
+        [JsonIgnore]
+        public string ParameterEndFullName => endFulllName;
+
+        public DateTime Start => start;
+
+        public DateTime Stop => stop;
 
         public TimeRange(string startFullName, string endFullName, DateTime start, DateTime stop)
         {

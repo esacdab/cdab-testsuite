@@ -11,98 +11,38 @@ namespace cdabtesttools.Data
     public class ItemNumberRange : IMissionFilter
     {
         private readonly string key;
-
-        [JsonIgnore]
-        public string Key
-        {
-            get
-            {
-                return key;
-            }
-        }
-
         private string filterDefinition;
-
-        public string FullName
-        {
-            get
-            {
-                return filterDefinition;
-            }
-        }
-
         private double min;
-
-        public double Min
-        {
-            get
-            {
-                return min;
-            }
-        }
-
         private double max;
-
-        public double Max
-        {
-            get
-            {
-                return max;
-            }
-        }
-
         private double step;
-
-        public double Step
-        {
-            get
-            {
-                return step;
-            }
-        }
-
         private string formatter;
+        private Regex parser;
         private string label;
         private readonly Func<double[], Func<IOpenSearchResultItem, bool>> itemValueValidator;
-
-        [JsonIgnore]
-        public Func<double[], Func<IOpenSearchResultItem, bool>> ItemValueValidator
-        {
-            get
-            {
-                return itemValueValidator;
-            }
-        }
-
         private readonly Func<double[], Func<IOpenSearchResultCollection, bool>> resultsValidator;
 
         [JsonIgnore]
-        public Func<double[], Func<IOpenSearchResultCollection, bool>> ResultsValidator
-        {
-            get
-            {
-                return resultsValidator;
+        public string Key => key;
 
-            }
-        }
+        public string FullName => filterDefinition;
 
-        public string Label
-        {
-            get
-            {
-                return label;
-            }
-        }
+        public double Min => min;
 
-        public string Formatter
-        {
-            get
-            {
-                return formatter;
-            }
-        }
+        public double Max => max;
 
-        public Regex Parser { get; private set; }
+        public double Step => step;
+
+        [JsonIgnore]
+        public Func<double[], Func<IOpenSearchResultItem, bool>> ItemValueValidator => itemValueValidator;
+
+        [JsonIgnore]
+        public Func<double[], Func<IOpenSearchResultCollection, bool>> ResultsValidator => resultsValidator;
+
+        public string Formatter => formatter;
+
+        public Regex Parser => parser;
+
+        public string Label => label;
 
         public ItemNumberRange(string key, string filterDefinition, double min, double max, double step, string formatter, Regex parser, string label, Func<double[], Func<IOpenSearchResultItem, bool>> itemValidator, Func<double[], Func<IOpenSearchResultCollection, bool>> resultsValidator)
         {
@@ -112,10 +52,10 @@ namespace cdabtesttools.Data
             this.max = max;
             this.step = step;
             this.formatter = formatter;
+            this.parser = parser;
             this.label = label;
             this.itemValueValidator = itemValidator;
             this.resultsValidator = resultsValidator;
-            this.Parser = parser;
         }
 
         public Func<IOpenSearchResultItem, bool> GetItemValidator(OpenSearchParameter parameter)

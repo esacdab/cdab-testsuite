@@ -14,12 +14,15 @@ import socket
 import sys
 import threading
 import time
+import uuid
 import xml.etree.ElementTree as ET
 import yaml
 
 class TestClient:
+    """Main class for remote execution of the test scenarios TS11, TS12, TS13 and TS15.
+    """
 
-    VERSION = "1.22"
+    VERSION = "1.24"
 
     errors = {
         ERR_CONFIG: 'Missing or invalid configuration',
@@ -127,7 +130,7 @@ class TestClient:
         TestClient.keep_vm = False
         TestClient.exit_at = None
         self.config_file = None
-        self.service_provider_config = None
+        self.service_provider_configs = None
         self.ca_certificates = []
         self.connect_retries = 30
         self.connect_interval = 0.5
@@ -292,6 +295,52 @@ class TestClient:
 
 
 
+    def set_property(self, name, label, value):
+        if name == '-h':
+            TestClient.print_usage(exit_code=0)
+        if name == '-v':
+            Logger.verbose = True
+        if name == '-ml':
+            Logger.mixed_logs = True
+        elif name == '-P':
+            Logger.show_passwords = True
+        elif name == '-K':
+            TestClient.keep_vm = True
+        elif name == '-X1':
+            TestClient.exit_at = 1
+        elif name == '-conf':
+            self.config_file = value
+        elif name == '-vm':
+            if value < 1: TestClient.print_usage("Value for {0} must be at least 1".format(name))
+            self.vm_count = value
+        elif name == '-lf':
+            if value < 1: TestClient.print_usage("Value for {0} must be at least 1".format(name))
+            self.load_factor = value
+        elif name == '-sp':
+            self.service_provider = value
+        elif name == '-ts':
+            self.target_site = value
+        elif name == '-te':
+            self.target_endpoint = value
+        elif name == '-tc':
+            self.target_credentials = value
+        elif name == '-ps':
+            self.processing_scenario_name = value
+        elif name == '-psw':
+            self.processing_scenario_cwl_file = value
+        elif name == '-psi':
+            self.processing_scenario_input_file = value
+        elif name == '-i':
+            self.docker_image_id = value
+        elif name == '-a':
+            self.docker_config = value
+        elif name == '-n':
+            self.test_site_name = value
+        elif label == 'test-scenario':
+            self.test_scenario = value
+
+
+
     def exit(exit_code, message):
         print("ERROR: {0}".format(message), file=sys.stderr)
         sys.exit(exit_code)
@@ -299,6 +348,10 @@ class TestClient:
 
 
     def read_config_file(self):
+        """Reads the config file sections relevant to the test scenario execution,
+        based on the command-line arguments.
+        """
+        
         if not path.exists(self.config_file) or not path.isfile(self.config_file):
             exit_client(ERR_CONFIG, "Configuration file {0} does not exist".format(self.config_file))
 
@@ -335,19 +388,19 @@ class TestClient:
 
             # Set service provider parameters
             if 'service_providers' in full_config:
-                self.service_provider_config = full_config['service_providers']
+                self.service_provider_configs = full_config['service_providers']
             else:
                 exit_client(ERR_CONFIG, "Service provider configuration section not found")
 
-            if self.service_provider not in self.service_provider_config:
+            if self.service_provider not in self.service_provider_configs:
                 exit_client(ERR_CONFIG, "No configuration found for service provider '{0}'".format(self.service_provider))
 
-            self.provider_config = self.service_provider_config[self.service_provider]
+            self.service_provider_config = self.service_provider_configs[self.service_provider]
 
-            if 'compute' not in self.provider_config:
+            if 'compute' not in self.service_provider_config:
                 exit_client(ERR_CONFIG, "Service provider '{0}' does not contain a 'compute' configuration".format(self.service_provider))
 
-            self.compute_config = self.provider_config['compute']
+            self.compute_config = self.service_provider_config['compute']
 
             if not isinstance(self.compute_config, dict):
                 exit_client(ERR_CONFIG, "'compute' configuration for service provider '{0}' is empty or invalid".format(self.service_provider))
@@ -448,6 +501,9 @@ class TestClient:
 
 
     def check_scenario(self):
+        """Checks the information provided by the command-line arguments and the configuration file
+        and verifies that the test scenario can be executed.
+        """
 
         if not self.test_scenario in TestClient.test_scenarios:
             exit_client(ERR_CONFIG, "Test scenario '{0}' not configured".format(self.test_scenario))
@@ -476,15 +532,15 @@ class TestClient:
 
             if self.target_endpoint is None or self.target_credentials is None:
 
-                if self.target_site not in self.service_provider_config:
+                if self.target_site not in self.service_provider_configs:
                     exit_client(ERR_CONFIG, "No configuration found for target '{0}'".format(self.target_site))
 
-                self.provider_config = self.service_provider_config[self.target_site]
+                self.target_site_config = self.service_provider_configs[self.target_site]
 
-                if 'data' not in self.provider_config:
+                if 'data' not in self.target_site_config:
                     exit_client(ERR_CONFIG, "Service provider '{0}' does not contain a 'data' configuration".format(self.target_site))
 
-                data_config = self.provider_config['data']
+                data_config = self.target_site_config['data']
 
                 if not isinstance(data_config, dict):
                     exit_client(ERR_CONFIG, "'data' configuration for service provider '{0}' is empty or invalid".format(self.target_site))
@@ -539,55 +595,21 @@ class TestClient:
 
 
 
-    def set_property(self, name, label, value):
-        if name == '-h':
-            TestClient.print_usage(exit_code=0)
-        if name == '-v':
-            Logger.verbose = True
-        if name == '-ml':
-            Logger.mixed_logs = True
-        elif name == '-P':
-            Logger.show_passwords = True
-        elif name == '-K':
-            TestClient.keep_vm = True
-        elif name == '-X1':
-            TestClient.exit_at = 1
-        elif name == '-conf':
-            self.config_file = value
-        elif name == '-vm':
-            if value < 1: TestClient.print_usage("Value for {0} must be at least 1".format(name))
-            self.vm_count = value
-        elif name == '-lf':
-            if value < 1: TestClient.print_usage("Value for {0} must be at least 1".format(name))
-            self.load_factor = value
-        elif name == '-sp':
-            self.service_provider = value
-        elif name == '-ts':
-            self.target_site = value
-        elif name == '-te':
-            self.target_endpoint = value
-        elif name == '-tc':
-            self.target_credentials = value
-        elif name == '-ps':
-            self.processing_scenario_name = value
-        elif name == '-psw':
-            self.processing_scenario_cwl_file = value
-        elif name == '-psi':
-            self.processing_scenario_input_file = value
-        elif name == '-i':
-            self.docker_image_id = value
-        elif name == '-a':
-            self.docker_config = value
-        elif name == '-n':
-            self.test_site_name = value
-        elif label == 'test-scenario':
-            self.test_scenario = value
-
-
-
-
-
     def run_test(self):
+        """Oversees the entire execution of the test scenario, which is split in
+        individual test run threads (their number is the product of the number of
+        requested virtual machines and the number of different flavours or
+        machine types to be used).
+
+        This method is the central method of the test scenario execution and it does the following:
+        * Create an appropriate connector to the cloud provider,
+        * Delete resources that might have been left over from previous test
+          executions,
+        * Create the resources (VMs, volumes, etc.) required for the test execution,
+        * Start the threads for all test executions and waits for their termination,
+        * Delete the resources previously created,
+        * Produce the test scenario metrics from the downloaded test results.
+        """
 
         Logger.log(LogLevel.INFO, "cdab-remote-client version {0}".format(TestClient.VERSION))
 
@@ -647,6 +669,9 @@ class TestClient:
 
         self.connector.prepare()
 
+        # Get random sequence for VM names to avoid conflicts
+        random_sequence = str(uuid.uuid4())[0:8]
+
         Logger.log(LogLevel.INFO, "Start of execution")
 
         self.start_time = datetime.datetime.utcnow()
@@ -660,16 +685,19 @@ class TestClient:
                 short_name = "#{0}".format(index + 1)
                 if self.total_vm_count == 1:
                     name = "Test run"
-                    suffix = ""
+                    suffix = "-{0}".format(random_sequence)
                 else:
                     name = "Parallel test run #{0}".format(index + 1)
                     if self.flavor_count > 1:
                         name += " (flavour: '{0}')".format(flavor)
-                    suffix = "-{0}".format(index + 1)
+                    suffix = "-{0}-{1}".format(random_sequence, index + 1)
                 if self.total_vm_count == 1 or Logger.mixed_logs:
                     stderr = sys.stderr
                 else:
                     stderr = io.StringIO()
+
+
+                
                 run = TestRun(index, suffix, short_name, name, flavor, self.compute_config['cost_monthly'][fi], self.compute_config['cost_hourly'][fi], self.compute_config['currency'], stderr)
                 runs.append(run)
                 index += 1
@@ -725,6 +753,13 @@ class TestClient:
 
 
     def run_single_test(self, run):
+        """Executes a single test run. This method is the main method in the test run execution thread.
+        
+        Parameters
+        ----------
+        run : TestRun
+            The test run object encapsulating all information for an individual test run.
+        """
         try:
             if self.connector.create_vm(run):
                 self.run_remote_commands(run)
@@ -739,6 +774,19 @@ class TestClient:
 
 
     def run_remote_commands(self, run):
+        """Executes the remote commands for a single run of the test scenario.
+        This method is called when the virtual machine is ready to accept
+        remote shell commands (ssh or scp).
+
+        The contains scenario-specific installtion of software, transfer of files,
+        e.g. for confuguration, and eventually the execution of the actual test
+        scenario and the download of test results.
+
+        Parameters
+        ----------
+        run : TestRun
+            The test run object encapsulating all information for an individual test run.
+        """
         Logger.log(LogLevel.INFO, "Installing and starting docker ...", run=run)
 
         run.install_start_time = datetime.datetime.utcnow()
@@ -795,8 +843,14 @@ class TestClient:
         else:
             working_dir = "$HOME"
 
+        copy_file(self.compute_config, run, self.config_file, "config.yaml")
+        try:
+            self.connector.copy_additional_files(run)
+        except Exception as e:
+            Logger.log(LogLevel.WARN, str(e), run=run)
+
         if self.docker_run_command == 'CDAB_CLIENT_DEFAULT':
-            copy_file(self.compute_config, run, self.config_file, "config.yaml")
+
             Logger.log(LogLevel.INFO, "Running test scenario {0} (using cdab-client) ...".format(self.cdab_client_test_scenario), run=run)
 
             execute_remote_command(
@@ -876,6 +930,21 @@ class TestClient:
 
 
     def produce_metrics(self, runs, total_runs):
+        """Executes the remote commands for a single run of the test scenario.
+        This method is called when the virtual machine is ready to accept
+        remote shell commands (ssh or scp).
+
+        The contains scenario-specific installtion of software, transfer of files,
+        e.g. for confuguration, and eventually the execution of the actual test
+        scenario and the download of test results.
+
+        Parameters
+        ----------
+        runs : list of TestRun instances
+            The test run objects encapsulating all information for an individual test run.
+            The list contains only test runs for which a virtual machine was successfully created.
+        total_runs : the number of total test runs (can be different from the lengths of runs)
+        """
 
         test_target_url = self.target_endpoint
 
@@ -1231,6 +1300,10 @@ class TestClient:
 
 
 class TestRun:
+    """Contains properties for individual test executions.
+    Usually one instance corresponds to one thread, each of which handles a test scenario
+    execution on a dedicated virtual machine.
+    """
 
     def __init__(self, index, suffix, short_name, name, flavor, cost_monthly, cost_hourly, currency, stderr):
         self.suffix = suffix
@@ -1247,7 +1320,7 @@ class TestRun:
         self.volume_id = None
         self.volume_attached = False
         self.volume_device = None
-        self.junit_file = "junit-remote{0}.xml".format(suffix)
+        self.junit_file = "junit-remote-{0}.xml".format(suffix)
         self.cdab_json_file = "TestResult-remote{0}.json".format(suffix)
         self.create_start_time = None
         self.ssh_ready_time = None

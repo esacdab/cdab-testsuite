@@ -21,7 +21,6 @@ namespace cdabtesttools.TestCases
 {
     internal class TestCase202 : TestCase201
     {
-
         public TestCase202(ILog log, TargetSiteWrapper target, int load_factor, IEnumerable<Data.Mission> missions, out List<IOpenSearchResultItem> foundItems) :
             base(log, target, load_factor, missions, out foundItems)
         {
@@ -36,7 +35,5 @@ namespace cdabtesttools.TestCases
             var test = new ConcurrentQueue<FiltersDefinition>(Mission.ShuffleComplexRandomFiltersCombination(missions, baselines, load_factor * target.TargetSiteConfig.MaxCatalogueThread));
             queryFilters = test;
         }
-
-
     }
 }

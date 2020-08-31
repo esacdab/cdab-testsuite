@@ -14,6 +14,22 @@ namespace cdabtesttools.Data
         private List<FilterDefinition> filters;
 
         public string Name { get => name; set => name = value; }
+        
+        public string Label
+        {
+            get
+            {
+                string label = "";
+
+                foreach (var filter in filters)
+                {
+                    label += string.Format("{0} ", filter.Label);
+                }
+
+                return label.Trim(' ');
+            }
+        }
+
         public List<FilterDefinition> Filters { get => filters; set => filters = value; }
 
         public FiltersDefinition(string name)
@@ -27,7 +43,6 @@ namespace cdabtesttools.Data
             this.name = filtersd.name;
             this.filters = new List<FilterDefinition>(filtersd.GetFilters());
         }
-
 
         internal void AddFilter(string key, string fullName, string value, string label, Func<IOpenSearchResultItem, bool> itemValidator, Func<IOpenSearchResultCollection, bool> resultsValidator)
         {
@@ -54,21 +69,6 @@ namespace cdabtesttools.Data
             }
 
             return nvc;
-        }
-
-        public string Label
-        {
-            get
-            {
-                string label = "";
-
-                foreach (var filter in filters)
-                {
-                    label += string.Format("{0} ", filter.Label);
-                }
-
-                return label.Trim(' ');
-            }
         }
 
         internal IEnumerable<FilterDefinition> GetFilters()

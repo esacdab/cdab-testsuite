@@ -31,12 +31,12 @@ namespace cdabtesttools.TestCases
         private string storageName;
         private readonly List<string> uploadedFiles;
 
-        public TestCase701(ILog log, TargetSiteWrapper target, int load_factor, string storageName, List<string> uploadedFiles) :
+        public TestCase701(ILog log, TargetSiteWrapper target, string storageName, List<string> uploadedFiles) :
             base(log, target, null)
         {
             this.Id = "TC701";
             this.Title = "Single remote upload to cloud storage";
-            this.load_factor = load_factor;
+            this.load_factor = 1;
             uploadRequests = new ConcurrentQueue<ITransferRequest>();
             this.storageName = storageName;
             this.uploadedFiles = uploadedFiles;
@@ -87,27 +87,13 @@ namespace cdabtesttools.TestCases
         private void CreateUploadAndEnqueue(IStorageClient storageClient, string storageName)
         {
             string fileName = GenerateName(10) + ".dat";
-            
-            int minSize = 0;
-            int maxSize = 0;
-            if (target.TargetSiteConfig.Storage != null)
-            {
-                minSize = target.TargetSiteConfig.Storage.MinUploadSize;
-                maxSize = target.TargetSiteConfig.Storage.MaxUploadSize;
-            }
-            if (minSize <= 0 || maxSize <= 0 || minSize > maxSize)
-            {
-                minSize = 5;
-                maxSize = 25;
-                log.InfoFormat("Missing or invalid upload file size range, using default {0}MB - {1}MB", minSize, maxSize);
-            }
             Random rng = new Random();
-            ulong totalSize = Convert.ToUInt64(rng.Next(minSize, maxSize) * 1024 * 1024);
-            log.InfoFormat("Upload file size: {0} (range is from {1}MB to {2}MB)", BytesToString(Convert.ToInt64(totalSize)), minSize, maxSize);
-            if (Configuration.Current.Global.TestMode) totalSize = 20 * 1024 * 1024;
+            ulong totalSize = Convert.ToUInt64(rng.Next(50, 300) * 1024 * 1024);
+            if (Configuration.Current.Global.TestMode) totalSize = 10485760 * 2;
             var uploadRequest = storageClient.CreateUploadRequest(storageName, fileName, totalSize);
+            log.DebugFormat("TC702-1 {0}", uploadRequest.GetType().FullName);
 
-            if (uploadRequest is HttpTransferRequest) {
+            if ( uploadRequest is HttpTransferRequest ){
                 var httpUploadRequest = uploadRequest as HttpTransferRequest;
                 httpUploadRequest.HttpWebRequest.AllowWriteStreamBuffering = false;
                 httpUploadRequest.HttpWebRequest.ContentLength = Convert.ToInt64(totalSize);
@@ -163,6 +149,7 @@ namespace cdabtesttools.TestCases
                 log.WarnFormat("Test Case Execution Error : {0}", e.InnerException.Message);
                 throw e;
             }
+
         }
 
         public override IEnumerable<TestUnitResult> RunTestUnits(TaskFactory taskFactory, Task prepTask)
@@ -232,11 +219,12 @@ namespace cdabtesttools.TestCases
             Stopwatch sw = new Stopwatch();
             sw.Start();
 
-            var uploadStreamTask = transferRequest.GetRequestStreamAsync();
-            uploadStreamTask.ContinueWith(streamTask =>
+            var uploadStreamTask = transferRequest.GetRequestStreamAsync().ContinueWith(streamTask =>
             {
+                log.DebugFormat("TC701-UPLOAD");
                 respTime = sw.ElapsedMilliseconds;
                 Stream stream = streamTask.Result;
+                stream.Seek(0, SeekOrigin.Begin);
                 byte[] buf = new byte[4096];
                 double progessPct = 0;
                 long totalByteCounter = 0;
@@ -245,9 +233,6 @@ namespace cdabtesttools.TestCases
                 while (totalByteCounter < totalSize)
                 {
                     rng.NextBytes(buf);
-                    int length = buf.Length;
-                    if ( totalSize < totalByteCounter + length )
-                        length = Convert.ToInt32(totalSize - totalByteCounter);
                     stream.Write(buf, 0, buf.Length);
                     totalByteCounter += buf.Length;
                     intermediateCounter += buf.Length;
@@ -268,7 +253,6 @@ namespace cdabtesttools.TestCases
                         break;
                     }
                 }
-                stream.Close();
                 stopWatchUploadElaspedTime.Stop();
             });
 
@@ -300,11 +284,14 @@ namespace cdabtesttools.TestCases
                 }
             }
 
-            var uploadTask = transferRequest.GetResponseAsync().ContinueWith(resp =>
+
+            var uploadTask = transferRequest.GetResponseAsync().ContinueWith(async resp =>
             {
                 sw.Stop();
 
-                using (ITransferResponse response = resp.Result)
+                
+
+                using (ITransferResponse response = await resp)
                 {
 
                     log.InfoFormat("[{1}] > {3} Status Code {0} ({2}ms)", response.StatusCode, taskId, respTime, method);
@@ -351,6 +338,7 @@ namespace cdabtesttools.TestCases
                 }
             }
 
+
             DateTimeOffset timeStop = DateTimeOffset.UtcNow;
             metrics.Add(new DateTimeMetric(MetricName.endTime, timeStop, "dateTime"));
             metrics.Add(new LongMetric(MetricName.endGetResponseTime, DateTime.UtcNow.Ticks, "ticks"));
@@ -365,4 +353,6 @@ namespace cdabtesttools.TestCases
             return tcr;
         }
     }
+
+
 }

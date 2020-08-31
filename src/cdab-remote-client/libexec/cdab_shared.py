@@ -20,10 +20,31 @@ def exit_client(exit_code, message):
 
 
 def await_vm_availability(compute_config, connect_retries, connect_interval, run):
+    """Polls a freshly created virtual machine until it is accessible via SSH.
+
+    There are 3 overall retry rounds, with a waiting time of 30 seconds between them.
+
+    Parameters
+    ----------
+    compute_config : dict
+        A dict object containing information taken from the compute node of a
+        service provider configuration in the configuration YAML file.
+    connect_retries : int
+        The number of retries per overall retry round.
+    connect_interval : int
+        The time (in seconds) between individual connect retries.
+    run : TestRun
+        The test run object encapsulating all information for an individual test run.
+
+    Returns
+    -------
+    A boolean value indicating whether the virtual machine is available before all retries
+    have been exhausted.
+    """
     Logger.log(LogLevel.INFO, "Awaiting SSH availability ...", run=run)
 
     available = False
-    max_retries = 3     # max_retries and retry refer to overall retries (each consisting of <connect_retries> SSH connection attempts)
+    max_retries = 3     # max_retries and retry refer to overall retry rounds (each consisting of <connect_retries> SSH connection attempts)
     retry = 0
 
     while retry < max_retries and not available:
@@ -54,7 +75,34 @@ def await_vm_availability(compute_config, connect_retries, connect_interval, run
 
 
 
-def execute_local_command(run, options, json_output = False, exit_code = None, quiet = False, stdout = subprocess.PIPE, timeout=None):
+def execute_local_command(run, options, json_output=False, exit_code=None, quiet=False, stdout=subprocess.PIPE, timeout=None):
+    """Executes a shell command locally.
+
+    Parameters
+    ----------
+    run : TestRun
+        The test run object encapsulating all information for the individual test run to which
+        this command execution belongs.
+    options : list of str
+        An array containing the command and its command-line arguments as used by subprocess.run().
+        Elements in that array can be tuples, where the first element is used for the command execution
+        and the second element is used for display in logs (e.g. to mask passwords).
+    json_output : bool
+        Whether or not the command output should be parsed and returned as JSON (default: False).
+    exit_code : int
+        The program exit code in case of a fatal error (default: None).
+    quiet : bool
+        Whether or not detailed error information is hidden from the log (default: False).
+    stdout : file
+        The file where the standard output of the command execution is redirected
+        (default: no redirection).
+    timeout : int
+        The timeout in seconds passed to subprocess.run().
+
+    Returns
+    -------
+    The stdout output fron the command execution.
+    """
 
     if run is None:
         stderr = sys.stderr
@@ -93,7 +141,31 @@ def execute_local_command(run, options, json_output = False, exit_code = None, q
 
 
 def execute_remote_command(compute_config, run, command, display_command = None, json_output = False, exit_code = None, quiet = False, timeout=None):
+    """Executes a shell command on a virtual machine using the ssh command.
 
+    Parameters
+    ----------
+    run : TestRun
+        The test run object encapsulating all information for the individual test run to which
+        this command execution belongs.
+    command : str
+        The remote command as one string.
+    display_command : str
+        The remote command to be shown in logs if different to command (e.g. to mask passwords)
+        (default: None).
+    json_output : bool
+        Whether or not the command output should be parsed and returned as JSON (default: False).
+    exit_code : int
+        The program exit code in case of a fatal error (default: None).
+    quiet : bool
+        Whether or not detailed error information is hidden from the log (default: False).
+    timeout : int
+        The timeout in seconds passed to subprocess.run().
+
+    Returns
+    -------
+    The stdout output fron the command execution.
+    """
     if run is None:
         stderr = sys.stderr
     else:
@@ -116,6 +188,30 @@ def execute_remote_command(compute_config, run, command, display_command = None,
 
 
 def copy_file(compute_config, run, local_file, remote_file, to_remote = True, exit_code = None, quiet = False):
+    """Transfers a file between the local machine and the remote virtual machine
+    via the scp command.
+
+    Parameters
+    ----------
+    compute_config : dict
+        A dict object containing information taken from the compute node of a
+        service provider configuration in the configuration YAML file.
+    run : TestRun
+        The test run object encapsulating all information for the individual test run to which
+        this file transfer belongs.
+    local_file : str
+        The path to the local file.
+    remote_file : str
+        The path to the file on the remote virtual machine.
+    to_remote : bool
+        Whether the file is copied from the local machine to the remote machine or vice versa
+        (default: True, i.e. from local to remote).
+    exit_code : int
+        The program exit code in case of a fatal error (default: None).
+    quiet : bool
+        Whether or not detailed error information is hidden from the log (default: False).
+
+    """
 
     options = [
         "scp", '-i', compute_config['private_key_file'],
@@ -154,8 +250,22 @@ def get_command_str(options):
 
 
 class Logger:
+    """Simple class for logging.
+    """
 
     def log(level, message, run=None):
+        """Writes a message to the log.
+
+        Parameters
+        ----------
+        level : int
+            One of the values from the LogLevel enumeration.
+        message : str
+            The message to be logged.
+        run : TestRun
+            The test run object encapsulating all information for the individual test run to which
+            this log message belongs (default: None, i.e. a global log entry).
+        """
         
         if run is None:
             stderr = sys.stderr

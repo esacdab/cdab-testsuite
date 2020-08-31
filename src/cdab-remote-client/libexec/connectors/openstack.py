@@ -161,6 +161,11 @@ class OpenStackConnector:
 
   
     
+    def copy_additional_files(self, run):
+        pass
+
+
+
     def create_vm(self, run):
 
         Logger.log(LogLevel.INFO, "Creating virtual machine ...", run=run)

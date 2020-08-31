@@ -38,10 +38,13 @@ namespace cdabtesttools.TestCases
         protected int max_try_for_finding_download = 3;
 
         public TestCase301(ILog log, TargetSiteWrapper target, List<IOpenSearchResultItem> foundItems) :
+            this(log, target, 1, foundItems) {}
+
+        public TestCase301(ILog log, TargetSiteWrapper target, int load_factor, List<IOpenSearchResultItem> foundItems) :
             base("TC301", "Single Remote Download")
         {
             this.log = log;
-            this.load_factor = 1;
+            this.load_factor = load_factor;
             this.foundItems = foundItems;
             this.target = target;
             this.sp = ServicePointManager.FindServicePoint(target.Wrapper.Settings.ServiceUrl);

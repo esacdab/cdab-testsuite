@@ -7,11 +7,14 @@ using cdabtesttools.Measurement;
 
 namespace cdabtesttools.TestCases
 {
+    /// <summary>
+    /// Represents the consolidated result of the execution of a test case.
+    /// </summary>
     public class TestCaseResult
     {
-
         private Collection<IMetric> metrics;
         DateTimeOffset start;
+        DateTimeOffset end;
 
         public DateTimeOffset Start
         {
@@ -21,23 +24,12 @@ namespace cdabtesttools.TestCases
             }
         }
 
-        DateTimeOffset end;
-
         public DateTimeOffset End
         {
             set
             {
                 end = value;
             }
-        }
-
-        
-        public TestCaseResult(string name, IEnumerable<IMetric> metrics, DateTimeOffset start, DateTimeOffset end)
-        {
-            this.end = end;
-            this.start = start;
-            this.metrics = new Collection<IMetric>(metrics.ToList());
-            this.TestName = name;
         }
 
         public string TestName { get; set; }
@@ -90,6 +82,14 @@ namespace cdabtesttools.TestCases
         {
             get;
             set;
+        }
+        
+        public TestCaseResult(string name, IEnumerable<IMetric> metrics, DateTimeOffset start, DateTimeOffset end)
+        {
+            this.end = end;
+            this.start = start;
+            this.metrics = new Collection<IMetric>(metrics.ToList());
+            this.TestName = name;
         }
     }
 }

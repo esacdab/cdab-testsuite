@@ -13,13 +13,11 @@ using Terradue.OpenSearch.DataHub.Aws;
 using Terradue.OpenSearch.DataHub.GoogleCloud;
 
 
-using System.IO;
-using Terradue.Metadata.EarthObservation.OpenSearch.Extensions;
-using Terradue.OpenSearch.Result;
-using Terradue.ServiceModel.Ogc.Eop21;
-
 namespace cdabtesttools.Target
 {
+    /// <summary>
+    /// Class providing functionality related to a target site.
+    /// </summary>
     public class TargetSiteWrapper
     {
 
@@ -30,6 +28,39 @@ namespace cdabtesttools.Target
         private Terradue.OpenSearch.Engine.OpenSearchEngine ose;
         private readonly TargetSiteConfiguration targetSiteConfig;
 
+        /// <summary>
+        /// Gets the type of this target site wrapper.
+        /// </summary>
+        /// <value>One of the values of the <see cref="cdabtesttools.Target.TargetType"/> enum.</value>
+        public TargetType Type
+        {
+            get
+            {
+                return target_type;
+            }
+        }
+
+        /// <summary>
+        /// Gets a label representing this target site.
+        /// </summary>
+        public string Label => string.Format("{2} {0} [{1}]", Type, Wrapper.Settings.ServiceUrl.Host, Name);
+
+        /// <summary>
+        /// Gets the name of this target site.
+        /// </summary>
+        public string Name { get; set; }
+
+        public OpenSearchEngine OpenSearchEngine => ose;
+
+        public IDataHubSourceWrapper Wrapper => wrapper;
+
+        public TargetSiteConfiguration TargetSiteConfig => targetSiteConfig;
+
+        /// <summary>
+        /// Creates a <see cref="cdabtesttools.Target.TargetSiteWrapper"/> instance.
+        /// </summary>
+        /// <param name="name">A name for the target site.</param>
+        /// <param name="targetSiteConfig">The object representing the target site node from the configuration YAML file.</param>
         public TargetSiteWrapper(string name, TargetSiteConfiguration targetSiteConfig)
         {
             Name = name;
@@ -39,24 +70,6 @@ namespace cdabtesttools.Target
             wrapper = CreateDataAccessWrapper(targetSiteConfig);
             target_type = InitType();
         }
-
-        public TargetType Type
-        {
-            get
-            {
-                return target_type;
-            }
-        }
-
-        public string Label => string.Format("{2} {0} [{1}]", Type, Wrapper.Settings.ServiceUrl.Host, Name);
-
-        public string Name { get; set; }
-
-        public OpenSearchEngine OpenSearchEngine => ose;
-
-        public IDataHubSourceWrapper Wrapper => wrapper;
-
-        public TargetSiteConfiguration TargetSiteConfig => targetSiteConfig;
 
         private TargetType InitType()
         {
@@ -123,7 +136,7 @@ namespace cdabtesttools.Target
 
             if (target_uri.Host == "catalogue.onda-dias.eu")
             {
-                return new TempOndaDiasWrapper(new Uri(string.Format("https://catalogue.onda-dias.eu/dias-catalogue")), (NetworkCredential)target_creds, targetSiteConfig.Storage.ToOpenStackStorageSettings());
+                return new OndaDiasWrapper(new Uri(string.Format("https://catalogue.onda-dias.eu/dias-catalogue")), (NetworkCredential)target_creds, targetSiteConfig.Storage.ToOpenStackStorageSettings());
             }
 
             if (target_uri.Host == "finder.creodias.eu")
@@ -141,7 +154,9 @@ namespace cdabtesttools.Target
 
             if (target_uri.Host.Contains("sobloo.eu"))
             {
-                return new SoblooDiasWrapper(target_creds);
+                var soblooDiasWrapper = new SoblooDiasWrapper(target_creds);
+                soblooDiasWrapper.S3StorageSettings = targetSiteConfig.Storage.ToS3StorageSettings();
+                return soblooDiasWrapper;
             }
 
             if (target_uri.Host == "api.daac.asf.alaska.edu")
@@ -194,86 +209,4 @@ namespace cdabtesttools.Target
             Wrapper.AuthenticateRequest(request);
         }
     }
-
-
-    public class TempOndaDiasWrapper : DHuSWrapper
-    {
-
-        private log4net.ILog log = log4net.LogManager.GetLogger
-            (System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-
-        public TempOndaDiasWrapper(Uri uri, NetworkCredential target_creds, OpenStackStorageSettings openStackStorageSettings) : base(uri, target_creds)
-        {
-            this.openStackStorageSettings = openStackStorageSettings;
-        }
-
-        private OpenStackStorageSettings openStackStorageSettings;
-        public override string Name => string.Format("ONDA DIAS ({0})", ServiceUrl);
-
-        public override IAssetAccess OrderProduct(IOpenSearchResultItem item)
-        {
-
-            HttpWebRequest request = CreateOrderRequest(item);
-            log.DebugFormat("Ordering : {0}...", request.RequestUri);
-            try
-            {
-                HttpWebResponse objResponse = (HttpWebResponse)request.GetResponse();
-                using (StreamReader sr =
-                   new StreamReader(objResponse.GetResponseStream()))
-                {
-                    log.Debug(sr.ReadToEnd());
-
-                    // Close and clean up the StreamReader
-                    sr.Close();
-                }
-            }
-            catch (WebException we)
-            {
-                log.WarnFormat("Order request return an error but this is normal according to ONDA support: {0}", we.Message);
-                using (StreamReader sr =
-                   new StreamReader(we.Response.GetResponseStream()))
-                {
-                    log.Debug(sr.ReadToEnd());
-
-                    // Close and clean up the StreamReader
-                    sr.Close();
-                }
-            }
-
-            return ProductOrderEnclosureAccess.Create(item.Id, new Uri(string.Format("https://catalogue.onda-dias.eu/dias-catalogue/Products('{0}')/$value", item.Id)), item);
-        }
-
-        private HttpWebRequest CreateOrderRequest(IOpenSearchResultItem item)
-        {
-            if (Settings.Credentials == null)
-                return null;
-            //setup some variables
-            string url = string.Format("https://catalogue.onda-dias.eu/dias-catalogue/Products({0})/Ens.Order", item.Id);
-            //setup some variables end
-
-            HttpWebRequest objRequest = (HttpWebRequest)WebRequest.Create(url);
-            objRequest.Method = "POST";
-            objRequest.Credentials = Settings.Credentials;
-
-            return objRequest;
-        }
-
-        public override IAssetAccess CheckOrder(string orderId, IOpenSearchResultItem item)
-        {
-            EarthObservationType eop = item.GetEarthObservationProfile() as EarthObservationType;
-
-            if (eop.EopMetaDataProperty.EarthObservationMetaData.statusSubType == StatusSubTypeValueEnumerationType.OFFLINE)
-                return null;
-
-            return GetEnclosureAccess(item);
-        }
-
-        public override IStorageClient CreateStorageClient()
-        {
-            if ( openStackStorageSettings == null )
-                throw new InvalidOperationException("No Openstack Settings found for this Sobloo wrapper.");
-            return new OpenStackStorageClient(openStackStorageSettings);
-        }
-    }
-
 }

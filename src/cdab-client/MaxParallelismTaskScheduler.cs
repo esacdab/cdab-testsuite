@@ -7,14 +7,17 @@ using log4net;
 namespace cdabtesttools
 {
 
-    // Provides a task scheduler that ensures a maximum concurrency level while 
-    // running on top of the thread pool.
+    /// <summary>
+    /// Provides a task scheduler that ensures a maximum concurrency level while running on top of the thread pool.
+    /// </summary>
     public class MaxParallelismTaskScheduler : TaskScheduler
     {
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger
             (System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-        // Indicates whether the current thread is processing work items.
+        /// <summary>
+        /// Indicates whether the current thread is processing work items. 
+        /// </summary>
         [ThreadStatic]
         private static bool _currentThreadIsProcessingItems;
 
@@ -34,7 +37,10 @@ namespace cdabtesttools
             _maxDegreeOfParallelism = maxDegreeOfParallelism;
         }
 
-        // Queues a task to the scheduler. 
+        /// <summary>
+        /// Queues a task to the scheduler.  
+        /// </summary>
+        /// <param name="task">The task to be queued.</param>
         protected sealed override void QueueTask(Task task)
         {
             // Add the task to the list of tasks to be processed.  If there aren't enough 
@@ -50,7 +56,10 @@ namespace cdabtesttools
             }
         }
 
-        // Inform the ThreadPool that there's work to be executed for this scheduler. 
+
+        /// <summary>
+        /// Informs the ThreadPool that there is work to be executed for this scheduler. 
+        /// </summary>
         private void NotifyThreadPoolOfPendingWork()
         {
             ThreadPool.UnsafeQueueUserWorkItem(_ =>
@@ -92,7 +101,13 @@ namespace cdabtesttools
             }, null);
         }
 
-        // Attempts to execute the specified task on the current thread. 
+
+        /// <summary>
+        /// Attempts to execute the specified task on the current thread.
+        /// </summary>
+        /// <param name="task">The task to be executed.</param>
+        /// <param name="taskWasPreviouslyQueued">Whether the task was queued previously.</param>
+        /// <returns>True if the task was successfully executed.</returns>
         protected sealed override bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued)
         {
             // If this thread isn't already processing a task, we don't support inlining
@@ -113,16 +128,28 @@ namespace cdabtesttools
             }
         }
 
-        // Attempt to remove a previously scheduled task from the scheduler. 
+
+        /// <summary>
+        /// Attempts to remove a previously scheduled task from the scheduler. 
+        /// </summary>
+        /// <param name="task">The task to be removed from the queue.</param>
+        /// <returns>True if the task was successfully removed.</returns>
         protected sealed override bool TryDequeue(Task task)
         {
             lock (_tasks) return _tasks.Remove(task);
         }
 
-        // Gets the maximum concurrency level supported by this scheduler. 
+
+        /// <summary>
+        /// Gets the maximum concurrency level supported by this scheduler.
+        /// </summary>
         public sealed override int MaximumConcurrencyLevel { get { return _maxDegreeOfParallelism; } }
 
-        // Gets an enumerable of the tasks currently scheduled on this scheduler. 
+
+        /// <summary>
+        /// Gets an enumerable of the tasks currently scheduled on this scheduler.
+        /// </summary>
+        /// <returns>An <see cref="IEnumerable&lt;Task&gt;"/> containing the scheduled tasks.</returns>
         protected sealed override IEnumerable<Task> GetScheduledTasks()
         {
             bool lockTaken = false;
