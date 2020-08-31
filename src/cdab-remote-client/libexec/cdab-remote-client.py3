@@ -19,6 +19,8 @@ import xml.etree.ElementTree as ET
 import yaml
 
 class TestClient:
+    """Main class for remote execution of the test scenarios TS11, TS12, TS13 and TS15.
+    """
 
     VERSION = "1.24"
 
@@ -293,6 +295,52 @@ class TestClient:
 
 
 
+    def set_property(self, name, label, value):
+        if name == '-h':
+            TestClient.print_usage(exit_code=0)
+        if name == '-v':
+            Logger.verbose = True
+        if name == '-ml':
+            Logger.mixed_logs = True
+        elif name == '-P':
+            Logger.show_passwords = True
+        elif name == '-K':
+            TestClient.keep_vm = True
+        elif name == '-X1':
+            TestClient.exit_at = 1
+        elif name == '-conf':
+            self.config_file = value
+        elif name == '-vm':
+            if value < 1: TestClient.print_usage("Value for {0} must be at least 1".format(name))
+            self.vm_count = value
+        elif name == '-lf':
+            if value < 1: TestClient.print_usage("Value for {0} must be at least 1".format(name))
+            self.load_factor = value
+        elif name == '-sp':
+            self.service_provider = value
+        elif name == '-ts':
+            self.target_site = value
+        elif name == '-te':
+            self.target_endpoint = value
+        elif name == '-tc':
+            self.target_credentials = value
+        elif name == '-ps':
+            self.processing_scenario_name = value
+        elif name == '-psw':
+            self.processing_scenario_cwl_file = value
+        elif name == '-psi':
+            self.processing_scenario_input_file = value
+        elif name == '-i':
+            self.docker_image_id = value
+        elif name == '-a':
+            self.docker_config = value
+        elif name == '-n':
+            self.test_site_name = value
+        elif label == 'test-scenario':
+            self.test_scenario = value
+
+
+
     def exit(exit_code, message):
         print("ERROR: {0}".format(message), file=sys.stderr)
         sys.exit(exit_code)
@@ -300,6 +348,10 @@ class TestClient:
 
 
     def read_config_file(self):
+        """Reads the config file sections relevant to the test scenario execution,
+        based on the command-line arguments.
+        """
+        
         if not path.exists(self.config_file) or not path.isfile(self.config_file):
             exit_client(ERR_CONFIG, "Configuration file {0} does not exist".format(self.config_file))
 
@@ -449,6 +501,9 @@ class TestClient:
 
 
     def check_scenario(self):
+        """Checks the information provided by the command-line arguments and the configuration file
+        and verifies that the test scenario can be executed.
+        """
 
         if not self.test_scenario in TestClient.test_scenarios:
             exit_client(ERR_CONFIG, "Test scenario '{0}' not configured".format(self.test_scenario))
@@ -540,55 +595,21 @@ class TestClient:
 
 
 
-    def set_property(self, name, label, value):
-        if name == '-h':
-            TestClient.print_usage(exit_code=0)
-        if name == '-v':
-            Logger.verbose = True
-        if name == '-ml':
-            Logger.mixed_logs = True
-        elif name == '-P':
-            Logger.show_passwords = True
-        elif name == '-K':
-            TestClient.keep_vm = True
-        elif name == '-X1':
-            TestClient.exit_at = 1
-        elif name == '-conf':
-            self.config_file = value
-        elif name == '-vm':
-            if value < 1: TestClient.print_usage("Value for {0} must be at least 1".format(name))
-            self.vm_count = value
-        elif name == '-lf':
-            if value < 1: TestClient.print_usage("Value for {0} must be at least 1".format(name))
-            self.load_factor = value
-        elif name == '-sp':
-            self.service_provider = value
-        elif name == '-ts':
-            self.target_site = value
-        elif name == '-te':
-            self.target_endpoint = value
-        elif name == '-tc':
-            self.target_credentials = value
-        elif name == '-ps':
-            self.processing_scenario_name = value
-        elif name == '-psw':
-            self.processing_scenario_cwl_file = value
-        elif name == '-psi':
-            self.processing_scenario_input_file = value
-        elif name == '-i':
-            self.docker_image_id = value
-        elif name == '-a':
-            self.docker_config = value
-        elif name == '-n':
-            self.test_site_name = value
-        elif label == 'test-scenario':
-            self.test_scenario = value
-
-
-
-
-
     def run_test(self):
+        """Oversees the entire execution of the test scenario, which is split in
+        individual test run threads (their number is the product of the number of
+        requested virtual machines and the number of different flavours or
+        machine types to be used).
+
+        This method is the central method of the test scenario execution and it does the following:
+        * Create an appropriate connector to the cloud provider,
+        * Delete resources that might have been left over from previous test
+          executions,
+        * Create the resources (VMs, volumes, etc.) required for the test execution,
+        * Start the threads for all test executions and waits for their termination,
+        * Delete the resources previously created,
+        * Produce the test scenario metrics from the downloaded test results.
+        """
 
         Logger.log(LogLevel.INFO, "cdab-remote-client version {0}".format(TestClient.VERSION))
 
@@ -732,6 +753,13 @@ class TestClient:
 
 
     def run_single_test(self, run):
+        """Executes a single test run. This method is the main method in the test run execution thread.
+        
+        Parameters
+        ----------
+        run : TestRun
+            The test run object encapsulating all information for an individual test run.
+        """
         try:
             if self.connector.create_vm(run):
                 self.run_remote_commands(run)
@@ -746,6 +774,19 @@ class TestClient:
 
 
     def run_remote_commands(self, run):
+        """Executes the remote commands for a single run of the test scenario.
+        This method is called when the virtual machine is ready to accept
+        remote shell commands (ssh or scp).
+
+        The contains scenario-specific installtion of software, transfer of files,
+        e.g. for confuguration, and eventually the execution of the actual test
+        scenario and the download of test results.
+
+        Parameters
+        ----------
+        run : TestRun
+            The test run object encapsulating all information for an individual test run.
+        """
         Logger.log(LogLevel.INFO, "Installing and starting docker ...", run=run)
 
         run.install_start_time = datetime.datetime.utcnow()
@@ -889,6 +930,21 @@ class TestClient:
 
 
     def produce_metrics(self, runs, total_runs):
+        """Executes the remote commands for a single run of the test scenario.
+        This method is called when the virtual machine is ready to accept
+        remote shell commands (ssh or scp).
+
+        The contains scenario-specific installtion of software, transfer of files,
+        e.g. for confuguration, and eventually the execution of the actual test
+        scenario and the download of test results.
+
+        Parameters
+        ----------
+        runs : list of TestRun instances
+            The test run objects encapsulating all information for an individual test run.
+            The list contains only test runs for which a virtual machine was successfully created.
+        total_runs : the number of total test runs (can be different from the lengths of runs)
+        """
 
         test_target_url = self.target_endpoint
 
@@ -1244,6 +1300,10 @@ class TestClient:
 
 
 class TestRun:
+    """Contains properties for individual test executions.
+    Usually one instance corresponds to one thread, each of which handles a test scenario
+    execution on a dedicated virtual machine.
+    """
 
     def __init__(self, index, suffix, short_name, name, flavor, cost_monthly, cost_hourly, currency, stderr):
         self.suffix = suffix
