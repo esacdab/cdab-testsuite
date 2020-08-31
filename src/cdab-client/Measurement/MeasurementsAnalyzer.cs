@@ -211,7 +211,7 @@ namespace cdabtesttools.Measurement
                 List<TimeSpan> offlineDataAvailabilityLatencies = new List<TimeSpan>();
                 foreach (var result in results)
                 {
-                    if ( result.Status != TestUnitResultStatus.Complete )
+                    if (result.Status != TestUnitResultStatus.Complete)
                         continue;
                     var _httpStatus = result.Metrics.Where(m => m.Name == MetricName.httpStatusCode).Cast<StringMetric>().Select(m => m.Value);
                     int statusCode = int.Parse(_httpStatus.First().Split(':').First());
@@ -497,12 +497,12 @@ namespace cdabtesttools.Measurement
                 wrongResultsCounts.Add(dataCollectionDivision, wrongResultsCount);
                 // exceptions.Add(dataCollectionDivision, exception);
 
-                if (exception == null)
+                try
                 {
                     opsAvgLatencies.Add(dataCollectionDivision, ((LongMetric)testUnit.Metrics.FirstOrDefault(m => m.Name == MetricName.avgDataOperationalLatency)).Value);
                     opsMaxLatencies.Add(dataCollectionDivision, ((LongMetric)testUnit.Metrics.FirstOrDefault(m => m.Name == MetricName.maxDataOperationalLatency)).Value);
                 }
-                else
+                catch
                 {
                     opsAvgLatencies.Add(dataCollectionDivision, -1);
                     opsMaxLatencies.Add(dataCollectionDivision, -1);

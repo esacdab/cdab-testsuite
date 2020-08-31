@@ -224,6 +224,19 @@
             ]
         },
         {
+            "name": "CreoDias TS06",
+            "type": "mono",
+            "request": "launch",
+            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "cwd": "${workspaceRoot}",
+            "args": [
+                "-v",
+                "-tsn=Local",
+                "-tn=CREO",
+                "TS06"
+            ]
+        },
+        {
             "name": "CreoDias TS07",
             "type": "mono",
             "request": "launch",
