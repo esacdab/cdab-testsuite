@@ -18,9 +18,25 @@ namespace cdabtesttools.Data
         public List<OfflineDataStatusItem> OfflineData { get; set; }
     }
 
+
     public class OfflineDataStatusItem
     {
         private IOpenSearchResultItem sourceItem;
+
+        public string Identifier { get; set; }
+
+        public DateTime FirstQueryDateTime { get; set; }
+
+        public DateTime LastQueryUpdateDateTime { get; set; }
+
+        public string TargetSiteName { get; set; }
+
+        public string OrderId { get; set; }
+
+        public string Url { get; set; }
+
+        [JsonIgnore]
+        public IOpenSearchResultItem SourceItem { get => sourceItem; }
 
         public OfflineDataStatusItem()
         {
@@ -35,19 +51,6 @@ namespace cdabtesttools.Data
             if (link != null)
                 Url = link.Uri.ToString();
         }
-
-        public string Identifier { get; set; }
-
-        public DateTime FirstQueryDateTime { get; set; }
-
-        public DateTime LastQueryUpdateDateTime { get; set; }
-
-        public string TargetSiteName { get; set; }
-        public string OrderId { get; set; }
-        public string Url { get; set; }
-
-        [JsonIgnore]
-        public IOpenSearchResultItem SourceItem { get => sourceItem; }
 
         public IAssetAccess GetEnclosureAccess(TargetSiteWrapper target)
         {

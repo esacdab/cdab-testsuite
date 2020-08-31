@@ -18,20 +18,11 @@ namespace cdabtesttools.Data
 
     public class Mission
     {
-
         private static log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-
-
         public static Random rnd = new Random(DateTime.Now.Millisecond);
         private static WKTWriter wktWriter = new WKTWriter();
         private static WKTReader wktreader = new WKTReader();
         private readonly LabelString psn;
-
-        public Mission(string name, LabelString psn)
-        {
-            this.Name = name;
-            this.psn = psn;
-        }
 
         public string Name { get; set; }
 
@@ -81,6 +72,11 @@ namespace cdabtesttools.Data
         [SimpleChoice]
         public ItemNumberRange Count { get; set; }
 
+        public Mission(string name, LabelString psn)
+        {
+            this.Name = name;
+            this.psn = psn;
+        }
 
         public static IEnumerable<Mission> GenerateExistingDataDictionary(TargetSiteWrapper target)
         {

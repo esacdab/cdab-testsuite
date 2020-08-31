@@ -26,7 +26,6 @@ namespace cdabtesttools.TestCases
 {
     internal class TestCase702 : TestCase301
     {
-
         private string storageName;
         private readonly List<string> uploadedFiles;
 
@@ -73,7 +72,6 @@ namespace cdabtesttools.TestCases
                         log.Debug(response.ReadToEnd());
                     }
                 }
-
             }
         }
 
@@ -122,7 +120,5 @@ namespace cdabtesttools.TestCases
             }
 
         }
-
-
     }
 }

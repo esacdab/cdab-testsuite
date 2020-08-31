@@ -75,7 +75,6 @@ namespace cdabtesttools.TestCases
                 }
             }
 
-
             return MeasurementsAnalyzer.GenerateTestCaseResult(this, new MetricName[]{
                 MetricName.avgResponseTime,
                 MetricName.peakResponseTime,
@@ -83,10 +82,7 @@ namespace cdabtesttools.TestCases
                 MetricName.avgConcurrency,
                 MetricName.peakConcurrency
             }, tasks.Result.Count());
-
         }
-
-
 
         private HttpWebRequest CreateRequest()
         {

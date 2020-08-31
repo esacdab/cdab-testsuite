@@ -3,6 +3,9 @@ using cdabtesttools.TestCases;
 
 namespace cdabtesttools.TestScenarios
 {
+    /// <summary>
+    /// Represents metadata and the test case results of a test scenario execution.
+    /// </summary>
     public class TestScenarioResult
     {
         public string JobName { get; set; }

@@ -2,6 +2,9 @@ using System.Collections.Generic;
 
 namespace cdabtesttools.Config
 {
+    /// <summary>
+    /// Data object class for the <em>data.sets.*</em> and <em>service_providers.*.data.catalogue.sets.*</em> nodes in the configuration YAML file.
+    /// </summary>
     public class CatalogueSetConfiguration
     {
         public string ReferenceTargetSite { get; set; }

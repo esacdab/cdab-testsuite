@@ -158,7 +158,6 @@ namespace cdabtesttools.TestCases
                 log.WarnFormat("Test Case Execution Error : {0}", e.InnerException.Message);
                 throw e;
             }
-
         }
 
         public override IEnumerable<TestUnitResult> RunTestUnits(TaskFactory taskFactory, Task prepTask)
@@ -296,7 +295,6 @@ namespace cdabtesttools.TestCases
                 }
             }
 
-
             var uploadTask = transferRequest.GetResponseAsync().ContinueWith(resp =>
             {
                 sw.Stop();
@@ -348,7 +346,6 @@ namespace cdabtesttools.TestCases
                 }
             }
 
-
             DateTimeOffset timeStop = DateTimeOffset.UtcNow;
             metrics.Add(new DateTimeMetric(MetricName.endTime, timeStop, "dateTime"));
             metrics.Add(new LongMetric(MetricName.endGetResponseTime, DateTime.UtcNow.Ticks, "ticks"));
@@ -363,6 +360,4 @@ namespace cdabtesttools.TestCases
             return tcr;
         }
     }
-
-
 }

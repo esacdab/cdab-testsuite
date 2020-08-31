@@ -27,9 +27,7 @@ namespace cdabtesttools.TestCases
 {
     internal class TestCase304 : TestCase301
     {
-
         private OfflineDataStatus offlineDataStatus = null;
-
         private FileInfo offlineDataStatusFile;
 
         public OfflineDataStatus OfflineDataStatus { get => offlineDataStatus; }

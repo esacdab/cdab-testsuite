@@ -1,8 +1,10 @@
 ﻿namespace cdabtesttools.Measurement
 {
+    /// <summary>
+    /// Enumeration for the metric types measured by the application.
+    /// </summary>
     public enum MetricName
     {
-
         throughput,
 
         responseTime,

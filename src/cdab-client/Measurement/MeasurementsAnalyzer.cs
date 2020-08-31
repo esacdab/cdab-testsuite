@@ -9,6 +9,9 @@ using Terradue.OpenSearch.DataHub;
 
 namespace cdabtesttools.Measurement
 {
+    /// <summary>
+    /// Functionality to generate test results for the various test cases.
+    /// </summary>
     public static class MeasurementsAnalyzer
     {
         private static ILog log = LogManager.GetLogger(typeof(MeasurementsAnalyzer));
@@ -21,14 +24,14 @@ namespace cdabtesttools.Measurement
             if (testCase.Results.Count() == 0)
             {
                 return new TestCaseResult(testCase.Id, metrics, testCase.StartTime, testCase.EndTime);
-                DoubleMetric _errorRate2 = new DoubleMetric(MetricName.errorRate,
-                100,
-                 "%");
+                /*
+                DoubleMetric _errorRate2 = new DoubleMetric(MetricName.errorRate, 100, "%");
                 log.DebugFormat("Error Rate : {0}{1}", _errorRate2.Value, _errorRate2.Uom);
                 metrics.Add(_errorRate2);
                 var _tcr2 = new TestCaseResult(testCase.Id, metrics, testCase.StartTime, testCase.EndTime);
                 _tcr2.ClassName = testCase.GetType().ToString();
                 return _tcr2;
+                */
             }
 
             var results = testCase.Results.Where(r => r != null);

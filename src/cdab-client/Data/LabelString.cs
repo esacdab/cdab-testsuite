@@ -9,43 +9,25 @@ namespace cdabtesttools.Data
     public class LabelString : IMissionFilterOption
     {
         private string value;
-
-        public string Value
-        {
-            get
-            {
-                return value;
-            }
-        }
-
         private string label;
         private readonly Func<IOpenSearchResultItem, bool> validator;
+        private Func<NameValueCollection, bool> condition;
+
+        public string Value => value;
+
+        public string Label => label;
 
         [JsonIgnore]
-        public Func<IOpenSearchResultItem, bool> Validator
-        {
-            get
-            {
-                return validator;
-            }
-        }
+        public Func<IOpenSearchResultItem, bool> Validator => validator;
 
-        public string Label
-        {
-            get
-            {
-                return label;
-            }
-        }
-
-        public Func<NameValueCollection, bool> Condition { get; }
+        public Func<NameValueCollection, bool> Condition => condition;
 
         public LabelString(string value, string label, Func<IOpenSearchResultItem, bool> validator, Func<NameValueCollection, bool> condition = null)
         {
             this.value = value;
             this.label = label;
             this.validator = validator;
-            Condition = condition;
+            this.condition = condition;
         }
     }
 }

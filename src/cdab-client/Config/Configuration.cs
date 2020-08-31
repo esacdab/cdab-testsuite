@@ -6,6 +6,9 @@ using YamlDotNet.Serialization;
 
 namespace cdabtesttools.Config
 {
+    /// <summary>
+    /// Data object class for the base node of the configuration YAML file.
+    /// </summary>
     public class Configuration
     {
         private static ILog log = LogManager.GetLogger(typeof(MainClass));
@@ -25,7 +28,11 @@ namespace cdabtesttools.Config
         public DataGlobalConfiguration Data { get; set; }
 
 
-
+        /// <summary>
+        /// Gets the configuration of the target site with the specified name if it exists in the configuration YAML file.
+        /// </summary>
+        /// <param name="targetSiteName">The name of the target site as specified in the configuration YAML file.</param>
+        /// <returns>The <see cref="TargetSiteConfiguration"> object representing the target site configuration.</returns>
         public TargetSiteConfiguration GetTargetSiteConfiguration(string targetSiteName)
         {
             if (Global != null && !string.IsNullOrEmpty(targetSiteName))
@@ -50,12 +57,23 @@ namespace cdabtesttools.Config
             }
         }
 
+
+        /// <summary>
+        /// Loads the default configuration file <em>config.yaml</em>.
+        /// </summary>
+        /// <returns>An object representing the content of the configuration YAML file.</returns>
         private static Configuration LoadDefault()
         {
             FileInfo configFile = new FileInfo("config.yaml");
             return Load(configFile);
         }
 
+
+        /// <summary>
+        /// Loads the configuration file from the specified YAML file.
+        /// </summary>
+        /// <param name="configFile">A <see cref="FileInfo"/> object referring to the configuration file.</param>
+        /// <returns>An object representing the content of the configuration YAML file.</returns>
         public static Configuration Load(FileInfo configFile)
         {
             ConfigurationFactory _configFactory = new ConfigurationFactory();

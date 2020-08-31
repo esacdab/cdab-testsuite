@@ -8,7 +8,6 @@ namespace cdabtesttools.TestCases
 {
     internal class TestCase311 : TestCase301
     {
-
         public TestCase311(ILog log, TargetSiteWrapper target, List<IOpenSearchResultItem> foundItems) :
             base(log, target, foundItems)
         {

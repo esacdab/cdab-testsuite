@@ -20,7 +20,6 @@ namespace cdabtesttools.TestCases
 {
     internal class TestCase203 : TestCase201
     {
-
         public TestCase203(ILog log, TargetSiteWrapper target, int load_factor, IEnumerable<Data.Mission> missions, out List<IOpenSearchResultItem> foundItems) :
             base(log, target, load_factor, missions, out foundItems)
         {
@@ -34,7 +33,5 @@ namespace cdabtesttools.TestCases
             var test = new ConcurrentQueue<FiltersDefinition>(DataHelper.GenerateBulkSystematicDataFiltersDefinition(target));
             queryFilters = test;
         }
-
-
     }
 }

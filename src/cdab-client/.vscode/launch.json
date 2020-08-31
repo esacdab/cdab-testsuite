@@ -5,34 +5,6 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "CreoDias TS07",
-            "type": "mono",
-            "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
-            "cwd": "${workspaceRoot}",
-            "args": [
-                "-v",
-                "-tsn=Local",
-                "-lf=1",
-                "-tn=CREO",
-                "TS07"
-            ]
-        },
-        {
-            "name": "Mundi TS07",
-            "type": "mono",
-            "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
-            "cwd": "${workspaceRoot}",
-            "args": [
-                "-v",
-                "-tsn=Local",
-                "-lf=1",
-                "-tn=MUNDI",
-                "TS07"
-            ]
-        },
-        {
             "name": "Apihub TS01",
             "type": "mono",
             "request": "launch",
@@ -245,6 +217,7 @@
             "args": [
                 "-v",
                 "-tsn=Local",
+                "-lf=1",
                 "-tn=CREO",
                 "TS07"
             ]
@@ -426,6 +399,20 @@
             "args": [
                 "-v",
                 "-tsn=Local",
+                "-lf=1",
+                "-tn=MUNDI",
+                "TS07"
+            ]
+        },
+        {
+            "name": "Mundi TS07 (lf=2)",
+            "type": "mono",
+            "request": "launch",
+            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "cwd": "${workspaceRoot}",
+            "args": [
+                "-v",
+                "-tsn=Local",
                 "-lf=2",
                 "-tn=MUNDI",
                 "TS07"
@@ -506,6 +493,7 @@
                 "-v",
                 "-tsn=Local",
                 "-tn=SOBLOO",
+                "-lf=3",
                 "TS07"
             ]
         },
@@ -576,6 +564,20 @@
                 "-lf=2",
                 "-tn=AMAZON",
                 "TS03"
+            ]
+        },
+        {
+            "name": "Amazon TS07",
+            "type": "mono",
+            "request": "launch",
+            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "cwd": "${workspaceRoot}",
+            "args": [
+                "-v",
+                "-tsn=Local",
+                "-lf=1",
+                "-tn=AMAZON",
+                "TS07"
             ]
         },
         {

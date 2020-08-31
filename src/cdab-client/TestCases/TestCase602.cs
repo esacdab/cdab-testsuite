@@ -15,7 +15,6 @@ namespace cdabtesttools.TestCases
 {
     internal class TestCase602 : TestCase201
     {
-
         private Dictionary<int, CrossCatalogueCoverageFiltersDefinition> queryFiltersTuple;
 
         public TestCase602(ILog log, TargetSiteWrapper target, int load_factor, out List<IOpenSearchResultItem> foundItems) :
@@ -23,7 +22,6 @@ namespace cdabtesttools.TestCases
         {
             Id = "TC602";
             Title = "Data Availability Latency Analysis";
-
         }
 
         public override void PrepareTest()
