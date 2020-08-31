@@ -49,7 +49,7 @@ namespace cdabtesttools.TestCases
                 testCaseResults.SearchFiltersDefinition = results.Select(tcr => tcr.FiltersDefinition).ToList();
                 return testCaseResults;
             }
-            catch (AggregateException e)
+            catch (Exception e)
             {
                 log.WarnFormat("Test Case Execution Error : {0}", e.InnerException.Message);
                 throw e;
