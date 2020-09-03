@@ -42,6 +42,5 @@
     <PackageReference Include="System.Diagnostics.Debug" Version="4.3.0" />
     <PackageReference Include="System.Runtime.InteropServices" Version="4.3.0" />
     <PackageReference Include="YamlDotNet" Version="7.0.0" />
-    <PackageReference Include="AWSSDK.S3" Version="3.3.109" />
   </ItemGroup>
 </Project>
