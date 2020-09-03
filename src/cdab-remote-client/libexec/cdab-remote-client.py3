@@ -78,7 +78,7 @@ class TestClient:
         { 'name': '-vm', 'label': 'number', 'type': 'int', 'description': 'Number of virtual machines to be run in parallel (min: 1)', 'default': 1 },
         { 'name': '-lf', 'label': 'number', 'type': 'int', 'description': 'Load factor (min: 1)', 'default': 1 },
         { 'name': '-sp', 'label': 'name', 'description': 'Service provider for test execution (as defined in configuration file)' },
-        { 'name': '-ts', 'label': 'name', 'description': 'Target site for querying (as defined in configuration file)', 'min_occurs': 1 },
+        { 'name': '-ts', 'label': 'name', 'description': 'Target site for querying (as defined in configuration file)' },
         { 'name': '-te', 'label': 'url', 'description': 'Endpoint URL for remote target calls (overrides settings from target site set with -ts)', 'min_occurs': 0 },
         { 'name': '-tc', 'label': 'username:password', 'description': 'Credentials for target (overrides settings from target site set with -ts)', 'min_occurs': 0 },
         { 'name': '-ps', 'label': 'name', 'description': 'Processing scenario identifier (TS15 only), takes precedence over -psw and -psi', 'min_occurs': 0, 'possible_values': [s for s in processing_scenarios] },
@@ -228,7 +228,7 @@ class TestClient:
                 else:
                     cl['min_occurs'] = 1
             if not 'max_occurs' in cl:
-                if cl['label'] is None:
+                if cl['label'] is None:   # flags (without values)
                     cl['max_occurs'] = 0   # no limit
                 else:
                     cl['max_occurs'] = 1
