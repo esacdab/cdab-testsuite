@@ -1,4 +1,4 @@
-# Use Case Scenario #2 - Rapid Mapping
+# Use Case Scenario #5 - Interferogram Computation
 
 ## Story
 
