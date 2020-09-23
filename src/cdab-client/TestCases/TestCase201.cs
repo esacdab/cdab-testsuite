@@ -31,9 +31,10 @@ namespace cdabtesttools.TestCases
         private readonly MaxParallelismTaskScheduler catalogue_scheduler;
         private readonly TaskFactory catalogue_task_factory;
         protected ConcurrentQueue<FiltersDefinition> queryFilters = null;
-        List<IOpenSearchResultItem> foundItems = null;
+        private List<IOpenSearchResultItem> foundItems = null;
+        private bool ignoreEmptyResult = false;
 
-        public TestCase201(ILog log, TargetSiteWrapper target, int load_factor, IEnumerable<Data.Mission> missions, out List<IOpenSearchResultItem> foundItems) :
+        public TestCase201(ILog log, TargetSiteWrapper target, int load_factor, IEnumerable<Data.Mission> missions, out List<IOpenSearchResultItem> foundItems, bool ignoreEmptyResult = false) :
             base("TC201", "Basic catalogue query")
         {
             this.log = log;
@@ -42,6 +43,7 @@ namespace cdabtesttools.TestCases
             this.target = target;
             this.sp = ServicePointManager.FindServicePoint(target.Wrapper.Settings.ServiceUrl);
             this.foundItems = new List<IOpenSearchResultItem>();
+            this.ignoreEmptyResult = ignoreEmptyResult;
             foundItems = this.foundItems;
             ose = target.OpenSearchEngine;
             catalogue_scheduler = new MaxParallelismTaskScheduler(100);
@@ -52,7 +54,15 @@ namespace cdabtesttools.TestCases
         {
             log.DebugFormat("Prepare {0}", Id);
             var baselines = target.TargetSiteConfig.Data.Catalogue.Sets.Where(cs => cs.Value.Type == TargetCatalogueSetType.baseline).ToDictionary(c => c.Key, c => c.Value);
-            queryFilters = new ConcurrentQueue<FiltersDefinition>(Mission.ShuffleSimpleRandomFiltersCombination(missions, baselines, load_factor));
+
+            // Workaround for non-compliant ONDA range syntax
+            Func<ItemNumberRange, string> rangeReformatter = null;
+            if (target.Wrapper.Settings.ServiceUrl.Host == "catalogue.onda-dias.eu") {
+                rangeReformatter = (r) => {
+                    return (r.Formatter.Replace(",", " TO "));
+                };
+            }
+            queryFilters = new ConcurrentQueue<FiltersDefinition>(Mission.ShuffleSimpleRandomFiltersCombination(missions, baselines, load_factor, rangeReformatter));
         }
 
         public override TestCaseResult CompleteTest(Task<IEnumerable<TestUnitResult>> tasks)
@@ -182,6 +192,7 @@ namespace cdabtesttools.TestCases
                 if (results != null)
                 {
                     foundItems.AddRange(results.Items);
+
                     long serializedSize = 0;
                     try
                     {
@@ -245,7 +256,7 @@ namespace cdabtesttools.TestCases
 
                     if (results.Count == 0)
                     {
-                        if ( results.TotalResults > 0 ){
+                        if ( results.TotalResults > 0 && !ignoreEmptyResult) {
                             log.WarnFormat("[{1}] no entries for {2} whilst {0} totalResult. This seems to be an error.", results.TotalResults, Task.CurrentId, fd.Label);
                             metrics.Add(new ExceptionMetric(new InvalidOperationException("No entries found")));
                         }

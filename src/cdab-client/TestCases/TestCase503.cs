@@ -25,7 +25,7 @@ namespace cdabtesttools.TestCases
         private ConcurrentQueue<CrossCatalogueCoverageFiltersDefinition> queryFiltersTuple;
 
         public TestCase503(ILog log, TargetSiteWrapper target, int load_factor, out List<IOpenSearchResultItem> foundItems) :
-            base(log, target, load_factor, null, out foundItems)
+            base(log, target, load_factor, null, out foundItems, true)
         {
             Id = "TC503";
             Title = "Target Local Data Offer Consistency";

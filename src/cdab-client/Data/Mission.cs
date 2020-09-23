@@ -124,8 +124,8 @@ namespace cdabtesttools.Data
                     new LabelString("EW", "Extra Wide swath", GetIdentifierValidator(new Regex(@"^S1.*_EW_.*"))),
                     new LabelString("WV", "Wave", GetIdentifierValidator(new Regex(@"^S1.*_WV_.*"))),
                 });
-            s1Mission.RelativeOrbit = new ItemNumberRange("track", "{http://a9.com/-/opensearch/extensions/eo/1.0/}track", 1, 175, 1, "[{0} TO {1}]",
-             new Regex(@"\[([0-9]+(\\.[0-9]+)?) TO ([0-9]+(\\.[0-9]+)?)\]"), "Track", GetTrackValidator, null);
+            s1Mission.RelativeOrbit = new ItemNumberRange("track", "{http://a9.com/-/opensearch/extensions/eo/1.0/}track", 1, 175, 1, "[{0},{1}]",
+             new Regex(@"\[([0-9]+(\\.[0-9]+)?),([0-9]+(\\.[0-9]+)?)\]"), "Track", GetTrackValidator, null);
 
             // s1Mission.Timeliness = new StringListChoice("timeliness", "{http://a9.com/-/opensearch/extensions/eo/1.0/}timeliness",
             //     new LabelString[] {
@@ -164,8 +164,8 @@ namespace cdabtesttools.Data
                     new LabelString("S2MSI1C", "Level-1C", GetIdentifierValidator(new Regex(@"^S2.*_MSIL1C_.*"))),
                     new LabelString("S2MSI2A", "Level-2A", GetIdentifierValidator(new Regex(@"^S2.*_MSIL2A_.*"))),
                 });
-            s2Mission.RelativeOrbit = new ItemNumberRange("track", "{http://a9.com/-/opensearch/extensions/eo/1.0/}track", 1, 143, 1, "[{0} TO {1}]",
-                new Regex(@"\[([0-9]+(\\.[0-9]+)?) TO ([0-9]+(\\.[0-9]+)?)\]"), "Track", GetTrackValidator, null);
+            s2Mission.RelativeOrbit = new ItemNumberRange("track", "{http://a9.com/-/opensearch/extensions/eo/1.0/}track", 1, 143, 1, "[{0},{1}]",
+                new Regex(@"\[([0-9]+(\\.[0-9]+)?),([0-9]+(\\.[0-9]+)?)\]"), "Track", GetTrackValidator, null);
 
             s2Mission.Count = new ItemNumberRange("count", "{http://a9.com/-/spec/opensearch/1.1/}count", 1, 50, 1, "{0}",
                 new Regex(@"([0-9]+(\\.[0-9]+)?)"), "Count", null, GetCountValidator);
@@ -209,8 +209,8 @@ namespace cdabtesttools.Data
                     new LabelString("SY_2_SYN___", "Synergy Level-2 Surface Reflectance", GetIdentifierValidator(new Regex(@"^S3.*SY_2_SYN___.*"))),
                     // new LabelString("SY_2_VGP___", "Synergy Level-2 Vegetation",  GetIdentifierValidator(new Regex(@"^S3.*SY_2_VGP___.*"))),
                 });
-            s3Mission.RelativeOrbit = new ItemNumberRange("track", "{http://a9.com/-/opensearch/extensions/eo/1.0/}track", 1, 385, 1, "[{0} TO {1}]",
-                new Regex(@"\[([0-9]+(\\.[0-9]+)?) TO ([0-9]+(\\.[0-9]+)?)\]"), "Track", GetTrackValidator, null);
+            s3Mission.RelativeOrbit = new ItemNumberRange("track", "{http://a9.com/-/opensearch/extensions/eo/1.0/}track", 1, 385, 1, "[{0},{1}]",
+                new Regex(@"\[([0-9]+(\\.[0-9]+)?),([0-9]+(\\.[0-9]+)?)\]"), "Track", GetTrackValidator, null);
 
             s3Mission.Count = new ItemNumberRange("count", "{http://a9.com/-/spec/opensearch/1.1/}count", 1, 50, 1, "{0}",
                 new Regex(@"([0-9]+(\\.[0-9]+)?)"), "Count", null, GetCountValidator);
@@ -399,7 +399,7 @@ namespace cdabtesttools.Data
             };
         }
 
-        public static IEnumerable<FiltersDefinition> ShuffleSimpleRandomFiltersCombination(IEnumerable<Mission> missions, Dictionary<string, CatalogueSetConfiguration> catConfig, int num)
+        public static IEnumerable<FiltersDefinition> ShuffleSimpleRandomFiltersCombination(IEnumerable<Mission> missions, Dictionary<string, CatalogueSetConfiguration> catConfig, int num, Func<ItemNumberRange, string> rangeReformatter = null)
         {
             List<FiltersDefinition> _randomCombinations = new List<FiltersDefinition>();
 
@@ -418,7 +418,7 @@ namespace cdabtesttools.Data
                 var collections = baselines.SelectMany(b => b.Collections.Where(c =>
                             c.Value.Parameters.Any(p => p.FullName == "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
                                 && p.Value == _mission.MissionName.Value))).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-                var fd = Mission.ShuffleSimpleRandomFiltersCombination(_mission, collections, string.Format("Simple-Random-{0}", i));
+                var fd = Mission.ShuffleSimpleRandomFiltersCombination(_mission, collections, string.Format("Simple-Random-{0}", i), rangeReformatter);
                 // fd.AddFilter("archiveStatus", "{http://a9.com/-/opensearch/extensions/eo/1.0/}statusSubType", "online", "Online", null, null);
                 _randomCombinations.Add(fd);
             }
@@ -462,7 +462,7 @@ namespace cdabtesttools.Data
             return _randomCombinations;
         }
 
-        private static FiltersDefinition ShuffleSimpleRandomFiltersCombination(Mission mission, Dictionary<string, DataCollectionDefinition> collections, string FilterSetkey, int limit = 3)
+        private static FiltersDefinition ShuffleSimpleRandomFiltersCombination(Mission mission, Dictionary<string, DataCollectionDefinition> collections, string FilterSetkey, Func<ItemNumberRange, string> rangeReformatter = null, int limit = 3)
         {
             FiltersDefinition _filtersDefinition = new FiltersDefinition(FilterSetkey);
             var collection = collections.ToArray()[rnd.Next(0, collections.Count())].Value;
@@ -493,13 +493,18 @@ namespace cdabtesttools.Data
                     int randomMax = rnd.Next((int)((int)min / nb.Step), (int)(nb.Max / nb.Step));
                     decimal max = new decimal(randomMax * nb.Step);
                     var value = new double[2] { (double)min, (double)max };
+                    var formatter = nb.Formatter;
+                    if (rangeReformatter != null)
+                    {
+                        formatter = rangeReformatter.Invoke(nb);
+                    }
                     Func<IOpenSearchResultItem, bool> ivalidator = null;
                     if (nb.ItemValueValidator != null)
                         ivalidator = nb.ItemValueValidator.Invoke(value);
                     Func<IOpenSearchResultCollection, bool> cvalidator = null;
                     if (nb.ResultsValidator != null)
                         cvalidator = nb.ResultsValidator.Invoke(value);
-                    _filtersDefinition.AddFilter(nb.Key, nb.FullName, string.Format(nb.Formatter, value.Cast<object>().ToArray()), string.Format("{0} {1}", nb.Label, string.Format(nb.Formatter, value.Cast<object>().ToArray())), ivalidator, cvalidator);
+                    _filtersDefinition.AddFilter(nb.Key, nb.FullName, string.Format(formatter, value.Cast<object>().ToArray()), string.Format("{0} {1}", nb.Label, string.Format(formatter, value.Cast<object>().ToArray())), ivalidator, cvalidator);
                 }
 
             }
@@ -510,7 +515,7 @@ namespace cdabtesttools.Data
 
         private static FiltersDefinition ShuffleComplexRandomFiltersCombination(Mission mission, Dictionary<string, DataCollectionDefinition> collections, string filterSetKey)
         {
-            FiltersDefinition _filtersDefinition = ShuffleSimpleRandomFiltersCombination(mission, collections, filterSetKey, 2);
+            FiltersDefinition _filtersDefinition = ShuffleSimpleRandomFiltersCombination(mission, collections, filterSetKey, null, 2);
 
             IEnumerable<System.Reflection.PropertyInfo> props = mission.GetType().GetProperties().Where(
                 prop => Attribute.IsDefined(prop, typeof(ComplexChoiceAttribute)));
