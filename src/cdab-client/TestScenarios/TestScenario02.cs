@@ -39,7 +39,7 @@ namespace cdabtesttools.TestScenarios
             List<IOpenSearchResultItem> foundItems;
 
             _testCases.Add(new TestCase202(log, target, load_factor, Mission.GenerateExistingDataDictionary(target), out foundItems));
-            _testCases.Add(new TestCase302(log, target, load_factor, foundItems));
+            //_testCases.Add(new TestCase302(log, target, load_factor, foundItems));
 
             return _testCases;
         }

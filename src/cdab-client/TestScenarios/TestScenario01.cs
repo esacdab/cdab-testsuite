@@ -40,7 +40,7 @@ namespace cdabtesttools.TestScenarios
 
             _testCases.Add(new TestCase101(log, target, load_factor));
             _testCases.Add(new TestCase201(log, target, load_factor, Mission.GenerateExistingDataDictionary(target), out foundItems));
-            _testCases.Add(new TestCase301(log, target, foundItems));
+//            _testCases.Add(new TestCase301(log, target, foundItems));
 
             return _testCases;
         }
