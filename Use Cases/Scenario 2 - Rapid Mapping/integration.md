@@ -58,7 +58,7 @@ $ ls -l /workspace/active_fire_S3A_SL_1_RBT____20170618T104548_20170618T104848_2
 
 8. Download it to your computer and open it with any tool that can visualise TIFF files. Verify that the band/layer `active_fire_detected` show a monochrome image of the detected fires as in the picture below: [100%]
 
-![Active fires seen in the SNAP desktop application](active_fire_S3A_SL_1_RBT____20170618T104548_20170618T104848_20181004T040944_0179_019_051______LR1_R_NT_003 "Active fires seen in the SNAP desktop application")
+![Active fires seen in the SNAP desktop application](active_fire_S3A_SL_1_RBT____20170618T104548_20170618T104848_20181004T040944_0179_019_051______LR1_R_NT_003.png "Active fires seen in the SNAP desktop application")
 
 
 ## Application build procedure 
