@@ -1,0 +1,18 @@
+name: env_s3
+channels:
+  - defaults
+  - terradue
+  - conda-forge
+dependencies:
+  - snap
+  - ipykernel
+  - otb
+  - gdal>2.2.2
+  - poppler<0.66
+  - lxml
+  - shapely
+  - pyyaml
+  - imageio
+  - parso=0.7
+  - geopandas
+  - psutil
