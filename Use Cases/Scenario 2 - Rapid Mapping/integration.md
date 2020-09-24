@@ -45,7 +45,7 @@ Make sure the contents of the zipped archive are extracted and available and lol
 ```console
 $ unzip S3A_SL_1_RBT____20170618T104548_20170618T104848_20181004T040944_0179_019_051______LR1_R_NT_003.zip
 ```
-4. Return to Jupyter Notebook, open the notebook with a Python 3 kernel. If you created and new conda environment during the installation procedure, make sure the Python kernel is using that environment. [40%]
+4. Return to Jupyter Notebook, open the notebook with a Python 3 kernel. If you created and new conda environment during the installation procedure, make sure the Python kernel is using that environment. [50%]
 
 5. Execute, one after another, the cells of the notebook, waiting for each cell to complete, ensuring no errors occur. [60%]
 
