@@ -1,4 +1,4 @@
-[![Build Status](https://build.terradue.com/job/Terradue/job/cdab-testsuite/job/b'develop'/badge/icon)](https://build.terradue.com/blue/organizations/jenkins/Terradue%2Fcdab-testsuite/activity?branch=b'develop')
+[![Build Status](https://build.terradue.com/job/Terradue/job/cdab-testsuite/job/b'release/75'/badge/icon)](https://build.terradue.com/blue/organizations/jenkins/Terradue%2Fcdab-testsuite/activity?branch=b'release/75')
 
 ![CDAB logo](doc/images/cdab-logo.jpg)
 
