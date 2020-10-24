@@ -66,10 +66,10 @@ OPTIONS
     -ts=<name>                Target site for querying (as defined in configuration file)
     -te=<url>                 Endpoint URL for remote target calls (overrides settings from target site set with -ts)
     -tc=<username:password>   Credentials for target (overrides settings from target site set with -ts)
-    -ps=<name>                Processing scenario identifier (TS15 only), takes precedence over -psw and -psi
+    -ps=<name>                Processing scenario identifier (TS15 only), takes precedence over -psw
                               Possible values: ndvi
     -psw=<name>               CWL workflow file (TS15 only) if -ps is not specified
-    -psi=<name>               Text file with input product URLsfor workflow (TS15 only) if -ps is not specified
+    -psi=<name>               Text file with input product URLsfor workflow (TS15 only)
     -i=<name>                 Docker image identifier (URL)
                               Default value is automatically determined
     -a=<name>                 Docker authentication file (config.json)
