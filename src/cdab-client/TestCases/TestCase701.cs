@@ -110,7 +110,6 @@ namespace cdabtesttools.TestCases
             if (uploadRequest is HttpTransferRequest) {
                 var httpUploadRequest = uploadRequest as HttpTransferRequest;
                 httpUploadRequest.HttpWebRequest.AllowWriteStreamBuffering = false;
-                httpUploadRequest.HttpWebRequest.ContentLength = Convert.ToInt64(totalSize);
             }
 
             uploadRequests.Enqueue(uploadRequest);
@@ -252,7 +251,7 @@ namespace cdabtesttools.TestCases
                     totalByteCounter += buf.Length;
                     intermediateCounter += buf.Length;
                     double totalPct = ((double)totalByteCounter / totalSize) * 100;
-                    if ((Math.Abs(progessPct - totalPct) > 1) || intermediateCounter >= 10485760)
+                    if ((Math.Abs(progessPct - totalPct) >= 1) || intermediateCounter >= 10485760)
                     {
                         progessPct = totalPct;
                         double bytespersec = (double)totalByteCounter / ((double)stopWatchUploadElaspedTime.ElapsedMilliseconds / 1000);
@@ -365,4 +364,5 @@ namespace cdabtesttools.TestCases
             return tcr;
         }
     }
+
 }

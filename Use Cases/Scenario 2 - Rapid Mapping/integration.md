@@ -8,7 +8,7 @@
     - Jupyter Notebook (with Python 3 support)
     - With data offer access if required
   
-2. Open Jupyter Notebook on the provisioned machine
+2. Open Jupyter Notebook on the provisioned machine.
 
 3. Run the following in a cell and make sure there is no error.
 

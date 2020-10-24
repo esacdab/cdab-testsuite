@@ -66,6 +66,14 @@ class TestClient:
         'ndvi',
     ]
 
+    target_site_uri_prefixes = {
+        'CREO': 'https://auth.creodias.eu/',
+        'MUNDI': 'https://mundiwebservices.com',
+        'ONDA': 'https://catalogue.onda-dias.eu/',
+        'SOBLOO': 'https://sobloo.eu/',
+        'AMAZON': 'https://scihub.copernicus.eu/',
+        'GOOGLE': 'https://scihub.copernicus.eu/',
+    }
 
     command_line = [
         { 'name': '-h', 'label': None, 'description': 'Display this help and exit' },
@@ -81,9 +89,9 @@ class TestClient:
         { 'name': '-ts', 'label': 'name', 'description': 'Target site for querying (as defined in configuration file)' },
         { 'name': '-te', 'label': 'url', 'description': 'Endpoint URL for remote target calls (overrides settings from target site set with -ts)', 'min_occurs': 0 },
         { 'name': '-tc', 'label': 'username:password', 'description': 'Credentials for target (overrides settings from target site set with -ts)', 'min_occurs': 0 },
-        { 'name': '-ps', 'label': 'name', 'description': 'Processing scenario identifier (TS15 only), takes precedence over -psw and -psi', 'min_occurs': 0, 'possible_values': [s for s in processing_scenarios] },
+        { 'name': '-ps', 'label': 'name', 'description': 'Processing scenario identifier (TS15 only), takes precedence over -psw', 'min_occurs': 0, 'possible_values': [s for s in processing_scenarios] },
         { 'name': '-psw', 'label': 'name', 'description': 'CWL workflow file (TS15 only) if -ps is not specified', 'min_occurs': 0 },
-        { 'name': '-psi', 'label': 'name', 'description': 'Text file with input product URLsfor workflow (TS15 only) if -ps is not specified', 'min_occurs': 0 },
+        { 'name': '-psi', 'label': 'name', 'description': 'Text file with input product URLsfor workflow (TS15 only)', 'min_occurs': 0 },
         { 'name': '-i', 'label': 'name', 'description': 'Docker image identifier (URL)', 'default': None },
         { 'name': '-a', 'label': 'name', 'description': 'Docker authentication file (config.json)', 'default': None },
         { 'name': '-n', 'label': 'name', 'description': 'Test site name (parameter for cdab-client call)' },
@@ -143,6 +151,8 @@ class TestClient:
         self.target_site = None
         self.target_endpoint = None
         self.target_credentials = None
+        self.target_site_class = None
+        self.target_site_uri_prefix = None
         self.docker_config = None
         self.docker_image_id = None
         self.docker_run_command = None
@@ -540,37 +550,54 @@ class TestClient:
                 if 'data' not in self.target_site_config:
                     exit_client(ERR_CONFIG, "Service provider '{0}' does not contain a 'data' configuration".format(self.target_site))
 
-                data_config = self.target_site_config['data']
-
-                if not isinstance(data_config, dict):
-                    exit_client(ERR_CONFIG, "'data' configuration for service provider '{0}' is empty or invalid".format(self.target_site))
-
-                if 'url' in data_config:
-                    self.target_endpoint = data_config['url']
-                else:
-                    exit_client(ERR_CONFIG, "Service provider '{0}' configuration does not contain target endpoint ('url')".format(self.target_site))
-
-                if 'credentials' in data_config:
-                    self.target_credentials = data_config['credentials']
-                else:
-                    exit_client(ERR_CONFIG, "Service provider '{0}' configuration does not contain target credentials".format(self.target_site))
+                self.get_target_site_access()
 
             self.remote_cdab_json_file = "{0}Results.json".format(self.cdab_client_test_scenario)
 
         elif self.docker_run_command == 'PROCESSING':
 
+            if not self.target_site:
+                self.target_site = self.service_provider
+                
+            if self.target_site not in self.service_provider_configs:
+                exit_client(ERR_CONFIG, "No configuration found for target '{0}'".format(self.target_site))
+
+            self.target_site_config = self.service_provider_configs[self.target_site]
+
+            if 'data' not in self.target_site_config:
+                exit_client(ERR_CONFIG, "Service provider '{0}' does not contain a 'data' configuration".format(self.target_site))
+
+            self.get_target_site_access()
+
+            if not self.target_site_class:
+                exit_client(ERR_CONFIG, "Service provider '{0}' configuration does not contain target site class ('class')".format(self.target_site))
+
+            if not self.target_site_uri_prefix:
+                exit_client(ERR_CONFIG, "Service provider '{0}' class is invalid (must be among {1})".format(self.target_site, ", ".join([s for s in TestClient.target_site_uri_prefixes])))
+
+            credential_regex = re.compile('^([^:]+):(.*)')
+            match = credential_regex.match(self.target_credentials)
+            if match is None:  # it's an argument (i.e. only a value)
+                self.target_site_username = ''
+                self.target_site_password = ''
+            else:  # it's an option (with an optional value)
+                self.target_site_username = match[1]
+                self.target_site_password = match[2]
+
             if self.test_scenario == "TS15":
+
                 if self.processing_scenario_name:
                     self.processing_scenario_cwl_file = "{0}/ts-scripts/{1}.workflow.cwl".format(os.path.dirname(sys.argv[0]), self.processing_scenario_name)
-                    self.processing_scenario_input_file = "{0}/ts-scripts/{1}.input".format(os.path.dirname(sys.argv[0]), self.processing_scenario_name)
+                    # self.processing_scenario_input_file = "{0}/ts-scripts/{1}.input".format(os.path.dirname(sys.argv[0]), self.processing_scenario_name)
                 else:
-                    if not self.processing_scenario_cwl_file or not self.processing_scenario_input_file:
-                        TestClient.print_usage("Either -ps or both -psw and -psi have to be specified")
+                    if not self.processing_scenario_cwl_file:
+                        TestClient.print_usage("Either -ps or -psw have to be specified")
 
                 if not path.exists(self.processing_scenario_cwl_file) or not path.isfile(self.processing_scenario_cwl_file):
                     exit_client(ERR_CONFIG, "Processing scenario CWL workflow file {0} does not exist".format(self.processing_scenario_cwl_file))
-                if not path.exists(self.processing_scenario_input_file) or not path.isfile(self.processing_scenario_input_file):
-                    exit_client(ERR_CONFIG, "Processing scenario input YAML file {0} does not exist".format(self.processing_scenario_input_file))
+                if self.processing_scenario_input_file:
+                    if not path.exists(self.processing_scenario_input_file) or not path.isfile(self.processing_scenario_input_file):
+                        exit_client(ERR_CONFIG, "Processing scenario input YAML file {0} does not exist".format(self.processing_scenario_input_file))
 
                         
             if 'cdab_client_test_scenario' in scenario:
@@ -592,6 +619,32 @@ class TestClient:
 
         if 'test_target_url' in scenario:
             self.test_target_url = scenario['test_target_url']
+
+
+
+    def get_target_site_access(self):
+        """Gets endpoint and credentials of target site (data section).
+        """
+        data_config = self.target_site_config['data']
+
+        if not isinstance(data_config, dict):
+            exit_client(ERR_CONFIG, "'data' configuration for service provider '{0}' is empty or invalid".format(self.target_site))
+
+        if 'url' in data_config:
+            self.target_endpoint = data_config['url']
+        else:
+            exit_client(ERR_CONFIG, "Service provider '{0}' configuration does not contain target endpoint ('url')".format(self.target_site))
+
+        if 'credentials' in data_config:
+            self.target_credentials = data_config['credentials']
+        else:
+            exit_client(ERR_CONFIG, "Service provider '{0}' configuration does not contain target credentials".format(self.target_site))
+
+        if 'class' in data_config:
+            self.target_site_class = data_config['class']
+            if self.target_site_class in TestClient.target_site_uri_prefixes:
+                self.target_site_uri_prefix = TestClient.target_site_uri_prefixes[self.target_site_class]
+
 
 
 
@@ -883,19 +936,38 @@ class TestClient:
         elif self.docker_run_command == 'PROCESSING':
             if self.test_scenario == "TS15":
                 copy_file(self.compute_config, run, self.processing_scenario_cwl_file, "workflow.cwl")
-                copy_file(self.compute_config, run, self.processing_scenario_input_file, "input")
+                if self.processing_scenario_input_file:
+                    copy_file(self.compute_config, run, self.processing_scenario_input_file, "input")
+
+            execute_remote_command(self.compute_config, run, "mkdir -p config/Stars")
+
+            credential_text = '''{{
+  "Credentials": {{
+    "supplier": {{
+      "Type": "Basic",
+      "UriPrefix": "{0}",
+      "Username": "{1}",
+      "Password": "{2}"
+    }}
+  }}
+}}'''.format(self.target_site_uri_prefix, self.target_site_username, self.target_site_password)
+
+            with open("ts15-usersettings.json", 'w') as credential_file:
+                credential_file.write(credential_text)
+                credential_file.close()
+            copy_file(self.compute_config, run, "ts15-usersettings.json", "config/Stars/usersettings.json")
 
             Logger.log(LogLevel.INFO, "Running processing test scenario {0} ...".format(self.test_scenario), run=run)
 
             execute_remote_command(
                 self.compute_config,
                 run,
-                "sh {0} {1} \"{2}\" {3}".format(
+                "sh {0} {1} \"{2}\" {3} {4}".format(
                     script_name,
                     working_dir,
                     self.docker_image_id,
                     self.test_site_name,
-                    # self.compute_config['download_origin'],
+                    self.target_site_class
                 )
             )
 
@@ -970,6 +1042,10 @@ class TestClient:
                                 run.error_rate = m['value']
                             if m['name'] == 'processDuration' and isinstance(m['value'], int):
                                 run.process_duration = m['value']
+                            if m['name'] == 'avgProcessDuration' and isinstance(m['value'], int):
+                                run.avg_process_duration = m['value']
+                            if m['name'] == 'processCount' and isinstance(m['value'], int):
+                                run.process_count = m['value']
                         continue   # don't add main test case of test scenario
 
                     all_test_case_nodes.append(test_case_result_node)
@@ -992,7 +1068,9 @@ class TestClient:
             'totalReadResults': sum,
             'totalSize': sum,
             'throughput': sum,
-            'dataCollectionDivision': lambda l: [i for l1 in l for i in l1]
+            'dataCollectionDivision': lambda l: [i for l1 in l for i in l1],
+            'processCount': sum,
+            'avgProcessDuration': lambda l: TestClient.get_average(l),
         }
 
         # List of remote test cases (unique entries)
@@ -1210,6 +1288,21 @@ class TestClient:
             },
         ]
 
+        if [r.avg_process_duration for r in runs if r.avg_process_duration]:
+            metrics.append({
+                'name': "avgProcessDuration",
+                'value': [r.avg_process_duration for r in runs],
+                'uom': "ms"
+            })
+        if [r.process_count for r in runs if r.process_count]:
+            metrics.append({
+                'name': "processCount",
+                'value': [r.process_count for r in runs],
+                'uom': "#"
+            })
+
+
+
         result['testCaseResults'].append({
             'testName': self.test_case_name,
             'className': test_case_class,
@@ -1332,6 +1425,8 @@ class TestRun:
         self.duration = None
         self.error_rate = 0
         self.process_duration = None
+        self.avg_process_duration = None
+        self.process_count = None
         self.provisioning_latency = None
 
 
