@@ -1,4 +1,4 @@
-# Use Case Scenario #1 - NDVI mapping - Integration Procedures
+# Use Case Scenario #5 - Interferogram Computation - Integration Procedures
 
 ## Development Environment installation procedure
 
@@ -87,7 +87,7 @@ export PATH="${CONDA_DIR}/envs/env_snap/snap/bin:${CONDA_DIR}/envs/env_snap/snap
 
    Search for a product, possibly the first, from the 10-day perriod starting at the moment of the event (earthquake in this example).
 
-   The resulting product will be the **post-event** product. Ideally it should be the one with the identifier **S1A_IW_SLC__1SSV_20200815T095747_20200815T095815_033916_03EF29_E739**.
+   The resulting product will be the **post-event** product. Ideally it should be the one with the identifier **S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD**.
   
    Obtain that product's metadata and extract its download location. [20%]
 
@@ -95,61 +95,74 @@ export PATH="${CONDA_DIR}/envs/env_snap/snap/bin:${CONDA_DIR}/envs/env_snap/snap
    In the case of the above product, the command for download from the Terradue storage would be the following:
 
     ```console
-    $ curl -L -o input_data/S1A_IW_SLC__1SSV_20200815T095747_20200815T095815_033916_03EF29_E739.zip https://store.terradue.com/download/sentinel1/files/v1/S1A_IW_SLC__1SSV_20200815T095747_20200815T095815_033916_03EF29_E739
+    $ curl -L -o input_data/S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD.zip https://store.terradue.com/download/sentinel1/files/v1/S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD
     ```
 
     Make the necessary commands to extract the product as a folder. The product directory should be in the same place as the *.zip* file, which can be deleted after extraction.
 
     ```console
-    $ unzip S2A_MSIL1C_20200507T104031_N0209_R008_T31TFK_20200507T124549.zip
+    $ unzip S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD.zip
     ```
 
     Verify that the directory structure and content of the extracted product is as follows:
 
-    ```console
-    ├── S1A_IW_SLC__1SSV_20200815T095747_20200815T095815_033916_03EF29_E739
-    └── download
-        └── S1A_IW_SLC__1SSV_20200815T095747_20200815T095815_033916_03EF29_E739.SAFE
-            ├── annotation
-            │   ├── calibration
-            │   │   ├── calibration-s1a-iw1-slc-vv-20200815t095747-20200815t095815-033916-03ef29-001.xml
-            │   │   ├── calibration-s1a-iw2-slc-vv-20200815t095748-20200815t095813-033916-03ef29-002.xml
-            │   │   ├── calibration-s1a-iw3-slc-vv-20200815t095749-20200815t095814-033916-03ef29-003.xml
-            │   │   ├── noise-s1a-iw1-slc-vv-20200815t095747-20200815t095815-033916-03ef29-001.xml
-            │   │   ├── noise-s1a-iw2-slc-vv-20200815t095748-20200815t095813-033916-03ef29-002.xml
-            │   │   └── noise-s1a-iw3-slc-vv-20200815t095749-20200815t095814-033916-03ef29-003.xml
-            │   ├── s1a-iw1-slc-vv-20200815t095747-20200815t095815-033916-03ef29-001.xml
-            │   ├── s1a-iw2-slc-vv-20200815t095748-20200815t095813-033916-03ef29-002.xml
-            │   └── s1a-iw3-slc-vv-20200815t095749-20200815t095814-033916-03ef29-003.xml
-            ├── manifest.safe
-            ├── measurement
-            │   ├── s1a-iw1-slc-vv-20200815t095747-20200815t095815-033916-03ef29-001.tiff
-            │   ├── s1a-iw2-slc-vv-20200815t095748-20200815t095813-033916-03ef29-002.tiff
-            │   └── s1a-iw3-slc-vv-20200815t095749-20200815t095814-033916-03ef29-003.tiff
-            ├── preview
-            │   ├── icons
-            │   │   └── logo.png
-            │   ├── map-overlay.kml
-            │   ├── product-preview.html
-            │   ├── quick-look.png
-            │   └── thumbnail.png
-            ├── S1A_IW_SLC__1SSV_20200815T095747_20200815T095815_033916_03EF29_E739.SAFE-report-20200815T130109.pdf
-            └── support
-                ├── s1-level-1-calibration.xsd
-                ├── s1-level-1-measurement.xsd
-                ├── s1-level-1-noise.xsd
-                ├── s1-level-1-product.xsd
-                ├── s1-level-1-quicklook.xsd
-                ├── s1-map-overlay.xsd
-                ├── s1-object-types.xsd
-                └── s1-product-preview.xsd
     ```
+    S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD
+    └── download
+        └── S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD.SAFE
+            ├── annotation
+            │   ├── calibration
+            │   │   ├── calibration-s1b-iw1-slc-vh-20200821t095716-20200821t095741-023020-02bb48-001.xml
+            │   │   ├── calibration-s1b-iw1-slc-vv-20200821t095716-20200821t095741-023020-02bb48-004.xml
+            │   │   ├── calibration-s1b-iw2-slc-vh-20200821t095714-20200821t095740-023020-02bb48-002.xml
+            │   │   ├── calibration-s1b-iw2-slc-vv-20200821t095714-20200821t095740-023020-02bb48-005.xml
+            │   │   ├── calibration-s1b-iw3-slc-vh-20200821t095715-20200821t095741-023020-02bb48-003.xml
+            │   │   ├── calibration-s1b-iw3-slc-vv-20200821t095715-20200821t095741-023020-02bb48-006.xml
+            │   │   ├── noise-s1b-iw1-slc-vh-20200821t095716-20200821t095741-023020-02bb48-001.xml
+            │   │   ├── noise-s1b-iw1-slc-vv-20200821t095716-20200821t095741-023020-02bb48-004.xml
+            │   │   ├── noise-s1b-iw2-slc-vh-20200821t095714-20200821t095740-023020-02bb48-002.xml
+            │   │   ├── noise-s1b-iw2-slc-vv-20200821t095714-20200821t095740-023020-02bb48-005.xml
+            │   │   ├── noise-s1b-iw3-slc-vh-20200821t095715-20200821t095741-023020-02bb48-003.xml
+            │   │   └── noise-s1b-iw3-slc-vv-20200821t095715-20200821t095741-023020-02bb48-006.xml
+            │   ├── s1b-iw1-slc-vh-20200821t095716-20200821t095741-023020-02bb48-001.xml
+            │   ├── s1b-iw1-slc-vv-20200821t095716-20200821t095741-023020-02bb48-004.xml
+            │   ├── s1b-iw2-slc-vh-20200821t095714-20200821t095740-023020-02bb48-002.xml
+            │   ├── s1b-iw2-slc-vv-20200821t095714-20200821t095740-023020-02bb48-005.xml
+            │   ├── s1b-iw3-slc-vh-20200821t095715-20200821t095741-023020-02bb48-003.xml
+            │   └── s1b-iw3-slc-vv-20200821t095715-20200821t095741-023020-02bb48-006.xml
+            ├── manifest.safe
+            ├── measurement
+            │   ├── s1b-iw1-slc-vh-20200821t095716-20200821t095741-023020-02bb48-001.tiff
+            │   ├── s1b-iw1-slc-vv-20200821t095716-20200821t095741-023020-02bb48-004.tiff
+            │   ├── s1b-iw2-slc-vh-20200821t095714-20200821t095740-023020-02bb48-002.tiff
+            │   ├── s1b-iw2-slc-vv-20200821t095714-20200821t095740-023020-02bb48-005.tiff
+            │   ├── s1b-iw3-slc-vh-20200821t095715-20200821t095741-023020-02bb48-003.tiff
+            │   └── s1b-iw3-slc-vv-20200821t095715-20200821t095741-023020-02bb48-006.tiff
+            ├── preview
+            │   ├── icons
+            │   │   └── logo.png
+            │   ├── map-overlay.kml
+            │   ├── product-preview.html
+            │   ├── quick-look.png
+            │   └── thumbnail.png
+            ├── S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD.SAFE-report-20200821T130013.pdf
+            └── support
+                ├── s1-level-1-calibration.xsd
+                ├── s1-level-1-measurement.xsd
+                ├── s1-level-1-noise.xsd
+                ├── s1-level-1-product.xsd
+                ├── s1-level-1-quicklook.xsd
+                ├── s1-map-overlay.xsd
+                ├── s1-object-types.xsd
+                └── s1-product-preview.xsd
     [30%]
 
 5. From the post-event's product's metadata obtained in step 3, extract the relative orbit number (track).
    In the case of the above product, it is **69**.
 
    As in step 3, do a new search for the **pre-event** product, this time for a 10-day from the 10-day perrod ending at the moment of the event. Use the relative orbit number as a query parameter to make sure that the product is from the same track.
+
+   A good candidate for the pre-event product is **S1A_IW_SLC__1SSV_20200815T095747_20200815T095815_033916_03EF29_E739**.
 
    Download and extract the product as in step 4. [35%]
 
@@ -173,7 +186,7 @@ export PATH="${CONDA_DIR}/envs/env_snap/snap/bin:${CONDA_DIR}/envs/env_snap/snap
 7. Wait for the processing to complete without error.
    Check the output directory structure and content (under *output_data/target.data*), it should look like this:
 
-  ```console
+  ```
   ├── coh_VV_15Aug2020_21Aug2020.hdr
   ├── coh_VV_15Aug2020_21Aug2020.img
   ├── i_ifg_VV_15Aug2020_21Aug2020.hdr
@@ -196,13 +209,17 @@ export PATH="${CONDA_DIR}/envs/env_snap/snap/bin:${CONDA_DIR}/envs/env_snap/snap
 
   [60%]
 
-8. Download it to your computer and open it with QGIS [75%]
-
-![NDVI in QIS](T31TFK_20200507T104031_NDVI.png "NDVI in QGIS")
+8. Download it to your computer and open it with a suitable tool to verify . [80%]
 
 
 9. Do another search similar to the one in step 5, but over a 3-year period before the pre-event product (i.e. the second product we chose), also the relative orbit number in the search.
-   Download the products as before. Make sure all products are downloaded correctly, belong to the correct track and cover the point of interest.
+   Analysing the metadata, make sure the products belong to the correct track and cover the area of interest.
+   Download the products as before. For this test. it is not necessary to extract the content. Check the content of the zip files, using this command:
+   
+   ```console
+   unzip --list <file>
+   ```
+   [100%]
 
 ## Application build procedure 
 
