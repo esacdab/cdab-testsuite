@@ -6,7 +6,7 @@ The use case describes an advanced story where the main user processes Sentinel-
 
 The main user selects Sentinel-1 Single Look Complex acquisitions over an area of interest. After having selected the reference acquisition (previously referred to as master), he uses the catalog discovery mechanism to select the other acquisition (previously referred to as slave) setting the same track (orbit) same orbit direction and an overlap of at least 80% between the two acquisitions.
 
-The main user creates a Python script that creates a directed acyclic graph (DAG) for SNAP and does a system call to the SNAP gpt utility to process it. The DAG includes all the steps for the unwrapped interferogram generation. 
+The main user creates a bash script that creates a directed acyclic graph (DAG) for SNAP and does a system call to the SNAP gpt utility to process it. The DAG includes all the steps for the unwrapped interferogram generation. 
 
 
 ## User Profile 

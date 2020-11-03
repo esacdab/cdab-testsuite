@@ -158,6 +158,107 @@ service_providers:
                     full_name: "{http://a9.com/-/opensearch/extensions/time/1.0/}start"
                     value: "[NOW-12M]"
                     label: "last 12 months"
+  HellenicHub:
+    max_catalogue_thread: 1
+    max_download_thread: 2
+    data:
+      url: https://sentinels.space.noa.gr/dhus
+      credentials: username:password
+      # Catalogue specific configuration
+      catalogue:
+        # CopHub Catalogue collections' set definition
+        sets:
+          # CopHub has the Copernicus catalogue (see baselines definition) ...
+          Copernicus:
+            # ... as a baseline (used in TC5O1, TC502, TC601 & TC602)...
+            type: baseline  # The catalogue collections' set of type baseline are referering to common baseline defined globally
+            # ... with ApiHub as a reference ...
+            reference_target_site: ApiHub
+            # ... and with the following parameters to filter out only baseline
+            parameters: # None for ONDA. All Copernicus products are baseline
+          # and the Sentinel-5P (see baselines definition) ...
+          Copernicus-S5P:
+            # ... as a baseline (used in TC5O1, TC502, TC601 & TC602)...
+            type: baseline  # The catalogue collections' set of type baseline are referering to common baseline defined globally
+            # ... with Sentinel-5P pre-Ops Hub as a reference
+            reference_target_site: S5PHub
+            # ... and with the following parameters to filter out only baseline
+            parameters: # None for ONDA. All S5P products are baseline
+          # Onda has a data offering... 
+          DataOffer:
+            # ... defined as locally managed (TC503)
+            type: local
+            # ... with ApiHub as a reference
+            reference_target_site: ApiHub
+            # collections' set definition
+            collections:
+              Sentinel1:
+                label: "Sentinel-1 last year"
+                parameters:
+                  - key: missionName
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+                    value: "Sentinel-1"
+                    label: "Sentinel-1"
+                  - key: sensingStart
+                    full_name: "{http://a9.com/-/opensearch/extensions/time/1.0/}start"
+                    value: "[NOW-12M]"
+                    label: "last 12 months"
+              Sentinel2:
+                label: "Sentinel-2 MSI last year"
+                parameters:
+                  - key: missionName
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+                    value: "Sentinel-2"
+                    label: "Sentinel-2"
+                  - key: sensingStart
+                    full_name: "{http://a9.com/-/opensearch/extensions/time/1.0/}start"
+                    value: "[NOW-12M]"
+                    label: "last 12 months"
+              Sentinel3-NonTimeCritical:
+                label: "Sentinel-3 Non Time Critical last year"
+                parameters:
+                  - key: missionName
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+                    value: "Sentinel-3"
+                    label: "Sentinel-3"
+                  - key: timeliness
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}timeliness"
+                    value: "NTC"
+                    label: "Non Time Critical"
+                  - key: sensingStart
+                    full_name: "{http://a9.com/-/opensearch/extensions/time/1.0/}start"
+                    value: "[NOW-12M]"
+                    label: "last 12 months"
+              Sentinel3-NearRealTime:
+                label: "Sentinel-3 Near Real Time last month"
+                parameters:
+                  - key: missionName
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+                    value: "Sentinel-3"
+                    label: "Sentinel-3"
+                  - key: timeliness
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}timeliness"
+                    value: "NRT"
+                    label: "Near Real Time"
+                  - key: sensingStart
+                    full_name: "{http://a9.com/-/opensearch/extensions/time/1.0/}start"
+                    value: "[NOW-12M]"
+                    label: "last 12 months"
+              Sentinel3-ShortTimeCritical:
+                label: "Sentinel-3 Short Time Critical last month"
+                parameters:
+                  - key: missionName
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+                    value: "Sentinel-3"
+                    label: "Sentinel-3"
+                  - key: timeliness
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}timeliness"
+                    value: "STC"
+                    label: "Short Time Critical"
+                  - key: sensingStart
+                    full_name: "{http://a9.com/-/opensearch/extensions/time/1.0/}start"
+                    value: "[NOW-12M]"
+                    label: "last 12 months"
   IntHub:
     max_catalogue_thread: 5
     max_download_thread: 2
@@ -430,6 +531,7 @@ service_providers:
     data:
       url: https://catalogue.onda-dias.eu/dias-catalogue/
       credentials: username:password
+      class: ONDA
       # Catalogue specific configuration
       catalogue:
         # ONDA Catalogue collections' set definition
@@ -928,6 +1030,7 @@ service_providers:
   CREO:
     max_catalogue_thread: 5
     max_download_thread: 5
+    class: CREO
     data:
       url: https://finder.creodias.eu/resto/api/collections/describe.xml
       credentials: username:password
@@ -1117,6 +1220,170 @@ service_providers:
       region_name: "RegionOne"
       storage_name: "teststorage"
       test_file: "path/to/testfile"
+  CODE_DE:
+    max_catalogue_thread: 5
+    max_download_thread: 5
+    data:
+      url: https://finder.code-de.org/resto/api/collections/describe.xml
+      credentials: username:password
+      catalogue:
+        # CREODias Catalogue collections' set definition
+        sets:
+          # CREODias has the Copernicus catalogue (see baselines definition) ...
+          Copernicus:
+            # Identifier of the cxatalogue set configured in the data section
+            reference_set_id: Copernicus
+            # ... as a baseline (used in TC5O1, TC502, TC601 & TC602)...
+            type: baseline  # The catalogue collections' set of type baseline are referering to common baseline defined globally
+            # ... with ApiHub as a reference ...
+            reference_target_site: ApiHub
+            # ... and with the following parameters to filter out only baseline
+            parameters: # All Copernicus products are baseline. Just remove the very recent one to avoid newly ingested bias
+              - key: sensingStop
+                full_name: "{http://a9.com/-/opensearch/extensions/time/1.0/}end"
+                value: "[NOW-1D]"
+                label: "before yesterday"
+              # ESA-DATASET filter
+              - key: dataset
+                full_name: "{http://creodias.eu/namespace/sentinel}dataset"
+                value: "ESA-DATASET"
+                label: "ESA Baseline"
+              # exact count for creodias
+              - key: exactCount
+                full_name: "{http://mapshup.info/-/resto/2.0/}exactCount"
+                value: "1"
+                label: "Exact count"
+          # and the Sentinel-5P (see baselines definition) ...
+          Copernicus-S5P:
+            # ... as a baseline (used in TC5O1, TC502, TC601 & TC602)...
+            type: baseline  # The catalogue collections' set of type baseline are referering to common baseline defined globally
+            # ... with Sentinel-5P pre-Ops Hub as a reference
+            reference_target_site: S5PHub
+            # ... and with the following parameters to filter out only baseline
+            parameters: # All Copernicus products are baseline. Just remove the very recent one to avoid newly ingested bias
+              - key: sensingStop
+                full_name: "{http://a9.com/-/opensearch/extensions/time/1.0/}end"
+                value: "[NOW-1D]"
+                label: "before yesterday"
+              # ESA-DATASET filter
+              - key: dataset
+                full_name: "{http://creodias.eu/namespace/sentinel}dataset"
+                value: "ESA-DATASET"
+                label: "ESA Baseline"
+              # exact count for creodias
+              - key: exactCount
+                full_name: "{http://mapshup.info/-/resto/2.0/}exactCount"
+                value: "1"
+                label: "Exact count"
+          # CREODias has a data offering... 
+          DataOffer:
+            # ... defined as locally managed (TC503)
+            type: local
+            # ... with ApiHub as a reference
+            reference_target_site: ApiHub
+            # collections' set definition
+            parameters:
+              # Parameters to filter only locally managed products (for TC503)
+              # ESA-DATASET filter
+              - key: dataset
+                full_name: "{http://creodias.eu/namespace/sentinel}dataset"
+                value: "ESA-DATASET"
+                label: "ESA Baseline"
+              # exact count for creodias
+              - key: exactCount
+                full_name: "{http://mapshup.info/-/resto/2.0/}exactCount"
+                value: "1"
+                label: "Exact count"
+            collections:
+              Sentinel1-RAW:
+                label: "Sentinel-1 RAW World last 6 months"
+                parameters:
+                  - key: missionName
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+                    value: "Sentinel-1"
+                    label: "Sentinel-1"
+                  - key: productType
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}productType"
+                    value: "RAW"
+                    label: "RAW"
+                  - key: sensingStart
+                    full_name: "{http://a9.com/-/opensearch/extensions/time/1.0/}start"
+                    value: "[NOW-6M]"
+                    label: "Last 6 months"
+              Sentinel1-GRD:
+                label: "Sentinel-1 GRD World"
+                parameters:
+                  - key: missionName
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+                    value: "Sentinel-1"
+                    label: "Sentinel-1"
+                  - key: productType
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}productType"
+                    value: "GRD"
+                    label: "GRD"
+              Sentinel1-OCN:
+                label: "Sentinel-1 GRD World"
+                parameters:
+                  - key: missionName
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+                    value: "Sentinel-1"
+                    label: "Sentinel-1"
+                  - key: productType
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}productType"
+                    value: "OCN"
+                    label: "OCN"
+              Sentinel1-SLC-Europe:
+                label: "Sentinel-1 SLC Europe"
+                parameters:
+                  - key: missionName
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+                    value: "Sentinel-1"
+                    label: "Sentinel-1"
+                  - key: productType
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}productType"
+                    value: "SLC"
+                    label: "SLC"
+                  - key: geom
+                    full_name: "{http://a9.com/-/opensearch/extensions/geo/1.0/}geometry"
+                    value: "POLYGON((-10.547 36.173,-2.109 36.031,6.855 38.548,11.25 37.996,20.391 34.452,35.156 34.162,42.363 67.942,26.895 72.342,-26.016 67.136,-10.547 36.173))"
+                    label: "Europe"
+              Sentinel1-SLC-World:
+                label: "Sentinel-1 SLC World last 6 months"
+                parameters:
+                  - key: missionName
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+                    value: "Sentinel-1"
+                    label: "Sentinel-1"
+                  - key: productType
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}productType"
+                    value: "SLC"
+                    label: "SLC"
+                  - key: sensingStart
+                    full_name: "{http://a9.com/-/opensearch/extensions/time/1.0/}start"
+                    value: "[NOW-6M]"
+                    label: "Last 6 months"
+              Sentinel2-MSI1C:
+                label: "Sentinel-2 MSI Level-1C World"
+                parameters:
+                  - key: missionName
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+                    value: "Sentinel-2"
+                    label: "Sentinel-2"
+                  - key: productType
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}productType"
+                    value: "S2MSI1C"
+                    label: "S2MSI1C"
+              Sentinel3:
+                label: "Sentinel-3 World Non Time Critical"
+                parameters:
+                  - key: missionName
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+                    value: "Sentinel-3"
+                    label: "Sentinel-3"
+                  - key: timeliness
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}timeliness"
+                    value: "NTC"
+                    label: "Non Time Critical"
   MUNDI:
     max_catalogue_thread: 5
     max_download_thread: 2
@@ -1125,6 +1392,7 @@ service_providers:
       credentials: username:password
       s3_secret_key: "secret"
       s3_key_id: id
+      class: MUNDI
       catalogue:
         # Mundi Catalogue collections' set definition
         sets:
@@ -1403,6 +1671,7 @@ service_providers:
     data:
       url: https://sobloo.eu/api/v1/services/search
       credentials: username:apikey
+      class: SOBLOO
       catalogue:
         # Sobloo Catalogue collections' set definition
         sets:
