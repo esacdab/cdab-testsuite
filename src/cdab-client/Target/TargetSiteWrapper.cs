@@ -79,7 +79,7 @@ namespace cdabtesttools.Target
                 return TargetType.DIAS;
             }
 
-            if (Wrapper.Settings.ServiceUrl.Host == "finder.creodias.eu")
+            if (Wrapper.Settings.ServiceUrl.Host == "finder.creodias.eu" || Wrapper.Settings.ServiceUrl.Host == "finder.code-de.org")
             {
                 log.DebugFormat("TARGET TYPE: DIAS");
                 return TargetType.DIAS;
@@ -103,7 +103,7 @@ namespace cdabtesttools.Target
                 return TargetType.ASF;
             }
 
-            if (Wrapper.Settings.ServiceUrl.Host.EndsWith("copernicus.eu"))
+            if (Wrapper.Settings.ServiceUrl.Host.EndsWith("copernicus.eu") || Wrapper.Settings.ServiceUrl.AbsolutePath.Contains("/dhus"))
             {
                 log.DebugFormat("TARGET TYPE: DATAHUB");
                 return TargetType.DATAHUB;
@@ -139,8 +139,12 @@ namespace cdabtesttools.Target
                 return new OndaDiasWrapper(new Uri(string.Format("https://catalogue.onda-dias.eu/dias-catalogue")), (NetworkCredential)target_creds, targetSiteConfig.Storage.ToOpenStackStorageSettings());
             }
 
-            if (target_uri.Host == "finder.creodias.eu")
+            if (target_uri.Host == "finder.creodias.eu" || target_uri.Host == "finder.code-de.org")
             {
+                if (targetSiteConfig.Data.Url != null)
+                {
+                    return new CreoDiasWrapper(target_creds, osUrl: targetSiteConfig.Data.Url, openStackStorageSettings: targetSiteConfig.Storage.ToOpenStackStorageSettings() );
+                }
                 return new CreoDiasWrapper(target_creds, openStackStorageSettings: targetSiteConfig.Storage.ToOpenStackStorageSettings() );
             }
 
@@ -164,7 +168,7 @@ namespace cdabtesttools.Target
                 return new AsfApiWrapper(target_uri, (NetworkCredential)target_creds);
             }
 
-            if (target_uri.Host.EndsWith("copernicus.eu"))
+            if (target_uri.Host.EndsWith("copernicus.eu") || target_uri.AbsolutePath.EndsWith("/dhus"))
             {
                 if (filters != null && filters.GetFilters().Any(f => f.Key == "archiveStatus"))
                 {
