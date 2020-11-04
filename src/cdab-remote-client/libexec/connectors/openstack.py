@@ -166,6 +166,12 @@ class OpenStackConnector:
 
 
 
+
+    def add_supplier(self, suppliers):
+        pass
+
+
+
     def create_vm(self, run):
 
         Logger.log(LogLevel.INFO, "Creating virtual machine ...", run=run)
@@ -226,7 +232,7 @@ class OpenStackConnector:
             options = ['openstack', 'volume', 'create', '-f', 'json']
             options.extend(self.cloud_base_options)
             options.extend([
-                "--size", "20",
+                "--size", "100",
                 "{0}{1}-volume".format(self.compute_config['vm_name'], run.suffix)
             ])
             response = execute_local_command(run, options, True)

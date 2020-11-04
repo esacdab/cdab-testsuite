@@ -114,6 +114,15 @@ class GoogleConnector:
 
     
 
+    def add_supplier(self, suppliers):
+        suppliers['GOOGLE'] = {
+            'Type': "Terradue.Data.Stars.Suppliers.DataHubSourceSupplier",
+            'ServiceUrl': "https://storage.googleapis.com",
+            'projectId': self.compute_config['project_id'],
+            'AccountFile': self.compute_config['account_file'],
+        }
+
+
         
     def create_vm(self, run):
 

@@ -37,14 +37,14 @@ class TestClient:
             'test_case_name': 'TC411',
             'docker_image_id': 'docker.terradue.com/centos7-testsite:latest',
             'docker_run_command': 'CDAB_CLIENT_DEFAULT',
-            'cdab_client_test_scenario': 'TS11',
+            'cdab_client_test_scenario_id': 'TS11',
         },
         'TS12': {
             'test_scenario_description': 'Remote execution of catalogue access and download test on VM (multiple)',
             'test_case_name': 'TC412',
             'docker_image_id': 'docker.terradue.com/centos7-testsite:latest',
             'docker_run_command': 'CDAB_CLIENT_DEFAULT',
-            'cdab_client_test_scenario': 'TS12',
+            'cdab_client_test_scenario_id': 'TS12',
         },
         'TS13': {
             'test_scenario_description': 'Remote execution of processing test (multiple)',
@@ -53,12 +53,21 @@ class TestClient:
             'docker_run_command': 'PROCESSING',
             'test_target_url': 'https://catalog.terradue.com/sentinel3/search?uid=S3A_OL_1_EFR____20191110T230850_20191110T231150_20191112T030831_0179_051_215_3600_LN1_O_NT_002',
         },
-        'TS15': {
-            'test_scenario_description': 'Remote execution of a predefined processing scenario test',
+        'TS15.1': {
+            'test_scenario_description': 'Remote execution of a predefined processing scenario test (NDVI)',
             'test_case_name': 'TC415',
             'docker_image_id': None,
             'docker_run_command': 'PROCESSING',
             'test_target_url': '',
+            'tools': [ 'conda', 'opensearch-client', 'Stars' ]
+        },
+        'TS15.5': {
+            'test_scenario_description': 'Remote execution of a predefined processing scenario test (interferogram)',
+            'test_case_name': 'TC415',
+            'docker_image_id': None,
+            'docker_run_command': 'PROCESSING',
+            'test_target_url': '',
+            'tools': [ 'conda', 'opensearch-client', 'Stars' ]
         },
     }
 
@@ -75,6 +84,11 @@ class TestClient:
         'GOOGLE': 'https://scihub.copernicus.eu/',
     }
 
+    target_site_s3_uri_prefixes = {
+        'MUNDI': 'https://obs.eu-de.otc.t-systems.com/',
+        'AMAZON': 'https://aws.amazon.com',
+    }
+
     command_line = [
         { 'name': '-h', 'label': None, 'description': 'Display this help and exit' },
         { 'name': '-v', 'label': None, 'description': 'Display more information during processing' },
@@ -89,8 +103,7 @@ class TestClient:
         { 'name': '-ts', 'label': 'name', 'description': 'Target site for querying (as defined in configuration file)' },
         { 'name': '-te', 'label': 'url', 'description': 'Endpoint URL for remote target calls (overrides settings from target site set with -ts)', 'min_occurs': 0 },
         { 'name': '-tc', 'label': 'username:password', 'description': 'Credentials for target (overrides settings from target site set with -ts)', 'min_occurs': 0 },
-        { 'name': '-ps', 'label': 'name', 'description': 'Processing scenario identifier (TS15 only), takes precedence over -psw', 'min_occurs': 0, 'possible_values': [s for s in processing_scenarios] },
-        { 'name': '-psw', 'label': 'name', 'description': 'CWL workflow file (TS15 only) if -ps is not specified', 'min_occurs': 0 },
+        { 'name': '-psw', 'label': 'name', 'description': 'CWL workflow file (TS15 only) replacing default file', 'min_occurs': 0 },
         { 'name': '-psi', 'label': 'name', 'description': 'Text file with input product URLsfor workflow (TS15 only)', 'min_occurs': 0 },
         { 'name': '-i', 'label': 'name', 'description': 'Docker image identifier (URL)', 'default': None },
         { 'name': '-a', 'label': 'name', 'description': 'Docker authentication file (config.json)', 'default': None },
@@ -128,6 +141,73 @@ class TestClient:
         { 'name': 'download_origin', 'description': 'Value of DOWNLOAD_ORIGIN environment variable for test execution on VM', 'default': "terradue" },
     ]
 
+    stars_plugins = {
+        "Plugins": {
+            "Terradue": {
+                "Assembly": "/usr/share/Stars-Terradue/Stars-Terradue.dll",
+                "Suppliers": {
+                    "ONDA": {
+                    "Type": "Terradue.Data.Stars.Suppliers.DataHubSourceSupplier",
+                    "Parameters": [
+                        ""
+                    ],
+                    "ServiceUrl": "https://catalogue.onda-dias.eu/dias-catalogue"
+                    },
+                    "CREO": {
+                    "Type": "Terradue.Data.Stars.Suppliers.DataHubSourceSupplier",
+                    "Parameters": [
+                        ""
+                    ],
+                    "ServiceUrl": "https://finder.creodias.eu/resto/api/collections/describe.xml"
+                    },
+                    "SOBLOO": {
+                    "Type": "Terradue.Data.Stars.Suppliers.DataHubSourceSupplier",
+                    "Parameters": [
+                        ""
+                    ],
+                    "ServiceUrl": "https://sobloo.eu/api/v1/services/search"
+                    },
+                    "MUNDI": {
+                    "Type": "Terradue.Data.Stars.Suppliers.DataHubSourceSupplier",
+                    "Parameters": [
+                        ""
+                    ],
+                    "ServiceUrl": "https://mundiwebservices.com/acdc/catalog/proxy/search"
+                    },
+                    "AMAZON": {
+                    "Type": "Terradue.Data.Stars.Suppliers.DataHubSourceSupplier",
+                    "Parameters": [
+                        ""
+                    ],
+                    "ServiceUrl": "https://aws.amazon.com"
+                    },
+                    "GOOGLE": {
+                    "Type": "Terradue.Data.Stars.Suppliers.DataHubSourceSupplier",
+                    "ServiceUrl": "https://storage.googleapis.com",
+                    "projectId": "still-tower-272111",
+                    "AccountFile": "/res/still-tower-272111-53008e24bcda.json"
+                    }
+                },
+                "Translators": {
+                    "AtomToStac": {
+                        "Type": "Terradue.Data.Stars.Translators.AtomToStacTranslator",
+                        "Parameters": [
+                            ""
+                        ]
+                    }
+                },
+                "Processings": {
+                    "KOMPSAT-3": {
+                        "Type": "Terradue.Data.Stars.Model.Metadata.Kompsat3.Kompsat3MetadataExtraction"
+                    },
+                    "SENTINEL-1": {
+                        "Type": "Terradue.Data.Stars.Model.Metadata.Sentinels.Sentinel1.Sentinel1MetadataExtractor"
+                    }
+                }
+            }
+        }
+    }
+
 
 
     def __init__(self):
@@ -153,14 +233,18 @@ class TestClient:
         self.target_credentials = None
         self.target_site_class = None
         self.target_site_uri_prefix = None
+        self.target_site_s3_uri_prefix = None
+        self.target_site_s3_key_id = None
+        self.target_site_s3_secret_key = None
         self.docker_config = None
         self.docker_image_id = None
         self.docker_run_command = None
         self.test_site_name = None
+        self.test_scenario_id = None
         self.test_scenario = None
-        self.cdab_client_test_scenario = None
+        self.processing_scenario_id = None
+        self.cdab_client_test_scenario_id = None
         self.test_scenario_description = None
-        self.processing_scenario_name = None
         self.processing_scenario_cwl_file = None
         self.processing_scenario_input_file = None
         self.test_case_name = None
@@ -334,8 +418,6 @@ class TestClient:
             self.target_endpoint = value
         elif name == '-tc':
             self.target_credentials = value
-        elif name == '-ps':
-            self.processing_scenario_name = value
         elif name == '-psw':
             self.processing_scenario_cwl_file = value
         elif name == '-psi':
@@ -347,7 +429,8 @@ class TestClient:
         elif name == '-n':
             self.test_site_name = value
         elif label == 'test-scenario':
-            self.test_scenario = value
+            self.test_scenario_id = value
+
 
 
 
@@ -515,28 +598,33 @@ class TestClient:
         and verifies that the test scenario can be executed.
         """
 
-        if not self.test_scenario in TestClient.test_scenarios:
-            exit_client(ERR_CONFIG, "Test scenario '{0}' not configured".format(self.test_scenario))
+        if not self.test_scenario_id in TestClient.test_scenarios:
+            exit_client(ERR_CONFIG, "Test scenario '{0}' not configured".format(self.test_scenario_id))
 
-        scenario = TestClient.test_scenarios[self.test_scenario]
+        self.test_scenario = TestClient.test_scenarios[self.test_scenario_id]
+
+        if self.test_scenario_id[0:4] == 'TS15':
+            self.processing_scenario_id = self.test_scenario_id[5:]
+            self.test_scenario_id = 'TS15'
+
 
         if self.docker_image_id is None:
-            if 'docker_image_id' in scenario:
-                self.docker_image_id = scenario['docker_image_id']
+            if 'docker_image_id' in self.test_scenario:
+                self.docker_image_id = self.test_scenario['docker_image_id']
             else:
-                exit_client(ERR_CONFIG, "No docker image ID configured for test scenario '{0}'".format(self.test_scenario))
+                exit_client(ERR_CONFIG, "No docker image ID configured for test scenario '{0}'".format(self.test_scenario_id))
 
         if self.docker_run_command is None:
-            if 'docker_run_command' in scenario:
-                self.docker_run_command = scenario['docker_run_command']
+            if 'docker_run_command' in self.test_scenario:
+                self.docker_run_command = self.test_scenario['docker_run_command']
             else:
-                exit_client(ERR_CONFIG, "No docker run command configured for test scenario '{0}'".format(self.test_scenario))
+                exit_client(ERR_CONFIG, "No docker run command configured for test scenario '{0}'".format(self.test_scenario_id))
 
         if self.docker_run_command == 'CDAB_CLIENT_DEFAULT':
-            if 'cdab_client_test_scenario' in scenario:
-                self.cdab_client_test_scenario = scenario['cdab_client_test_scenario']
+            if 'cdab_client_test_scenario_id' in self.test_scenario:
+                self.cdab_client_test_scenario_id = self.test_scenario['cdab_client_test_scenario_id']
             else:
-                exit_client(ERR_CONFIG, "No locally run test scenario configured for test scenario '{0}'".format(self.test_scenario))
+                exit_client(ERR_CONFIG, "No locally run test scenario configured for test scenario '{0}'".format(self.test_scenario_id))
 
             # Set target site parameters
 
@@ -552,7 +640,7 @@ class TestClient:
 
                 self.get_target_site_access()
 
-            self.remote_cdab_json_file = "{0}Results.json".format(self.cdab_client_test_scenario)
+            self.remote_cdab_json_file = "{0}Results.json".format(self.cdab_client_test_scenario_id)
 
         elif self.docker_run_command == 'PROCESSING':
 
@@ -584,41 +672,38 @@ class TestClient:
                 self.target_site_username = match[1]
                 self.target_site_password = match[2]
 
-            if self.test_scenario == "TS15":
+            if self.test_scenario_id == "TS15":
 
-                if self.processing_scenario_name:
-                    self.processing_scenario_cwl_file = "{0}/ts-scripts/{1}.workflow.cwl".format(os.path.dirname(sys.argv[0]), self.processing_scenario_name)
-                    # self.processing_scenario_input_file = "{0}/ts-scripts/{1}.input".format(os.path.dirname(sys.argv[0]), self.processing_scenario_name)
-                else:
-                    if not self.processing_scenario_cwl_file:
-                        TestClient.print_usage("Either -ps or -psw have to be specified")
+                if not self.processing_scenario_cwl_file:
+                    self.processing_scenario_cwl_file = "{0}/ts-scripts/workflow.{1}.cwl".format(os.path.dirname(sys.argv[0]), self.processing_scenario_id)
 
                 if not path.exists(self.processing_scenario_cwl_file) or not path.isfile(self.processing_scenario_cwl_file):
                     exit_client(ERR_CONFIG, "Processing scenario CWL workflow file {0} does not exist".format(self.processing_scenario_cwl_file))
+
                 if self.processing_scenario_input_file:
                     if not path.exists(self.processing_scenario_input_file) or not path.isfile(self.processing_scenario_input_file):
                         exit_client(ERR_CONFIG, "Processing scenario input YAML file {0} does not exist".format(self.processing_scenario_input_file))
 
                         
-            if 'cdab_client_test_scenario' in scenario:
-                self.cdab_client_test_scenario = scenario['cdab_client_test_scenario']
+            if 'cdab_client_test_scenario_id' in self.test_scenario:
+                self.cdab_client_test_scenario_id = self.test_scenario['cdab_client_test_scenario_id']
 
 
-            self.remote_cdab_json_file = "{0}Results.json".format(self.test_scenario)
+            self.remote_cdab_json_file = "{0}Results.json".format(self.test_scenario_id)
 
-        if 'test_scenario_description' in scenario:
-            self.test_scenario_description = scenario['test_scenario_description']
+        if 'test_scenario_description' in self.test_scenario:
+            self.test_scenario_description = self.test_scenario['test_scenario_description']
         else:
-            self.test_scenario_description = "Test scenario {0}".format(self.cdab_client_test_scenario)
+            self.test_scenario_description = "Test scenario {0}".format(self.cdab_client_test_scenario_id)
 
 
-        if 'test_case_name' in scenario:
-            self.test_case_name = scenario['test_case_name']
+        if 'test_case_name' in self.test_scenario:
+            self.test_case_name = self.test_scenario['test_case_name']
         else:
-            exit_client(ERR_CONFIG, "No test case name configured for test scenario '{0}'".format(self.test_scenario))
+            exit_client(ERR_CONFIG, "No test case name configured for test scenario '{0}'".format(self.test_scenario_id))
 
-        if 'test_target_url' in scenario:
-            self.test_target_url = scenario['test_target_url']
+        if 'test_target_url' in self.test_scenario:
+            self.test_target_url = self.test_scenario['test_target_url']
 
 
 
@@ -644,6 +729,14 @@ class TestClient:
             self.target_site_class = data_config['class']
             if self.target_site_class in TestClient.target_site_uri_prefixes:
                 self.target_site_uri_prefix = TestClient.target_site_uri_prefixes[self.target_site_class]
+            if self.target_site_class in TestClient.target_site_s3_uri_prefixes:
+                self.target_site_s3_uri_prefix = TestClient.target_site_s3_uri_prefixes[self.target_site_class]
+
+        if 's3_key_id' in data_config and 's3_secret_key' in data_config:
+            self.target_site_s3_key_id = data_config['s3_key_id']
+            self.target_site_s3_secret_key = data_config['s3_secret_key']
+
+            
 
 
 
@@ -682,8 +775,8 @@ class TestClient:
             print("- Docker configuration file:      {0}".format(self.docker_config), file=sys.stderr)
             print("- Docker image identifier:        {0}".format(self.docker_image_id), file=sys.stderr)
             print("- Test site name:                 {0}".format(self.test_site_name), file=sys.stderr)
-            print("- Test scenario (TS):             {0}".format(self.test_scenario), file=sys.stderr)
-            print("- Remote TS (if applicable):      {0}".format(self.cdab_client_test_scenario), file=sys.stderr)
+            print("- Test scenario (TS):             {0}".format(self.test_scenario_id), file=sys.stderr)
+            print("- Remote TS (if applicable):      {0}".format(self.cdab_client_test_scenario_id), file=sys.stderr)
             print("- Test scenario description:      {0}".format(self.test_scenario_description), file=sys.stderr)
             print("- Test case name:                 {0}".format(self.test_case_name), file=sys.stderr)
             print(file=sys.stderr)
@@ -887,14 +980,12 @@ class TestClient:
 
         run.test_start_time = datetime.datetime.utcnow()
 
-        script_name = "{0}-remote.sh".format(self.test_scenario)
-        copy_file(self.compute_config, run, "{0}/ts-scripts/{1}".format(os.path.dirname(sys.argv[0]), script_name), script_name)
-
-
         if self.compute_config['use_volume']:
             working_dir = "/mnt/cdab-volume/test"
+            execute_remote_command(self.compute_config, run, "sudo mkdir -p {0}".format(working_dir))
+            execute_remote_command(self.compute_config, run, "sudo chown {0}:{0} {1}".format(self.compute_config['remote_user'], working_dir))
         else:
-            working_dir = "$HOME"
+            working_dir = "."   # remote user's home directory
 
         copy_file(self.compute_config, run, self.config_file, "config.yaml")
         try:
@@ -904,7 +995,10 @@ class TestClient:
 
         if self.docker_run_command == 'CDAB_CLIENT_DEFAULT':
 
-            Logger.log(LogLevel.INFO, "Running test scenario {0} (using cdab-client) ...".format(self.cdab_client_test_scenario), run=run)
+            script_name = "{0}-remote.sh".format(self.test_scenario_id)
+            copy_file(self.compute_config, run, "{0}/ts-scripts/{1}".format(os.path.dirname(sys.argv[0]), script_name), script_name)
+
+            Logger.log(LogLevel.INFO, "Running test scenario {0} (using cdab-client) ...".format(self.cdab_client_test_scenario_id), run=run)
 
             execute_remote_command(
                 self.compute_config,
@@ -934,40 +1028,84 @@ class TestClient:
             )
 
         elif self.docker_run_command == 'PROCESSING':
-            if self.test_scenario == "TS15":
-                copy_file(self.compute_config, run, self.processing_scenario_cwl_file, "workflow.cwl")
+            if self.test_scenario_id == "TS15":
+                script_name = "{0}.{1}-remote.sh".format(self.test_scenario_id, self.processing_scenario_id)
+                copy_file(self.compute_config, run, self.processing_scenario_cwl_file, "{0}/workflow.cwl".format(working_dir))
                 if self.processing_scenario_input_file:
-                    copy_file(self.compute_config, run, self.processing_scenario_input_file, "input")
+                    copy_file(self.compute_config, run, self.processing_scenario_input_file, "{0}/input".format(working_dir))
+            else:
+                script_name = "{0}-remote.sh".format(self.test_scenario_id)
+            
+            if 'tools' in self.test_scenario:
+                if 'conda' in self.test_scenario['tools']:
+                    copy_file(self.compute_config, run, "{0}/ts-scripts/conda-install.sh".format(os.path.dirname(sys.argv[0])), "conda-install.sh")
+                    execute_remote_command(self.compute_config, run, "sudo sh conda-install.sh")
 
-            execute_remote_command(self.compute_config, run, "mkdir -p config/Stars")
+                if 'opensearch-client' in self.test_scenario['tools']:
+                    execute_remote_command(self.compute_config, run, "sudo yum install mono-devel -y")
+                    copy_file(self.compute_config, run, "{0}/ts-scripts/opensearch-client.zip".format(os.path.dirname(sys.argv[0])), "opensearch-client.zip")
+                    execute_remote_command(self.compute_config, run, "sudo unzip -d /usr/lib/ opensearch-client.zip")
+                    execute_remote_command(self.compute_config, run, "sudo mv /usr/lib/opensearch-client/bin/opensearch-client /usr/bin/")
 
-            credential_text = '''{{
-  "Credentials": {{
-    "supplier": {{
-      "Type": "Basic",
-      "UriPrefix": "{0}",
-      "Username": "{1}",
-      "Password": "{2}"
-    }}
-  }}
-}}'''.format(self.target_site_uri_prefix, self.target_site_username, self.target_site_password)
+                if 'Stars' in self.test_scenario['tools']:
+                    execute_remote_command(self.compute_config, run, "docker pull terradue/stars-t2:devlatest")
+                    execute_remote_command(self.compute_config, run, "mkdir -p config/Stars")
+                    execute_remote_command(self.compute_config, run, "mkdir -p config/etc/Stars")
 
-            with open("ts15-usersettings.json", 'w') as credential_file:
-                credential_file.write(credential_text)
-                credential_file.close()
-            copy_file(self.compute_config, run, "ts15-usersettings.json", "config/Stars/usersettings.json")
+                    # Add specific supplier
+                    self.connector.add_supplier(TestClient.stars_plugins['Plugins']['Terradue']['Suppliers'])
 
-            Logger.log(LogLevel.INFO, "Running processing test scenario {0} ...".format(self.test_scenario), run=run)
+                    with open("stars-terradue.json", 'w') as stars_file:
+                        stars_file.write(json.dumps(TestClient.stars_plugins, indent=4))
+                        stars_file.close()
+                    copy_file(self.compute_config, run, "stars-terradue.json", "config/etc/Stars/terradue.json")
 
+                    credential_config = {
+                        'Credentials': {
+                            'supplier': {
+                                'Type': "Basic",
+                                'UriPrefix': self.target_site_uri_prefix,
+                                'Username': self.target_site_username,
+                                'Password': self.target_site_password,
+                            }
+                        }
+                    }
+
+                    if self.target_site_s3_key_id and self.target_site_s3_secret_key and self.target_site_s3_uri_prefix:
+                        credential_config['Credentials']['s3_supplier'] = {
+                            'AuthType': "S3",
+                            'UriPrefix': self.target_site_s3_uri_prefix,
+                            "Username": self.target_site_s3_key_id,
+                            "Password": self.target_site_s3_secret_key
+                        }
+
+                    with open("stars-usersettings.json", 'w') as stars_file:
+                        stars_file.write(json.dumps(credential_config, indent=4))
+                        stars_file.close()
+                    copy_file(self.compute_config, run, "stars-usersettings.json", "config/Stars/usersettings.json")
+
+            Logger.log(LogLevel.INFO, "Running processing test scenario {0} ...".format(self.test_scenario_id), run=run)
+
+            copy_file(self.compute_config, run, "{0}/ts-scripts/{1}".format(os.path.dirname(sys.argv[0]), script_name), script_name)
+    
             execute_remote_command(
                 self.compute_config,
                 run,
-                "sh {0} {1} \"{2}\" {3} {4}".format(
+                "sh {0} {1} \"{2}\" {3} {4} {5}".format(
                     script_name,
                     working_dir,
                     self.docker_image_id,
                     self.test_site_name,
-                    self.target_site_class
+                    self.target_site_class,
+                    self.target_credentials
+                ),
+                display_command="sh {0} {1} \"{2}\" {3} {4} {5}".format(
+                    script_name,
+                    working_dir,
+                    self.docker_image_id,
+                    self.test_site_name,
+                    self.target_site_class,
+                    re.sub(':.*', ':xxxxxxxx', self.target_credentials),
                 )
             )
 
@@ -977,10 +1115,10 @@ class TestClient:
         stdout_file = "cdab{0}.stdout".format(run.suffix)
         stderr_file = "cdab{0}.stderr".format(run.suffix)
 
-        copy_file(self.compute_config, run, run.cdab_json_file, self.remote_cdab_json_file, False)
-        copy_file(self.compute_config, run, run.junit_file, "junit.xml", False)
-        copy_file(self.compute_config, run, stdout_file, "cdab.stdout", False)
-        copy_file(self.compute_config, run, stderr_file, "cdab.stderr", False)
+        copy_file(self.compute_config, run, run.cdab_json_file, "{0}/{1}".format(working_dir, self.remote_cdab_json_file), False)
+        copy_file(self.compute_config, run, run.junit_file, "{0}/junit.xml".format(working_dir), False)
+        copy_file(self.compute_config, run, stdout_file, "{0}/cdab.stdout".format(working_dir), False)
+        copy_file(self.compute_config, run, stderr_file, "{0}/cdab.stderr".format(working_dir), False)
         run.files_downloaded_time = datetime.datetime.utcnow()
 
         Logger.log(LogLevel.INFO, "Test result files received", run=run)
@@ -1215,7 +1353,7 @@ class TestClient:
         result = {
             'jobName': os.environ['JOB_NAME'] if 'JOB_NAME' in os.environ else None,
             'buildNumber': os.environ['BUILD_NUMBER'] if 'BUILD_NUMBER' in os.environ else None,
-            'testScenario': self.test_scenario,
+            'testScenario': self.test_scenario_id,
             'testSite': self.service_provider,
             'testTargetUrl': test_target_url,
             'testTarget': self.target_site,
@@ -1312,7 +1450,7 @@ class TestClient:
             'metrics': metrics
         })
 
-        output_file = "{0}Results.json".format(self.test_scenario)
+        output_file = "{0}Results.json".format(self.test_scenario_id)
         with open(output_file, 'w') as file:
             file.write(json.dumps(result, indent=2))
             file.close()

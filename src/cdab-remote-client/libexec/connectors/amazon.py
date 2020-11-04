@@ -116,7 +116,18 @@ class AmazonConnector:
         pass
 
 
-    
+
+    def add_supplier(self, suppliers):
+        suppliers['AMAZON'] = {
+            'Type': "Terradue.Data.Stars.Suppliers.DataHubSourceSupplier",
+            'Parameters': [
+                ''
+            ],
+            'ServiceUrl': "https://aws.amazon.com",
+        }
+
+
+   
     def create_vm(self, run):
 
         Logger.log(LogLevel.INFO, "Creating virtual machine ...", run=run)
