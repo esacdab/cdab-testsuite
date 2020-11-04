@@ -1,52 +1,17 @@
 function prepare() {
-    echo "Installing basic packages"
-    sudo yum install -y bc wget unzip libgfortran-4.8.5-39.el7.x86_64
-    echo "Done (basic packages)"
+    echo "Installing cwltool" >> cdab.stderr
+    sudo yum install -y bc unzip gcc python3-devel
+    sudo pip3 install cwltool
+    echo "Done" >> cdab.stderr
 
-    echo "Installing conda"
-    CONDA_DIR=/opt/anaconda
-    cd $(dirname $0)
-    MINIFORGE_VERSION=4.8.2-1
-    # SHA256 for installers can be obtained from https://github.com/conda-forge/miniforge/releases
-    SHA256SUM="4f897e503bd0edfb277524ca5b6a5b14ad818b3198c2f07a36858b7d88c928db"
-    URL="https://github.com/conda-forge/miniforge/releases/download/${MINIFORGE_VERSION}/Miniforge3-${MINIFORGE_VERSION}-Linux-x86_64.sh"
-    INSTALLER_PATH=/tmp/miniforge-installer.sh
-    # Make sure user's $HOME is not tampered with since this is run as root
-    unset HOME
-    wget --quiet $URL -O ${INSTALLER_PATH}
-    chmod +x ${INSTALLER_PATH}
-    # Check sha256 checksum
-    if ! echo "${SHA256SUM}  ${INSTALLER_PATH}" | sha256sum  --quiet -c -; then
-        echo "sha256 mismatch for ${INSTALLER_PATH}, exiting!"
-        exit 1
-    fi
-    bash ${INSTALLER_PATH} -b -p ${CONDA_DIR}
-    export PATH="${CONDA_DIR}/bin:$PATH"
-    # Preserve behavior of miniconda - packages come from conda-forge + defaults
-    conda config --system --append channels defaults
-    conda config --system --append channels https://conda.binstar.org/terradue
-    conda config --system --append channels https://conda.binstar.org/eoepca
-    conda config --system --append channels https://conda.binstar.org/r
-    # Do not attempt to auto update conda or dependencies
-    conda config --system --set auto_update_conda false
-    conda config --system --set show_channel_urls true
-    # bug in conda 4.3.>15 prevents --set update_dependencies
-    echo 'update_dependencies: false' >> ${CONDA_DIR}/.condarc
-    # avoid future changes to default channel_priority behavior
-    conda config --system --set channel_priority "flexible"
-    echo "Done (conda)"
-
-    echo "Creating conda environment with snap and cwltool"
-    conda create -n env_snap -y snap cwltool
-    conda activate env_snap
-    echo "Done (conda environment)"
-
-    echo "Installing Stars docker image"
+    echo "Installing Stars docker image" >> cdab.stderr
     docker pull $stage_in_docker_image
-    echo "Done (Stars)"
+    echo "Done" >> cdab.stderr
 
     mkdir input_data
 
+    touch cdab.stdout
+    touch cdab.stderr
 }
 
 
@@ -101,13 +66,13 @@ product_count=2
 
 stage_in_docker_image=terradue/stars-t2:devlatest
 
-cd "$working_dir"
+cd "$1"
 
 # Install
-prepare 2>> cdab.stderr
+prepare
 
 # Select input products
-select_input 2>> cdab.stderr
+select_input
 
 # Process inputs one by one
 
@@ -116,6 +81,50 @@ wrong_processings=0
 
 start_time=$(date +%s%N)
 
+for id in $(cat input)
+do
+    ((total_processings++))
+
+    echo "Stage in $id" >> cdab.stderr
+    # Stage in input product
+    stage_in $id > cdab.stdout 2>> cdab.stderr
+    res=$?
+    echo "EXIT CODE = $res" >> cdab.stderr
+
+    if [ $res -ne 0 ]
+    then
+        ((wrong_processings++))
+        echo "Stage in of $id FAILED" >> cdab.stderr
+        continue
+    fi
+    # Run tool
+
+    echo "CWL Command: cwltool workflow.cwl#wf wfinput.yaml" >> cdab.stderr
+    cwltool workflow.cwl#wf wfinput.yaml > cdab.stdout 2>> cdab.stderr
+    res=$?
+    echo "EXIT CODE = $res" >> cdab.stderr
+
+    if [ $res -ne 0 ]
+    then
+        ((wrong_processings++))
+        echo "Processing of $id FAILED" >> cdab.stderr
+    else
+        ls -l *.tif >> cdab.stderr
+        errors=0
+        count=0
+        for file in $(ls *.tif)
+        do
+            ((count++))
+            [ ! -s $file ] && errors=1
+        done
+
+        if [ ${errors} -ne 0 ] || [ ${count} -eq 0 ]
+        then
+            ((wrong_processings++))
+        fi
+    fi
+    rm -f *.tif
+done
 
 end_time=$(date +%s%N)
 
