@@ -48,7 +48,7 @@ cdab-remote-client -h
 And the output is the following:
 
 ```
-cdab-remote-client version 1.25 (c) 2020 Terradue Srl.
+cdab-remote-client version 1.26 (c) 2020 Terradue Srl.
 
 USAGE: cdab-remote-client [OPTIONS] <test-scenario>
 
@@ -66,9 +66,7 @@ OPTIONS
     -ts=<name>                Target site for querying (as defined in configuration file)
     -te=<url>                 Endpoint URL for remote target calls (overrides settings from target site set with -ts)
     -tc=<username:password>   Credentials for target (overrides settings from target site set with -ts)
-    -ps=<name>                Processing scenario identifier (TS15 only), takes precedence over -psw
-                              Possible values: ndvi
-    -psw=<name>               CWL workflow file (TS15 only) if -ps is not specified
+    -psw=<name>               CWL workflow file (TS15 only) replacing default file
     -psi=<name>               Text file with input product URLsfor workflow (TS15 only)
     -i=<name>                 Docker image identifier (URL)
                               Default value is automatically determined
@@ -78,7 +76,7 @@ OPTIONS
 
 ARGUMENTS
     <test-scenario>           Test scenario ID
-                              Possible values: TS11, TS12, TS13
+                              Possible values: TS11, TS12, TS13, TS15.1, TS15.5
 
 ```
 
