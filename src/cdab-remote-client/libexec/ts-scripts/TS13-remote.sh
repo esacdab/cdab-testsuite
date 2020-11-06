@@ -105,8 +105,8 @@ do
     start_time=$(date +%s%N)
     if [ $res -eq 0 ]
     then
-        echo "DOCKER COMMAND: docker run --memory=15g --rm --workdir /res -u root -v ${PWD}:/res \"${docker_image}\" python s3-olci-composites.py /res/current.atom.xml /res/${sen_folder}" >> cdab.stderr
-        docker run --memory=15g --rm --workdir /res -u root -v ${PWD}:/res "${docker_image}" python s3-olci-composites.py /res/current.atom.xml /res/${sen_folder} > cdab.stdout 2>> cdab.stderr
+        echo "DOCKER COMMAND: docker run --memory=15g --rm --workdir /res -u root -v ${PWD}:/res \"${docker_image}\" /opt/anaconda/envs/env_ewf_s3_olci_composites/bin/python s3-olci-composites.py /res/current.atom.xml /res/${sen_folder}" >> cdab.stderr
+        docker run --memory=15g --rm --workdir /res -u root -v ${PWD}:/res "${docker_image}" /opt/anaconda/envs/env_ewf_s3_olci_composites/bin/python s3-olci-composites.py /res/current.atom.xml /res/${sen_folder} > cdab.stdout 2>> cdab.stderr
         res=$?
         echo "EXIT CODE = $res" >> cdab.stderr
     fi
@@ -167,7 +167,7 @@ cat > junit.xml << EOF
 <?xml version="1.0"?>
 <testsuites xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <testsuite name="Simple data transformation" errors="${errors}" id="TS13">
-    <testcase name="TC403r" classname="cdabtesttools.TestCases.TestCase403r" status="${status}" />
+    <testcase name="TC413" classname="cdabtesttools.TestCases.TestCase413" status="${status}" />
   </testsuite>
 </testsuites>
 EOF
@@ -185,7 +185,7 @@ cat > TS13Results.json << EOF
   "hostAddress": null,
   "testCaseResults": [
     {
-      "testName": "TC403r",
+      "testName": "TC413",
       "className": "cdabtesttools.TestCases.TestCase415",
       "startedAt": "$(date -d @${start_time::-9} +%Y-"%m-%dT%H:%M:%SZ")",
       "endedAt": "$(date -d @${end_time::-9} +%Y-"%m-%dT%H:%M:%SZ")",
