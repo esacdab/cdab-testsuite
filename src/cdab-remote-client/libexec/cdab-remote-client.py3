@@ -52,6 +52,7 @@ class TestClient:
             'docker_image_id': 'docker-co.terradue.com/geohazards-tep/ewf-s3-olci-composites:0.41',
             'docker_run_command': 'PROCESSING',
             'test_target_url': 'https://catalog.terradue.com/sentinel3/search?uid=S3A_OL_1_EFR____20191110T230850_20191110T231150_20191112T030831_0179_051_215_3600_LN1_O_NT_002',
+            'files': [ 's3-olci-composites.py' ],
         },
         'TS15.1': {
             'test_scenario_description': 'Remote execution of a predefined processing scenario test (NDVI)',
@@ -590,6 +591,9 @@ class TestClient:
         if len(self.compute_config['cost_hourly']) != self.flavor_count:
             exit_client(ERR_CONFIG, "{0} value(s) required for hourly cost (as per flavour):".format(self.flavor_count))
 
+        if TestClient.keep_vm:
+            self.compute_config['vm_name'] = "K-{0}".format(self.compute_config['vm_name'])
+
 
 
 
@@ -1042,7 +1046,9 @@ class TestClient:
                     execute_remote_command(self.compute_config, run, "sudo sh conda-install.sh")
 
                 if 'opensearch-client' in self.test_scenario['tools']:
-                    execute_remote_command(self.compute_config, run, "sudo yum install mono-devel -y")
+                    execute_remote_command(self.compute_config, run, "sudo yum install -y unzip yum-utils")
+                    execute_remote_command(self.compute_config, run, "sudo yum-config-manager --add-repo http://download.mono-project.com/repo/centos/")
+                    execute_remote_command(self.compute_config, run, "sudo yum install -y mono-devel --nogpgcheck")
                     copy_file(self.compute_config, run, "{0}/ts-scripts/opensearch-client.zip".format(os.path.dirname(sys.argv[0])), "opensearch-client.zip")
                     execute_remote_command(self.compute_config, run, "sudo unzip -d /usr/lib/ opensearch-client.zip")
                     execute_remote_command(self.compute_config, run, "sudo mv /usr/lib/opensearch-client/bin/opensearch-client /usr/bin/")
@@ -1083,6 +1089,11 @@ class TestClient:
                         stars_file.write(json.dumps(credential_config, indent=4))
                         stars_file.close()
                     copy_file(self.compute_config, run, "stars-usersettings.json", "config/Stars/usersettings.json")
+
+            if 'files' in self.test_scenario:
+                for f in self.test_scenario['files']:
+                    copy_file(self.compute_config, run, "{0}/ts-scripts/{1}".format(os.path.dirname(sys.argv[0]), f), "{0}/{1}".format(working_dir, f))
+
 
             Logger.log(LogLevel.INFO, "Running processing test scenario {0} ...".format(self.test_scenario_id), run=run)
 
@@ -1140,13 +1151,7 @@ class TestClient:
 
 
     def produce_metrics(self, runs, total_runs):
-        """Executes the remote commands for a single run of the test scenario.
-        This method is called when the virtual machine is ready to accept
-        remote shell commands (ssh or scp).
-
-        The contains scenario-specific installtion of software, transfer of files,
-        e.g. for confuguration, and eventually the execution of the actual test
-        scenario and the download of test results.
+        """Receives the metrics from the test executions and aggregates them to the overall metrics.
 
         Parameters
         ----------
@@ -1218,12 +1223,12 @@ class TestClient:
             orig_nodes = [ t for t in all_test_case_nodes if t['testName'] == test_case ]
             test_name = test_case if test_case.startswith('TC') else "TC{0}".format(test_case)
             merged_node = { 'testName': test_name }
-            merged_node['className'] = next(t['className'] for t in orig_nodes)
-            seq = [t['startedAt'] for t in orig_nodes if t['startedAt']]
+            merged_node['className'] = next(t['className'] for t in orig_nodes if 'className' in t)
+            seq = [t['startedAt'] for t in orig_nodes if 'startedAt' in t and t['startedAt']]
             merged_node['startedAt'] = min(seq) if seq else None
-            seq = [t['endedAt'] for t in orig_nodes if t['endedAt']]
+            seq = [t['endedAt'] for t in orig_nodes if 'endedAt' in t and t['endedAt']]
             merged_node['endedAt'] = max(seq) if seq else None
-            durations = [t['duration'] for t in orig_nodes]
+            durations = [t['duration'] for t in orig_nodes if 'duration' in t]
             merged_node['duration'] = int(round(sum(durations) / len(durations)))
 
             merged_node['metrics'] = []
@@ -1426,13 +1431,13 @@ class TestClient:
             },
         ]
 
-        if [r.avg_process_duration for r in runs if r.avg_process_duration]:
+        if [r.avg_process_duration for r in runs if r.avg_process_duration is not None]:
             metrics.append({
                 'name': "avgProcessDuration",
                 'value': [r.avg_process_duration for r in runs],
                 'uom': "ms"
             })
-        if [r.process_count for r in runs if r.process_count]:
+        if [r.process_count for r in runs if r.process_count is not None]:
             metrics.append({
                 'name': "processCount",
                 'value': [r.process_count for r in runs],

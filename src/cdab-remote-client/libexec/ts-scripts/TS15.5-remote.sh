@@ -38,7 +38,6 @@ function select_input() {
     post_id=$(grep "<dc:identifier>" result.post.atom.xml | sed -E "s#.*<.*?>(.*)<.*>.*#\1#g")
     track=$(get_track $post_id)
     echo "Done (post-event product = $post_id, track = $track)" >> cdab.stderr
-
     echo "Selecting pre-event product from catalogue" >> cdab.stderr
     echo "opensearch-client -m Scihub -p \"geom=POINT($lon $lat)\" -p \"start=$pre_start_date\" -p \"stop=$event_date\" -p \"pt=SLC\" -p \"track=$track\" -p \"count=1\" \"${catalogue_base_url}\" {}" >> cdab.stderr
     opensearch-client $cat_creds -m Scihub -p "geom=POINT($lon $lat)" -p "start=$pre_start_date" -p "stop=$event_date" -p "pt=SLC" -p "track=$track" -p "count=1" "${catalogue_base_url}" {} | xmllint --format - > result.pre.atom.xml
@@ -658,16 +657,16 @@ echo "TC415: Interferogram" >> cdab.stderr
 total_processings=0
 wrong_processings=0
 
-start_time=$(date +%s%N)
+start_time_if=$(date +%s%N)
 
 if [ $res -eq 0 ]
 then
     process_interferogram
 fi
 
-end_time=$(date +%s%N)
+end_time_if=$(date +%s%N)
 
-process_duration_if=$(((end_time - start_time) / 1000000))
+process_duration_if=$(((end_time_if - start_time_if) / 1000000))
 
 if [ ${total_processings} -eq 0 ]
 then
@@ -694,16 +693,16 @@ echo "TC416: Stack" >> cdab.stderr
 total_processings=0
 wrong_processings=0
 
-start_time=$(date +%s%N)
+start_time_st=$(date +%s%N)
 
 if [ $res -eq 0 ]
 then
     process_stack
 fi
 
-end_time=$(date +%s%N)
+end_time_st=$(date +%s%N)
 
-process_duration_st=$(((end_time - start_time) / 1000000))
+process_duration_st=$(((end_time_st - start_time_st) / 1000000))
 
 
 
@@ -749,6 +748,9 @@ cat > TS15Results.json << EOF
     {
       "testName": "TC415",
       "className": "cdabtesttools.TestCases.TestCase415",
+      "startedAt": "$(date -d @${start_time_if::-9} +%Y-"%m-%dT%H:%M:%SZ")",
+      "endedAt": "$(date -d @${end_time_if::-9} +%Y-"%m-%dT%H:%M:%SZ")",
+      "duration": ${process_duration_if},
       "metrics": [
         { 
           "name": "errorRate",
@@ -775,6 +777,9 @@ cat > TS15Results.json << EOF
     {
       "testName": "TC416",
       "className": "cdabtesttools.TestCases.TestCase416",
+      "startedAt": "$(date -d @${start_time_st::-9} +%Y-"%m-%dT%H:%M:%SZ")",
+      "endedAt": "$(date -d @${end_time_st::-9} +%Y-"%m-%dT%H:%M:%SZ")",
+      "duration": ${process_duration_st},
       "metrics": [
         { 
           "name": "errorRate",
