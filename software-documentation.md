@@ -128,14 +128,14 @@ The test scenarios execute a sequence of basic test cases which are explained in
 
 The following table shows the test scenarios that access the service provider from the user's machine. They are run using **cdab-client**.
 
-| Scenario ID | Title | Test case sequence |
-| TS01 | Simple data search and single download | TC101 → TC201 → TC301 |
-| TS02 | Complex data search and bulk download |  TC101 → TC202 → TC302 |
-| TS03 | Systematic periodic data search and related remote data download | TC203 → TC303 |
-| TS04 | Offline data download | TC204 → TC304 |
-| TS05 | Data Coverage Analysis | TC501 → TC502 |
-| TS06 | Data Latency Analysis | TC601 → TC602 |
-| TS07 | Storage Upload and Download Performance | TC701 → TC702 |
+Scenario ID | Title | Test case sequence
+TS01 | Simple data search and single download | TC101 → TC201 → TC301
+TS02 | Complex data search and bulk download |  TC101 → TC202 → TC302
+TS03 | Systematic periodic data search and related remote data download | TC203 → TC303
+TS04 | Offline data download | TC204 → TC304
+TS05 | Data Coverage Analysis | TC501 → TC502
+TS06 | Data Latency Analysis | TC601 → TC602
+ TS07 | Storage Upload and Download Performance | TC701 → TC702
 
 The following table shows the test scenarios that run on virtual machines within the service providers' cloud infrastructure. They are run using **cdab-remote-client**.
 
