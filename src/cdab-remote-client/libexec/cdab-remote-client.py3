@@ -1048,7 +1048,7 @@ class TestClient:
                 if 'opensearch-client' in self.test_scenario['tools']:
                     execute_remote_command(self.compute_config, run, "sudo yum install -y unzip yum-utils")
                     execute_remote_command(self.compute_config, run, "sudo yum-config-manager --add-repo http://download.mono-project.com/repo/centos/")
-                    execute_remote_command(self.compute_config, run, "sudo yum install -y mono-devel --nogpgcheck")
+                    execute_remote_command(self.compute_config, run, "sudo yum install -y mono-devel --nogpgcheck > /dev/null 2> /dev/null")
                     copy_file(self.compute_config, run, "{0}/ts-scripts/opensearch-client.zip".format(os.path.dirname(sys.argv[0])), "opensearch-client.zip")
                     execute_remote_command(self.compute_config, run, "sudo unzip -d /usr/lib/ opensearch-client.zip")
                     execute_remote_command(self.compute_config, run, "sudo mv /usr/lib/opensearch-client/bin/opensearch-client /usr/bin/")
