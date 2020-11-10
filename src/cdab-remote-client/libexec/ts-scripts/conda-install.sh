@@ -17,7 +17,7 @@ then
     echo "sha256 mismatch for ${INSTALLER_PATH}, exiting!"
     exit 1
 fi
-bash ${INSTALLER_PATH} -b -p ${CONDA_DIR}
+bash ${INSTALLER_PATH} -b -p ${CONDA_DIR} > /dev/null 2> /dev/null
 export PATH="${CONDA_DIR}/bin:$PATH"
 # Preserve behavior of miniconda - packages come from conda-forge + defaults
 conda config --system --append channels defaults
