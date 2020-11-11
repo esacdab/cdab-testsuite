@@ -1,8 +1,6 @@
 global:
   docker_config: "docker-config.json"
-  # Reference target site for TS05 and TS06
-  reference_target_site: ApiHub
-  country_shapefile_path: App_Data/TM_WORLD_BORDERS-0.3/TM_WORLD_BORDERS-0.3
+  country_shapefile_path: /usr/lib/cdab-client/App_Data/TM_WORLD_BORDERS-0.3/TM_WORLD_BORDERS-0.3
   # Test Mode (Download limited to 20MB)
   # test_mode: true
 # Service Providers definition
@@ -1423,10 +1421,7 @@ service_providers:
             reference_target_site: S5PHub
             # ... and with the following parameters to filter out only baseline
             parameters: # All Copernicus products are baseline. Just remove the very recent one to avoid newly ingested bias
-              - key: sensingStop
-                full_name: "{http://a9.com/-/opensearch/extensions/time/1.0/}end"
-                value: "[NOW-1D]"
-                label: "before yesterday"
+              -  
               # ESA-DATASET filter
               - key: processingCenter
                 full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}processingCenter"
