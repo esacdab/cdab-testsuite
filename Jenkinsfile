@@ -100,8 +100,8 @@ pipeline {
                     def cdabclientrpm = findFiles(glob: "src/docker/cdab-client-*.rpm")
                     def cdabremoteclientrpm = findFiles(glob: "src/docker/cdab-remote-client-*.rpm")
                     def descriptor = readDescriptor()
-                    def testsuite = docker.build(descriptor.docker_image_name, "--build-arg CDAB_RELEASE=${descriptor.version} --build-arg CDAB_CLIENT_RPM=${cdabclientrpm[0].name} --build-arg CDAB_REMOTE_CLIENT_RPM=${cdabremoteclientrpm[0].name} ./src/docker")
                     def mType=getTypeOfVersion(env.BRANCH_NAME)
+                    def testsuite = docker.build(descriptor.docker_image_name, "--build-arg CDAB_RELEASE=${mType}${descriptor.version} --build-arg CDAB_CLIENT_RPM=${cdabclientrpm[0].name} --build-arg CDAB_REMOTE_CLIENT_RPM=${cdabremoteclientrpm[0].name} ./src/docker")
                     docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-emmanuelmathot') {
                       testsuite.push("${mType}${descriptor.version}")
                       testsuite.push("${mType}latest")
