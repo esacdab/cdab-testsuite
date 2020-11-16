@@ -18,6 +18,20 @@
             ]
         },
         {
+            "name": "Scihub TS01",
+            "type": "mono",
+            "request": "launch",
+            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "cwd": "${workspaceRoot}",
+            "args": [
+                "-v",
+                "-tsn=Local",
+                "-lf=1",
+                "-tn=SciHub",
+                "TS01"
+            ]
+        },
+        {
             "name": "Scihub TS02",
             "type": "mono",
             "request": "launch",
@@ -43,6 +57,19 @@
                 "-lf=1",
                 "-tn=SciHub",
                 "TS04"
+            ]
+        },
+        {
+            "name": "HellenicHub TS01",
+            "type": "mono",
+            "request": "launch",
+            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "cwd": "${workspaceRoot}",
+            "args": [
+                "-v",
+                "-tsn=Local",
+                "-tn=HellenicHub",
+                "TS01"
             ]
         },
         {
@@ -220,6 +247,34 @@
                 "-lf=1",
                 "-tn=CREO",
                 "TS07"
+            ]
+        },
+        {
+            "name": "CreoDias TS01",
+            "type": "mono",
+            "request": "launch",
+            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "cwd": "${workspaceRoot}",
+            "args": [
+                "-v",
+                "-tsn=Local",
+                "-lf=1",
+                "-tn=CREO",
+                "TS01"
+            ]
+        },
+        {
+            "name": "CODE-DE TS01",
+            "type": "mono",
+            "request": "launch",
+            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "cwd": "${workspaceRoot}",
+            "args": [
+                "-v",
+                "-tsn=Local",
+                "-lf=1",
+                "-tn=CODE_DE",
+                "TS01"
             ]
         },
         {
