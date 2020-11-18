@@ -1,4 +1,4 @@
-[![Build Status](https://build.terradue.com/buildStatus/icon?job=Terradue%2Fcdab-testsuite%2Fb'master')](https://build.terradue.com/blue/organizations/jenkins/Terradue%2Fcdab-testsuite/activity?branch=b'master')
+[![Build Status](https://build.terradue.com/buildStatus/icon?job=Terradue%2Fcdab-testsuite%2Fb'hotfix/readme')](https://build.terradue.com/job/Terradue/job/cdab-testsuite/job/b'hotfix/readme'/display/redirect
 
 
 ![CDAB logo](doc/images/cdab-logo.jpg)
