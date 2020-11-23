@@ -39,8 +39,8 @@ function stage_in() {
     # Temporarily using Terradue catalogue for query
     ref="https://catalog.terradue.com/${index}/search?uid=$id"
 
-    echo "docker run -u root --workdir /res -v ${PWD}:/res -v ${PWD}/config/Stars:/root/.config/Stars \"${stage_in_docker_image}\" Stars -v copy \"${ref}\" -r 4 -si ${provider} -o /res/input_data/"
-    docker run -u root --workdir /res -v ${PWD}:/res -v ${PWD}/config/Stars:/root/.config/Stars "${stage_in_docker_image}" Stars -v copy "${ref}" -r 4 -si ${provider} -o /res/input_data/
+    echo "docker run -u root --workdir /res -v ${PWD}:/res -v ${HOME}/config/etc/Stars:/etc/Stars/conf.d -v ${HOME}/config/Stars:/root/.config/Stars \"${stage_in_docker_image}\" Stars copy -v \"${ref}\" -r 4 -si ${provider} -o /res/input_data/"
+    docker run -u root --workdir /res -v ${PWD}:/res -v ${HOME}/config/etc/Stars:/etc/Stars/conf.d -v ${HOME}/config/Stars:/root/.config/Stars "${stage_in_docker_image}" Stars copy -v "${ref}" -r 4 -si ${provider} -o /res/input_data/
     res=$?
     [ $res -ne 0 ] && return $res
     
@@ -64,7 +64,7 @@ index="sentinel2"
 product_type="S2MSI1C"
 product_count=2
 
-stage_in_docker_image=terradue/stars-t2:devlatest
+stage_in_docker_image=terradue/stars-t2:latest
 
 cd "$1"
 

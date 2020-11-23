@@ -21,9 +21,9 @@ bash ${INSTALLER_PATH} -b -p ${CONDA_DIR} > /dev/null 2> /dev/null
 export PATH="${CONDA_DIR}/bin:$PATH"
 # Preserve behavior of miniconda - packages come from conda-forge + defaults
 conda config --system --append channels defaults
-conda config --system --append channels https://conda.binstar.org/terradue
-conda config --system --append channels https://conda.binstar.org/eoepca
-conda config --system --append channels https://conda.binstar.org/r
+conda config --system --append channels terradue
+conda config --system --append channels eoepca
+conda config --system --append channels r
 # Do not attempt to auto update conda or dependencies
 conda config --system --set auto_update_conda false
 conda config --system --set show_channel_urls true

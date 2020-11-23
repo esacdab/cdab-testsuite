@@ -227,54 +227,103 @@ class OpenStackConnector:
         else:
             Logger.log(LogLevel.ERROR, "Virtual machine not available after {0} seconds".format(int((datetime.datetime.utcnow() - connect_start_time).total_seconds())), run=run)
 
-        if available and self.compute_config['use_volume']:
-            Logger.log(LogLevel.INFO, "Creating volume for virtual machine ...", run=run)
-            options = ['openstack', 'volume', 'create', '-f', 'json']
-            options.extend(self.cloud_base_options)
-            options.extend([
-                "--size", "100",
-                "{0}{1}-volume".format(self.compute_config['vm_name'], run.suffix)
-            ])
-            response = execute_local_command(run, options, True)
+        if available and (self.compute_config['use_volume'] or self.compute_config['use_tmp_volume']):
+            if self.compute_config['use_volume']:
+                Logger.log(LogLevel.INFO, "Creating main volume for virtual machine ...", run=run)
+                options = ['openstack', 'volume', 'create', '-f', 'json']
+                options.extend(self.cloud_base_options)
+                options.extend([
+                    "--size", "100",
+                    "{0}{1}-volume".format(self.compute_config['vm_name'], run.suffix)
+                ])
+                response = execute_local_command(run, options, True)
 
-            if 'id' in response and response['id']:
-                run.volume_id = response['id']
-                Logger.log(LogLevel.INFO, "Volume '{0}' created".format(run.volume_id), run=run)
+                if 'id' in response and response['id']:
+                    run.volume_id = response['id']
+                    Logger.log(LogLevel.INFO, "Volume '{0}' created".format(run.volume_id), run=run)
 
-            if run.volume_id is None:
-                raise Exception("No volume ID found")
+                if run.volume_id is None:
+                    raise Exception("No volume found for volume")
 
-            Logger.log(LogLevel.INFO, "Attaching volume to virtual machine ...", run=run)
-            options = ['openstack', 'server', 'add', 'volume']
-            options.extend(self.cloud_base_options)
-            options.extend([
-                run.vm_id,
-                run.volume_id,
-            ])
-            execute_local_command(run, options, False)
-            time.sleep(10)
+                Logger.log(LogLevel.INFO, "Attaching volume to virtual machine ...", run=run)
+                options = ['openstack', 'server', 'add', 'volume']
+                options.extend(self.cloud_base_options)
+                options.extend([
+                    run.vm_id,
+                    run.volume_id,
+                ])
+                execute_local_command(run, options, False)
+
+            if self.compute_config['use_tmp_volume']:
+                Logger.log(LogLevel.INFO, "Creating /tmp volume for virtual machine ...", run=run)
+                options = ['openstack', 'volume', 'create', '-f', 'json']
+                options.extend(self.cloud_base_options)
+                options.extend([
+                    "--size", "50",
+                    "{0}{1}-volume".format(self.compute_config['vm_name'], run.suffix)
+                ])
+                response = execute_local_command(run, options, True)
+
+                if 'id' in response and response['id']:
+                    run.tmp_volume_id = response['id']
+                    Logger.log(LogLevel.INFO, "Volume '{0}' created".format(run.tmp_volume_id), run=run)
+
+                if run.tmp_volume_id is None:
+                    raise Exception("No ID found for /tmp volume")
+
+                Logger.log(LogLevel.INFO, "Attaching volume to virtual machine ...", run=run)
+                options = ['openstack', 'server', 'add', 'volume']
+                options.extend(self.cloud_base_options)
+                options.extend([
+                    run.vm_id,
+                    run.tmp_volume_id,
+                ])
+                execute_local_command(run, options, False)
+
+            time.sleep(15)
 
             options = ['openstack', 'volume', 'list', '-f', 'json']
             options.extend(self.cloud_base_options)
             response = execute_local_command(run, options, True)
 
-            volume_node = next((r for r in response if r['ID'] == run.volume_id), None)
+            if self.compute_config['use_volume']:
+                volume_node = next((r for r in response if r['ID'] == run.volume_id), None)
 
-            if volume_node and 'Attached to' in volume_node and volume_node['Attached to']:
-                if isinstance(volume_node['Attached to'], list):
-                    for a in volume_node['Attached to']:
-                        if 'server_id' in a and 'device' in a and a['server_id'] == run.vm_id:
-                            run.volume_device = a['device']
-                            break
-                else:
-                    device_match = re.match(r".* on (/dev/[^ ]+).*", volume_node['Attached to'])
-                    if device_match:
-                        run.volume_device = device_match[1]
+                if volume_node and 'Attached to' in volume_node and volume_node['Attached to']:
+                    if isinstance(volume_node['Attached to'], list):
+                        for a in volume_node['Attached to']:
+                            if 'server_id' in a and 'device' in a and a['server_id'] == run.vm_id:
+                                run.volume_device = a['device']
+                                break
+                    else:
+                        device_match = re.match(r".* on (/dev/[^ ]+).*", volume_node['Attached to'])
+                        if device_match:
+                            run.volume_device = device_match[1]
 
-            if run.volume_device is None:
-                raise Exception("No volume device found")
+                if run.volume_device is None:
+                    raise Exception("No volume device found (main volume)")
 
-            run.volume_attached = True
+                run.volume_attached = True
+
+            if self.compute_config['use_tmp_volume']:
+                volume_node = next((r for r in response if r['ID'] == run.tmp_volume_id), None)
+
+                if volume_node and 'Attached to' in volume_node and volume_node['Attached to']:
+                    if isinstance(volume_node['Attached to'], list):
+                        for a in volume_node['Attached to']:
+                            if 'server_id' in a and 'device' in a and a['server_id'] == run.vm_id:
+                                run.tmp_volume_device = a['device']
+                                break
+                    else:
+                        device_match = re.match(r".* on (/dev/[^ ]+).*", volume_node['Attached to'])
+                        if device_match:
+                            run.tmp_volume_device = device_match[1]
+
+                if run.tmp_volume_device is None:
+                    raise Exception("No volume device found (/tmp volume)")
+
+                run.tmp_volume_attached = True
+
 
             setup_disk_file = "setup-disk{0}.sh".format(run.suffix)
 
@@ -287,7 +336,20 @@ class OpenStackConnector:
                 file.write("mkdir /mnt/cdab-volume/test\n")
                 file.write("chown {0} /mnt/cdab-volume/test\n".format(self.compute_config['remote_user']))
                 file.write("echo '{0}1 /mnt/cdab-volume ext4 defaults 0 2' >> /etc/fstab\n".format(run.volume_device))
+
+                if self.compute_config['use_tmp_volume']:
+                    file.write("parted {0} mklabel gpt\n".format(run.tmp_volume_device))
+                    file.write("parted {0} unit GB \n".format(run.tmp_volume_device))
+                    file.write("parted {0} mkpart primary 0% 100%\n".format(run.tmp_volume_device))
+                    file.write("mkfs.ext4 {0}1\n".format(run.tmp_volume_device))
+                    file.write("mkdir /mnt/cdab-volume/tmp\n")
+                    file.write("echo '{0}1 /tmp ext4 defaults 0 0' >> /etc/fstab\n".format(run.tmp_volume_device))
+
                 file.write("mount -a\n")
+
+                if self.compute_config['use_tmp_volume']:
+                    file.write("chmod 1777 /tmp\n")
+
                 file.close()
 
             copy_file(self.compute_config, run, setup_disk_file, "setup-disk.sh")
@@ -304,7 +366,7 @@ class OpenStackConnector:
 
         max_retries = 3
         if self.compute_config['use_volume'] and run.volume_id and run.volume_attached:
-            Logger.log(LogLevel.INFO, "Detaching volume from virtual machine ...", run=run)
+            Logger.log(LogLevel.INFO, "Detaching main volume from virtual machine ...", run=run)
             options = ['openstack', 'server', 'remove', 'volume']
             options.extend(self.cloud_base_options)
             options.extend([
@@ -336,6 +398,47 @@ class OpenStackConnector:
                         self.client.incomplete_deletion = True
                         print("********************************************************************", file=run.stderr)
                         Logger.log(LogLevel.ERROR, "Failed to delete volume '{0}'".format(run.volume_id), run=run)
+                        Logger.log(LogLevel.ERROR, "Message: {0}".format(str(e)), run=run)
+                        Logger.log(LogLevel.ERROR, "Delete manually", run=run)
+                        print("********************************************************************", file=run.stderr)
+                    else:
+                        Logger.log(LogLevel.WARN, "Deletion failed, retrying after 30 seconds", run=run)
+                        time.sleep(30)
+
+
+        if self.compute_config['use_tmp_volume'] and run.tmp_volume_id and run.tmp_volume_attached:
+            Logger.log(LogLevel.INFO, "Detaching /tmp volume from virtual machine ...", run=run)
+            options = ['openstack', 'server', 'remove', 'volume']
+            options.extend(self.cloud_base_options)
+            options.extend([
+                run.vm_id,
+                run.tmp_volume_id,
+            ])
+            execute_local_command(run, options, False)
+            time.sleep(10)
+
+            Logger.log(LogLevel.INFO, "Deleting volume {0} ...".format(run.volume_id), run=run)
+            options = ['openstack', 'volume', 'delete']
+            options.extend(self.cloud_base_options)
+            options.extend([
+                run.tmp_volume_id,
+            ])
+            
+            retry = 0
+            deleted = False
+            while retry < max_retries and not deleted:
+                try:
+                    execute_local_command(run, options, False)
+                    run.delete_end_time = datetime.datetime.utcnow()
+                    Logger.log(LogLevel.INFO, "Volume deleted", run=run)
+                    deleted = True
+                except Exception as e:
+                    retry += 1
+
+                    if retry == max_retries:
+                        self.client.incomplete_deletion = True
+                        print("********************************************************************", file=run.stderr)
+                        Logger.log(LogLevel.ERROR, "Failed to delete volume '{0}'".format(run.tmp_volume_id), run=run)
                         Logger.log(LogLevel.ERROR, "Message: {0}".format(str(e)), run=run)
                         Logger.log(LogLevel.ERROR, "Delete manually", run=run)
                         print("********************************************************************", file=run.stderr)
