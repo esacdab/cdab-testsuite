@@ -35,24 +35,27 @@ class TestClient:
         'TS11': {
             'test_scenario_description': 'Remote execution of catalogue access and download test on VM (single)',
             'test_case_name': 'TC411',
-            'docker_image_id': 'docker.terradue.com/centos7-testsite:latest',
+            'docker_image_id': 'esacdab/testsuite:latest',
             'docker_run_command': 'CDAB_CLIENT_DEFAULT',
             'cdab_client_test_scenario_id': 'TS11',
+            'timeout': 1 * 60 * 60,
         },
         'TS12': {
             'test_scenario_description': 'Remote execution of catalogue access and download test on VM (multiple)',
             'test_case_name': 'TC412',
-            'docker_image_id': 'docker.terradue.com/centos7-testsite:latest',
+            'docker_image_id': 'esacdab/testsuite:latest',
             'docker_run_command': 'CDAB_CLIENT_DEFAULT',
             'cdab_client_test_scenario_id': 'TS12',
+            'timeout': 1 * 60 * 60,
         },
         'TS13': {
             'test_scenario_description': 'Remote execution of processing test (multiple)',
             'test_case_name': 'TC413',
-            'docker_image_id': 'docker-co.terradue.com/geohazards-tep/ewf-s3-olci-composites:0.41',
+            'docker_image_id': 'esacdab/ewf-s3-olci-composites:0.41',
             'docker_run_command': 'PROCESSING',
             'test_target_url': 'https://catalog.terradue.com/sentinel3/search?uid=S3A_OL_1_EFR____20191110T230850_20191110T231150_20191112T030831_0179_051_215_3600_LN1_O_NT_002',
             'files': [ 's3-olci-composites.py' ],
+            'timeout': 2 * 60 * 60,
         },
         'TS15.1': {
             'test_scenario_description': 'Remote execution of a predefined processing scenario test (NDVI)',
@@ -60,7 +63,8 @@ class TestClient:
             'docker_image_id': None,
             'docker_run_command': 'PROCESSING',
             'test_target_url': '',
-            'tools': [ 'conda', 'opensearch-client', 'Stars' ]
+            'tools': [ 'conda', 'opensearch-client', 'Stars' ],
+            'timeout': 2 * 60 * 60,
         },
         'TS15.5': {
             'test_scenario_description': 'Remote execution of a predefined processing scenario test (interferogram)',
@@ -68,7 +72,8 @@ class TestClient:
             'docker_image_id': None,
             'docker_run_command': 'PROCESSING',
             'test_target_url': '',
-            'tools': [ 'conda', 'opensearch-client', 'Stars' ]
+            'tools': [ 'conda', 'opensearch-client', 'Stars' ],
+            'timeout': 6 * 60 * 60,
         },
     }
 
@@ -139,6 +144,7 @@ class TestClient:
         { 'name': 'private_key_file', 'description': 'Location of the private key file for SSH connections to virtual machine (must correspond to public key in \'key_name\')' },
         { 'name': 'remote_user', 'description': 'User on virtual machine for SSH connections' },
         { 'name': 'use_volume', 'type': 'bool', 'description': 'Create an external volume for docker image and test execution', 'default': False },
+        { 'name': 'use_tmp_volume', 'type': 'bool', 'description': 'Create an external volume for /tmp', 'default': False },
         { 'name': 'download_origin', 'description': 'Value of DOWNLOAD_ORIGIN environment variable for test execution on VM', 'default': "terradue" },
     ]
 
@@ -148,45 +154,45 @@ class TestClient:
                 "Assembly": "/usr/share/Stars-Terradue/Stars-Terradue.dll",
                 "Suppliers": {
                     "ONDA": {
-                    "Type": "Terradue.Data.Stars.Suppliers.DataHubSourceSupplier",
-                    "Parameters": [
-                        ""
-                    ],
-                    "ServiceUrl": "https://catalogue.onda-dias.eu/dias-catalogue"
+                        "Type": "Terradue.Data.Stars.Suppliers.DataHubSourceSupplier",
+                        "Parameters": [
+                            ""
+                        ],
+                        "ServiceUrl": "https://catalogue.onda-dias.eu/dias-catalogue"
                     },
                     "CREO": {
-                    "Type": "Terradue.Data.Stars.Suppliers.DataHubSourceSupplier",
-                    "Parameters": [
-                        ""
-                    ],
-                    "ServiceUrl": "https://finder.creodias.eu/resto/api/collections/describe.xml"
+                        "Type": "Terradue.Data.Stars.Suppliers.DataHubSourceSupplier",
+                        "Parameters": [
+                            ""
+                        ],
+                        "ServiceUrl": "https://finder.creodias.eu/resto/api/collections/describe.xml"
                     },
                     "SOBLOO": {
-                    "Type": "Terradue.Data.Stars.Suppliers.DataHubSourceSupplier",
-                    "Parameters": [
-                        ""
-                    ],
+                        "Type": "Terradue.Data.Stars.Suppliers.DataHubSourceSupplier",
+                        "Parameters": [
+                            ""
+                        ],
                     "ServiceUrl": "https://sobloo.eu/api/v1/services/search"
                     },
                     "MUNDI": {
-                    "Type": "Terradue.Data.Stars.Suppliers.DataHubSourceSupplier",
-                    "Parameters": [
-                        ""
-                    ],
-                    "ServiceUrl": "https://mundiwebservices.com/acdc/catalog/proxy/search"
+                        "Type": "Terradue.Data.Stars.Suppliers.DataHubSourceSupplier",
+                        "Parameters": [
+                            ""
+                        ],
+                        "ServiceUrl": "https://mundiwebservices.com/acdc/catalog/proxy/search"
                     },
                     "AMAZON": {
-                    "Type": "Terradue.Data.Stars.Suppliers.DataHubSourceSupplier",
-                    "Parameters": [
-                        ""
-                    ],
-                    "ServiceUrl": "https://aws.amazon.com"
+                        "Type": "Terradue.Data.Stars.Suppliers.DataHubSourceSupplier",
+                        "Parameters": [
+                            ""
+                        ],
+                        "ServiceUrl": "https://aws.amazon.com"
                     },
                     "GOOGLE": {
-                    "Type": "Terradue.Data.Stars.Suppliers.DataHubSourceSupplier",
-                    "ServiceUrl": "https://storage.googleapis.com",
-                    "projectId": "still-tower-272111",
-                    "AccountFile": "/res/still-tower-272111-53008e24bcda.json"
+                        "Type": "Terradue.Data.Stars.Suppliers.DataHubSourceSupplier",
+                        "ServiceUrl": "https://storage.googleapis.com",
+                        "projectId": "ID",
+                        "AccountFile": "AF"
                     }
                 },
                 "Translators": {
@@ -991,7 +997,7 @@ class TestClient:
         else:
             working_dir = "."   # remote user's home directory
 
-        copy_file(self.compute_config, run, self.config_file, "config.yaml")
+        copy_file(self.compute_config, run, self.config_file, "{0}/config.yaml".format(working_dir))
         try:
             self.connector.copy_additional_files(run)
         except Exception as e:
@@ -1007,7 +1013,7 @@ class TestClient:
             execute_remote_command(
                 self.compute_config,
                 run,
-                "sh {0} {1} {2} {3} {4} {5} {6} {7} {8}".format(
+                "nohup sh {0} {1} {2} {3} {4} {5} {6} {7} {8} > /dev/null 2>&1 &".format(
                     script_name,
                     working_dir,
                     self.docker_image_id,
@@ -1018,7 +1024,7 @@ class TestClient:
                     self.load_factor,
                     self.compute_config['download_origin'],
                 ),
-                display_command="sh {0} {1} {2} {3} {4} {5} {6} {7} {8}".format(
+                display_command="nohup sh {0} {1} {2} {3} {4} {5} {6} {7} {8} > /dev/null 2>&1 &".format(
                     script_name,
                     working_dir,
                     self.docker_image_id,
@@ -1054,7 +1060,7 @@ class TestClient:
                     execute_remote_command(self.compute_config, run, "sudo mv /usr/lib/opensearch-client/bin/opensearch-client /usr/bin/")
 
                 if 'Stars' in self.test_scenario['tools']:
-                    execute_remote_command(self.compute_config, run, "docker pull terradue/stars-t2:devlatest")
+                    execute_remote_command(self.compute_config, run, "docker pull terradue/stars-t2:latest")
                     execute_remote_command(self.compute_config, run, "mkdir -p config/Stars")
                     execute_remote_command(self.compute_config, run, "mkdir -p config/etc/Stars")
 
@@ -1102,7 +1108,7 @@ class TestClient:
             execute_remote_command(
                 self.compute_config,
                 run,
-                "sh {0} {1} \"{2}\" {3} {4} {5}".format(
+                "nohup sh {0} {1} \"{2}\" {3} {4} {5} > /dev/null 2>&1 &".format(
                     script_name,
                     working_dir,
                     self.docker_image_id,
@@ -1110,7 +1116,7 @@ class TestClient:
                     self.target_site_class,
                     self.target_credentials
                 ),
-                display_command="sh {0} {1} \"{2}\" {3} {4} {5}".format(
+                display_command="nohup sh {0} {1} \"{2}\" {3} {4} {5} > /dev/null 2>&1 &".format(
                     script_name,
                     working_dir,
                     self.docker_image_id,
@@ -1119,6 +1125,23 @@ class TestClient:
                     re.sub(':.*', ':xxxxxxxx', self.target_credentials),
                 )
             )
+
+        if 'timeout' in self.test_scenario:
+            timeout = self.test_scenario['timeout']
+        else:
+            timeout = 2 * 60 * 60
+        max_end_time = datetime.datetime.utcnow() + datetime.timedelta(seconds=timeout)
+        Logger.log(LogLevel.INFO, "{0} - {1} - {2}".format(datetime.datetime.utcnow(), timeout, max_end_time), run=run)
+        Logger.log(LogLevel.INFO, "Maximum allowed end time of processing: {0}".format(max_end_time.strftime('%Y-%m-%dT%H:%M:%S.%fZ')), run=run)
+        running = True
+        while running and datetime.datetime.utcnow() < max_end_time:
+            output = execute_remote_command(self.compute_config, run, "ps auxw | grep {0} | grep -v grep | cat".format(script_name))
+            #Logger.log(LogLevel.DEBUG, "OUTPUT: {0}".format(output), run=run)
+            if output:
+                Logger.log(LogLevel.DEBUG, "Process still running, wait for 30 seconds", run=run)
+                time.sleep(30)
+            else:
+                running = False
 
         run.test_end_time = datetime.datetime.utcnow()
         Logger.log(LogLevel.INFO, "Test completed", run=run)
@@ -1556,6 +1579,9 @@ class TestRun:
         self.volume_id = None
         self.volume_attached = False
         self.volume_device = None
+        self.tmp_volume_id = None
+        self.tmp_volume_attached = False
+        self.tmp_volume_device = None
         self.junit_file = "junit-remote-{0}.xml".format(suffix)
         self.cdab_json_file = "TestResult-remote{0}.json".format(suffix)
         self.create_start_time = None

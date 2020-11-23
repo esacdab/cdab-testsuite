@@ -1,19 +1,18 @@
 function prepare() {
-    echo "Installing basic packages"
-    sudo yum install -y bc tree wget unzip libgfortran-4.8.5-39.el7.x86_64
-    echo "Done (basic packages)"
+    echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Installing basic packages" >> cdab.stderr
+    sudo yum install -y bc tree wget unzip libgfortran-4.8.5 >> cdab.stderr 2>&1
+    echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Done (basic packages)" >> cdab.stderr
 
-    echo "Creating conda environment with snap and cwltool"
+    echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Creating conda environment with snap and cwltool" >> cdab.stderr
     CONDA_DIR="/opt/anaconda"
-    sudo $CONDA_DIR/bin/conda create -n env_snap -y snap cwltool
-    export PATH="${CONDA_DIR}/bin:${CONDA_DIR}/envs/env_snap/bin:${CONDA_DIR}/envs/env_snap/snap/bin:${CONDA_DIR}/envs/env_snap/snap/jre/bin:$PATH"
-    echo "Done (conda environment)"
+    CONDA_PREFIX="${PWD}/env_snap"
+    sudo $CONDA_DIR/bin/conda create -p ${CONDA_PREFIX} -y snap cwltool >> cdab.stderr 2>&1
+    sudo ln -s "${PWD}/env_snap" "${CONDA_DIR}/envs/env_snap"
+    export PATH="${CONDA_DIR}/bin:${CONDA_PREFIX}/bin:${CONDA_PREFIX}/snap/bin:${CONDA_PREFIX}/snap/jre/bin:$PATH"
+    echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Done (conda environment)" >> cdab.stderr
 
     mkdir -p input_data
     mkdir -p output_data
-
-    touch cdab.stdout
-    touch cdab.stderr
 }
 
 
@@ -32,38 +31,27 @@ function select_input() {
     post_end_date=$(date -d@$((event_date_sec + 10 * 24 * 60 * 60)) +%Y-"%m-%dT00:00:00Z")
     pre_start_date=$(date -d@$((event_date_sec - 10 * 24 * 60 * 60)) +%Y-"%m-%dT00:00:00Z")
 
-    echo "Selecting post-event product from catalogue" >> cdab.stderr
+    echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Selecting post-event product from catalogue" >> cdab.stderr
     echo "opensearch-client -m Scihub -p \"geom=POINT($lon $lat)\" -p \"start=$event_date\" -p \"stop=$post_end_date\" -p \"pt=SLC\" -p \"count=1\" \"${catalogue_base_url}\" {}" >> cdab.stderr
     opensearch-client $cat_creds -m Scihub -p "geom=POINT($lon $lat)" -p "start=$event_date" -p "stop=$post_end_date" -p "pt=SLC" -p "count=1" "${catalogue_base_url}" {} | xmllint --format - > result.post.atom.xml
     post_id=$(grep "<dc:identifier>" result.post.atom.xml | sed -E "s#.*<.*?>(.*)<.*>.*#\1#g")
+    mv result.post.atom.xml ${post_id}.atom.xml
     track=$(get_track $post_id)
-    echo "Done (post-event product = $post_id, track = $track)" >> cdab.stderr
-    echo "Selecting pre-event product from catalogue" >> cdab.stderr
+    echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Done (post-event product = $post_id, track = $track)" >> cdab.stderr
+
+    echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Selecting pre-event product from catalogue" >> cdab.stderr
     echo "opensearch-client -m Scihub -p \"geom=POINT($lon $lat)\" -p \"start=$pre_start_date\" -p \"stop=$event_date\" -p \"pt=SLC\" -p \"track=$track\" -p \"count=1\" \"${catalogue_base_url}\" {}" >> cdab.stderr
     opensearch-client $cat_creds -m Scihub -p "geom=POINT($lon $lat)" -p "start=$pre_start_date" -p "stop=$event_date" -p "pt=SLC" -p "track=$track" -p "count=1" "${catalogue_base_url}" {} | xmllint --format - > result.pre.atom.xml
     pre_id=$(grep "<dc:identifier>" result.pre.atom.xml | sed -E "s#.*<.*?>(.*)<.*>.*#\1#g")
+    mv result.pre.atom.xml ${pre_id}.atom.xml
     track_new=$(get_track $pre_id)
-    echo "Done (pre-event product = $pre_id, track = $track_new)" >> cdab.stderr
+    echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Done (pre-event product = $pre_id, track = $track_new)" >> cdab.stderr
     
     if [ $track_new -ne $track ]
     then
-        echo "Pre- and post-event tracks different"
+        echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Pre- and post-event tracks different" >> cdab.stderr
         return 1
     fi
-}
-
-
-function stage_in() {
-    ref=$1
-    echo "Staging in $ref" >> cdab.stderr
-
-    echo "docker run -u root --workdir /res -v ${PWD}:/res -v ${HOME}/config/etc/Stars:/etc/Stars/conf.d -v ${HOME}/config/Stars:/root/.config/Stars \"${stage_in_docker_image}\" Stars -v copy \"${ref}\" -r 4 -si ${provider} -o /res/input_data/" >> cdab.stderr
-    docker run -u root --workdir /res -v ${PWD}:/res -v ${HOME}/config/etc/Stars:/etc/Stars/conf.d -v ${HOME}/config/Stars:/root/.config/Stars "${stage_in_docker_image}" Stars -v copy "${ref}" -r 4 -si ${provider} -o /res/input_data/ >> cdab.stdout 2>> cdab.stderr
-    res=$?
-    [ $res -ne 0 ] && return $res
-
-    echo "Done" >> cdab.stderr
-    return $res
 }
 
 
@@ -71,48 +59,40 @@ function process_interferogram() {
 
     if [ -z "$pre_id" ] || [ -z "$post_id" ] || [ "$pre_id" == "$post_id" ]
     then
-        echo "Pre- and post-event reference cannot be empty and must be different" >> cdab.stderr
+        echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Pre- and post-event reference cannot be empty and must be different" >> cdab.stderr
         return
     fi
 
-    echo "Stage in pre-event data: $pre_id" >> cdab.stderr
-    stage_in "file:///res/result.pre.atom.xml"
-    res=$?
-    echo "EXIT CODE = $res" >> cdab.stderr
-    if [ $res -ne 0 ]
-    then
-        ((wrong_processings++))
-        echo "Stage in of $pre_id FAILED" >> cdab.stderr
-        return 1
-    fi
-    pre_folder=$(find ${PWD}/input_data -type d -name "${pre_id}.SAFE")
-    if [ -z "$pre_folder" ]
-    then
-        echo "Pre-event data not downloaded correctly" >> cdab.stderr
-        return 1
-    fi
+    end_time=$(($(date +%s) + 1 * 60 * 60))   # Timeout after 1 hour
 
-    echo "Stage in post-event data: $post_id" >> cdab.stderr
-    stage_in "file:///res/result.post.atom.xml"
-    res=$?
-    echo "EXIT CODE = $res" >> cdab.stderr
-    if [ $res -ne 0 ]
+    echo $pre_id > if-ids.list
+    echo $post_id >> if-ids.list
+
+    while [ $(date +%s) -lt $end_time ]
+    do
+        download "if-ids.list" 2 true
+        missing=$?
+
+        if [ $missing -eq 0 ]
+        then
+            echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Both pre- and post-event product downloaded" >> cdab.stderr
+            break
+        else
+            echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Wait 5 minutes and retry" >> cdab.stderr
+            sleep 300   # wait 5 minutes
+        fi
+    done
+
+    if [ $missing -ne 0 ]
     then
-        ((wrong_processings++))
-        echo "Stage in of $post_id FAILED" >> cdab.stderr
-        return 1
-    fi
-    post_folder=$(find ${PWD}/input_data -type d -name "${post_id}.SAFE")
-    if [ -z "$post_folder" ]
-    then
-        echo "Post-event data not downloaded correctly" >> cdab.stderr
+        wrong_processings=1
         return 1
     fi
 
     cat > insar.yml << EOF
 snap_graph: {class: File, path: ./insar.xml}
-pre_event: { class: Directory, path: file://${pre_folder} }
-post_event: { class: Directory, path: file://${post_folder} }
+pre_event: { class: Directory, path: file://$(find ${PWD}/input_data -type d -name "${pre_id}.SAFE") }
+post_event: { class: Directory, path: file://$(find ${PWD}/input_data -type d -name "${post_id}.SAFE") }
 EOF
 
     cat > insar.xml << EOF
@@ -481,15 +461,15 @@ EOF
     # Execute graph via cwltool
     ((total_processings++))
     
-    echo "cwltool --no-container --no-read-only workflow.cwl insar.yml" >> cdab.stderr
+    echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - cwltool --no-container --no-read-only workflow.cwl insar.yml" >> cdab.stderr
     cwltool --no-container --no-read-only workflow.cwl insar.yml >> cdab.stdout 2>> cdab.stderr
     res=$?
-    echo "EXIT CODE = $res" >> cdab.stderr
+    echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - EXIT CODE = $res" >> cdab.stderr
 
     if [ $res -ne 0 ]
     then
         ((wrong_processings++))
-        echo "Processing of $id FAILED" >> cdab.stderr
+        echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Processing of $id FAILED" >> cdab.stderr
         return 1
     else
         dim_file=$(find $PWD -name target.dim)
@@ -498,14 +478,17 @@ EOF
             echo "No target.dim found" >> cdab.stderr
             return 1
         fi
-        echo "Processing of $id SUCCEEDED" >> cdab.stderr
+        echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Processing of $id SUCCEEDED" >> cdab.stderr
 
         output_base_dir=$(dirname $dim_file)
 
+        echo "Result" >> cdab.stderr
+        tree $output_base_dir >> cdab.stderr
         find $output_base_dir -type f >> cdab.stderr
+
         count=0
         errors=0
-        for f in $(find . -name "*.img" | grep -v tie_point_grids)
+        for f in $(find . -name "*.img" | grep output_data | grep -v tie_point_grids)
         do 
             size=$(stat -c %s $f)
             [ $size -lt 3000000000 ] && ((errors++))
@@ -525,16 +508,17 @@ function process_stack() {
 
     max_stack_size=4
     count=0
-    wrong=0
+    empty=0
+    printf "" > stack-ids.list
 
     while [ $count -lt $max_stack_size ]
     do
         ((count++))
         select_start_date=$(date -d@$((event_date_sec - count * 100 * 24 * 60 * 60)) +%Y-"%m-%dT00:00:00Z")
         select_end_date=$(date -d@$((event_date_sec - (count * 100 - 50) * 24 * 60 * 60)) +%Y-"%m-%dT00:00:00Z")
-        atom_file="result.stackitem-${count}.atom.xml"
+        atom_file="result.stackitem.atom.xml"
 
-        echo "Selecting stack product ${count}/${max_stack_size} from catalogue" >> cdab.stderr
+        echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Selecting stack product ${count}/${max_stack_size} from catalogue" >> cdab.stderr
         echo "opensearch-client -m Scihub -p \"geom=POINT($lon $lat)\" -p \"start=$select_start_date\" -p \"stop=$select_end_date\" -p \"pt=SLC\" -p \"track=$track\" -p \"count=1\" \"${catalogue_base_url}\" {}" >> cdab.stderr
         opensearch-client $cat_creds -m Scihub -p "geom=POINT($lon $lat)" -p "start=$select_start_date" -p "stop=$select_end_date" -p "pt=SLC" -p "track=$track" -p "count=1" "${catalogue_base_url}" {} | xmllint --format - > $atom_file
 
@@ -542,49 +526,102 @@ function process_stack() {
 
         if [ -z "$product_id" ]
         then
-            echo "Empty result" >> cdab.stderr
+            echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Empty result" >> cdab.stderr
             ((wrong++))
             continue
         fi
 
         track_new=$(get_track $product_id)
-        echo "Done (stack product #$count = $product_id, track = $track_new)" >> cdab.stderr
+        echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Done (stack product #$count = $product_id, track = $track_new)" >> cdab.stderr
         
         if [ $track_new -ne $track ]
         then
-            echo "Track does not match" >> cdab.stderr
+            echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Track does not match" >> cdab.stderr
             ((wrong++))
             continue
         fi
         
-        ref="file:///res/${atom_file}"
-        sudo rm -rf input_data/*
-        echo "Downloading stack product ${count}/${max_stack_size}" >> cdab.stderr
-        echo "docker run -u root --workdir /res -v ${PWD}:/res -v ${HOME}/config/etc/Stars:/etc/Stars/conf.d -v ${HOME}/config/Stars:/root/.config/Stars \"${stage_in_docker_image}\" Stars -v copy \"${ref}\" -r 4 -si ${provider} -o /res/input_data/" >> cdab.stderr
-        docker run -u root --workdir /res -v ${PWD}:/res -v ${HOME}/config/etc/Stars:/etc/Stars/conf.d -v ${HOME}/config/Stars:/root/.config/Stars "${stage_in_docker_image}" Stars -v copy "${ref}" -r 4 -si ${provider} -o /res/input_data/ >> cdab.stdout 2>> cdab.stderr
-        res=$?
-        if [ $res -ne 0 ]
-        then
-            echo "Error during download" >> cdab.stderr
-            ((wrong++))
-            continue
-        fi
+        mv $atom_file "${product_id}.atom.xml"
 
-        product_folder=$(find ${PWD}/input_data -type d -name "${product_id}.SAFE")
-        if [ -z "$product_folder" ]
-        then
-            echo "Stack product data not downloaded correctly" >> cdab.stderr
-            ((wrong++))
-            continue
-        fi
-
-        echo "Done (stack product #$count downloaded)" >> cdab.stderr
-        ls -l $product_folder >> cdab.stderr
-        find $product_folder -type f >> cdab.stderr
+        echo $product_id >> stack-ids.list
     done
 
-    total_processings=$count
-    wrong_processings=$wrong
+    stack_size=$(cat stack-ids.list | wc -l)
+
+    end_time=$(($(date +%s) + 20 * 60))   # Timeout after 20 minutes
+
+    while [ $(date +%s) -lt $end_time ]
+    do
+        download "stack-ids.list" $stack_size true
+        missing=$?
+
+        if [ $missing -eq 0 ]
+        then
+            echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - All products downloaded" >> cdab.stderr
+            break
+        else
+            echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Wait 5 minutes and retry" >> cdab.stderr
+            sleep 300   # wait 5 minutes
+        fi
+    done
+
+    total_processings=$max_stack_size
+    wrong_processings=$((wrong + missing))
+}
+
+
+
+function download() {
+    list_file=$1
+    size=$2
+    delete=$3
+
+    count=0
+    missing=0
+
+    for id in $(cat $list_file)
+    do
+        ((count++))
+        echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Processing product ${count}/${size}: ${id}" >> cdab.stderr
+        product_folder=$(find ${PWD}/input_data -type d -name "${id}.SAFE")
+        if [ -z "$product_folder" ]
+        then
+            atom_file="file:///res/${id}.atom.xml"
+            echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Downloading product ${count}/${size}" >> cdab.stderr
+            echo "docker run -u root --workdir /res -v ${PWD}:/res -v ${HOME}/config/etc/Stars:/etc/Stars/conf.d -v ${HOME}/config/Stars:/root/.config/Stars \"${stage_in_docker_image}\" Stars copy -v \"${atom_file}\" -r 4 -si ${provider} -o /res/input_data/ --allow-ordering" >> cdab.stderr
+            docker run -u root --workdir /res -v ${PWD}:/res -v ${HOME}/config/etc/Stars:/etc/Stars/conf.d -v ${HOME}/config/Stars:/root/.config/Stars "${stage_in_docker_image}" Stars copy -v "${atom_file}" -r 4 -si ${provider} -o /res/input_data/ --allow-ordering >> cdab.stdout 2>> cdab.stderr
+            res=$?
+            if [ $res -ne 0 ]
+            then
+                echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Error during download" >> cdab.stderr
+                ((missing++))
+                continue
+            fi
+
+            product_folder=$(find ${PWD}/input_data -type d -name "${id}.SAFE")
+            if [ -z "$product_folder" ]
+            then
+                order_file=$(find ${PWD}/input_data -type f -name "${id}.order.json")
+                if [ -n "$order_file" ]
+                then
+                    echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Order for product exists" >> cdab.stderr
+                else
+                    echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Stack product data not downloaded correctly" >> cdab.stderr
+                fi
+                ((missing++))
+                continue
+            fi
+
+            echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Done (product $count/$size downloaded)" >> cdab.stderr
+            ls -l $product_folder
+            find $product_folder -type f
+        else
+            echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Done (product $count/$size already downloaded)" >> cdab.stderr
+        fi
+    done
+
+    return $missing
+
 }
 
 
@@ -614,7 +651,7 @@ provider="$4"
 credentials="$5"
 cat_creds=""
 
-stage_in_docker_image=terradue/stars-t2:devlatest
+stage_in_docker_image=terradue/stars-t2:latest
 
 case "$provider" in
     CREO)
@@ -638,8 +675,11 @@ esac
 
 cd "$working_dir"
 
+printf "" > cdab.stdout
+printf "" > cdab.stderr
+
 # Install
-prepare 2>> cdab.stderr
+prepare
 res=$?
 
 if [ $res -eq 0 ]
@@ -652,7 +692,7 @@ fi
 # Process inputs
 
 echo "--------------------------------" >> cdab.stderr
-echo "TC415: Interferogram" >> cdab.stderr
+echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - TC415: Interferogram" >> cdab.stderr
 
 total_processings=0
 wrong_processings=0
@@ -688,7 +728,7 @@ total_processings_if=$total_processings
 
 # Download stack
 echo "--------------------------------" >> cdab.stderr
-echo "TC416: Stack" >> cdab.stderr
+echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - TC416: Stack" >> cdab.stderr
 
 total_processings=0
 wrong_processings=0
