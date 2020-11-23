@@ -48,7 +48,7 @@ cdab-remote-client -h
 And the output is the following:
 
 ```
-cdab-remote-client version 1.28 (c) 2020 Terradue Srl.
+cdab-remote-client version 1.29 (c) 2020 Terradue Srl.
 
 USAGE: cdab-remote-client [OPTIONS] <test-scenario>
 
@@ -154,7 +154,8 @@ Most of the values for the various keys can be obtained from the OpenStack dashb
 * **floating_ip_network**: Network from which to assign floating IP. This setting is optional.
 * **private_key_file**: Location of the private key file for SSH connections to virtual machine (must correspond to public key in **key_name**).
 * **remote_user**: User on virtual machine for SSH connections.
-* **use_volume**: Create an external volume for docker image and test execution; this is useful for flavours that have very limited main disk. The size of the additional disk is 20 GB.
+* **use_volume**: Create an external volume for docker image and test execution; this is useful for flavours that have very limited main disk. The size of the additional disk is 100 GB.
+* **use_tmp_volume**: Create an external volume for the /tmp directory; this is useful for flavours that have very limited main disk. The size of the additional disk is 50 GB.
 
 ##### Specific settings for Google Cloud Platform
 
