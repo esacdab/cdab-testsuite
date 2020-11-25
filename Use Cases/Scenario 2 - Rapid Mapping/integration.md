@@ -28,7 +28,7 @@ $ conda activate env_s3
 
 ## Integration procedure 
 
-1. Open Jupyter Notebook on the virtual machine. [10%]
+1. Open Jupyter Notebook on the virtual machine or within the environment provided through the target site's web interface. [10%]
 
 2. Upload the files scenario code files (_burned\_area.ipynb_ and the two helper _*.py_ files) to the workspace folder using the Jupyter upload functionality. [20%]
 
