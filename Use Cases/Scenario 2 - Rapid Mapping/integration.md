@@ -30,35 +30,34 @@ $ conda activate env_s3
 
 1. Open Jupyter Notebook on the virtual machine. [10%]
 
-2. Upload the files scenario code files (_active\_fire.ipynb_ and the two helper _*.py_ files) to the workspace folder using the Jupyter upload functionality. [20%]
+2. Upload the files scenario code files (_burned\_area.ipynb_ and the two helper _*.py_ files) to the workspace folder using the Jupyter upload functionality. [20%]
 
-3. **Using the target site data access and following the documentation available at the target site**, get a relevant Sentinel-3 SLSTR product tile. For instance, the product with the identifier `S3A_SL_1_RBT____20170618T104548_20170618T104848_20181004T040944_0179_019_051______LR1_R_NT_003` of the `18 Jun 2017 10:45:48 GMT` (Portugal) [30%]
+3. **Using the target site data access and following the documentation available at the target site**, get a relevant Sentinel-3 SLSTR product tile. For instance, the product with the identifier `S2 L2A` of the `TBD` (Portugal) [30%]
 
 If the product is not available from the target site, you can download it from the Terradue storage.
 
 ```console
-$ curl -L -o S3A_SL_1_RBT____20170618T104548_20170618T104848_20181004T040944_0179_019_051______LR1_R_NT_003.zip "https://store.terradue.com/download/sentinel3/files/v1/S3A_SL_1_RBT____20170618T104548_20170618T104848_20181004T040944_0179_019_051______LR1_R_NT_003"
+$ curl -L ... TBD"
 ```
 
 Make sure the contents of the zipped archive are extracted and available and lolcated in a directory accessible by Jupyter Notebook (adjust the notebook cell under *Data location and properties* as required). [40%]
 
 ```console
-$ unzip S3A_SL_1_RBT____20170618T104548_20170618T104848_20181004T040944_0179_019_051______LR1_R_NT_003.zip
+$ unzip S2 TBD
 ```
 4. Return to Jupyter Notebook, open the notebook with a Python 3 kernel. If you created and new conda environment during the installation procedure, make sure the Python kernel is using that environment. [50%]
 
 5. Execute, one after another, the cells of the notebook, waiting for each cell to complete, ensuring no errors occur. [60%]
 
-6. In the directory of your notebook there should now be a GeoTIFF file named `active_fire_S3A_SL_1_RBT____20170618T104548_20170618T104848_20181004T040944_0179_019_051______LR1_R_NT_003.tif` [90%]
+6. In the directory of your notebook there should now be a GeoTIFF file named `TBD` [90%]
 
 ```console
-$ ls -l /workspace/active_fire_S3A_SL_1_RBT____20170618T104548_20170618T104848_20181004T040944_0179_019_051______LR1_R_NT_003.tif
--rw-r--r-- 1 user ciop 7946390 Sep 23 14:41 /workspace/active_fire_S3A_SL_1_RBT____20170618T104548_20170618T104848_20181004T040944_0179_019_051______LR1_R_NT_003.tif
+$ ls -l /workspace/TBD
+-rw-r--r-- 1 user ciop 7946390 Sep 23 14:41 /workspace/TBD
 ```
 
-8. Download it to your computer and open it with any tool that can visualise TIFF files. Verify that the band/layer `active_fire_detected` show a monochrome image of the detected fires as in the picture below: [100%]
+8. Download it to your computer and open it with any tool that can visualise TIFF files. Verify that the band/layer `TBD` show a monochrome image of the detected fires as in the picture below: [100%]
 
-![Active fires seen in the SNAP desktop application](active_fire_S3A_SL_1_RBT____20170618T104548_20170618T104848_20181004T040944_0179_019_051______LR1_R_NT_003.png "Active fires seen in the SNAP desktop application")
 
 
 ## Application build procedure 
