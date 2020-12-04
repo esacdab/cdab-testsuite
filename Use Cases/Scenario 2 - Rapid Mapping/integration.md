@@ -44,24 +44,33 @@ $ conda activate env_s3
 
 2. Upload the files scenario code files (_burned\_area.ipynb_ and the two helper _*.py_ files) to the workspace folder using the Jupyter upload functionality. [20%]
 
-3. **Using the target site data access and following the documentation available at the target site**, get a relevant Sentinel-2 MSI L2A product tile. For instance, the products with the identifier `S2A_MSIL2A_20190403T021651_N0211_R003_T52SDH_20190404T105016` and `S2B_MSIL2A_20190408T021609_N0211_R003_T52SDH_20190408T045111` of April 2019 (North Korea) [30%]
+3. **Using the target site data access and following the documentation available at the target site**, get two relevant Sentinel-2 MSI L2A products. For instance, the products with the identifier `S2A_MSIL2A_20201026T112151_N0214_R037_T29TPE_20201027T144218` and `S2B_MSIL2A_20201130T112429_N0214_R037_T29TPE_20201130T131854` of November 2020 (Portugal) [30%]
 
-Make sure the contents of the zipped archive are extracted and available and lolcated in a directory accessible by Jupyter Notebook (adjust the notebook cell under *Data location* as required). [40%]
+* For **Sobloo**, the download can be operformed using the DirectData API. This is done automatically by the Jupyter notebook, so you can skip this manual step.
+* For **Onda**, ... TBD.
+* For the other DIASes, ... TBD.
+
+
+Make sure the contents of the zipped archive are extracted and available and located in a directory accessible by Jupyter Notebook (adjust the notebook cell under *Data location* as required). [40%]
 
 ```console
-$ unzip S2A_MSIL2A_20190403T021651_N0211_R003_T52SDH_20190404T105016.zip
-$ unzip S2B_MSIL2A_20190408T021609_N0211_R003_T52SDH_20190408T045111.zip
+$ unzip S2A_MSIL2A_20201026T112151_N0214_R037_T29TPE_20201027T144218.zip
+$ unzip S2B_MSIL2A_20201130T112429_N0214_R037_T29TPE_20201130T131854.zip
 ```
 4. Return to Jupyter Notebook, open the notebook with a Python 3.5 kernel. If you created and new conda environment during the installation procedure, make sure the Python kernel is using that environment. [50%]
 
-5. Execute, one after another, the cells of the notebook, waiting for each cell to complete, ensuring no errors occur. [60%]
+5. Make the appropriate settings in the first cell under *Settings* (self-explaining). Then execute, one after another, the cells of the notebook, waiting for each cell to complete, ensuring no errors occur.
+
+   If the data files were downloaded manually (step 3), you can skip the cells for the data download (under *Data Download*). Otherwise you have to execute the appropriate cell. In this case the download time, which is one of the metrics to record, is measured automatically and reported in the output.
+   
+   The total execution time of all cells should be somewhere around 20 minutes. [60%]
 
 6. In the directory of your notebook there should now be two GeoTIFF file whose names start with `burned_area...` [90%]
 
 ```console
 $ ls -l /workspace/TBD
--rw-r--r-- 1 user cdab   13536486 Nov 27 01:14 burned_area_20190408_021609_20190408_021609.rgb.tif
--rw-r--r-- 1 user cdab  161748359 Nov 27 00:44 burned_area_20190408_021609_20190408_021609.tif
+-rw-r--r-- 1 user cdab  13536486 Dec  4 23:13 /workspace/burned_area_20201130_112429_20201130_112429.rgb.tif
+-rw-r--r-- 1 user cdab 161748359 Dec  4 23:08 /workspace/burned_area_20201130_112429_20201130_112429.tif
 ```
 
 8. Download them to your computer and open it with any tool that can visualise TIFF files. Verify that the band/layer `TBD` show an image of the detected fires as in the picture below: [100%]
