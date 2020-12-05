@@ -45,7 +45,7 @@ class GraphProcessor():
         None.
     """
     
-    def __init__(self, gpt_path='/opt/anaconda/envs/env_s3/snap/bin/gpt', wdir='.'):
+    def __init__(self, gpt_path, wdir='.'):
         self.root = etree.Element('graph')
     
         version = etree.SubElement(self.root, 'version')
@@ -94,7 +94,7 @@ class GraphProcessor():
             sources_elem = self.root.xpath(xpath_expr + '/sources')[0]
             parameters_elem = self.root.xpath(xpath_expr + '/parameters')
 
-            for key, value in parameters.iteritems():
+            for key, value in parameters.items():
                 
                 if key == 'targetBandDescriptors':
                                         
@@ -128,7 +128,7 @@ class GraphProcessor():
             
             elif isinstance(source, dict):
 
-                for key, value in source.iteritems():
+                for key, value in source.items():
                     
                     source_product_elem = etree.SubElement(sources_elem, key)
                     source_product_elem.text = value
@@ -209,14 +209,12 @@ class GraphProcessor():
                '-c',
                '1024M',
                path]
-
             rc = run_command(options)
 
         finally:
-            os.remove(path)
-            
+            #os.remove(path)
             logging.info('Done.')
-            
+
         return rc
         
 def get_snap_parameters(operator):
@@ -381,7 +379,7 @@ def get_write_formats():
         
         
         
-def snap_graph(operators, **kwargs):
+def snap_graph(gpt_path, operators, **kwargs):
    
     options = dict()
    
@@ -395,12 +393,14 @@ def snap_graph(operators, **kwargs):
     
     for operator in operators:
             
+        logging.info('Getting default values for Operator {}'.format(operator))
         parameters = get_operator_default_parameters(operator)
         
         options[operator] = parameters
 
     for key, value in kwargs.items():
         
+        logging.info('Updating Operator {}'.format(key))
         
         # deal with the SNAP operators with dots in their name
         if key in op_name_exceptions.keys():
@@ -408,10 +408,11 @@ def snap_graph(operators, **kwargs):
         else:
             options[key.replace('_', '-')].update(value)
      
-    mygraph = GraphProcessor()
+    mygraph = GraphProcessor(gpt_path)
     
     for index, operator in enumerate(operators):
     
+        logging.info('Adding Operator {} to graph'.format(operator))
         if index == 0:  
             
             source_node_id = ''

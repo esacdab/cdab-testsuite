@@ -10,13 +10,25 @@
   
 2. Open Jupyter Notebook on the provisioned machine.
 
-3. Run the following in a cell and make sure there is no error.
+3. Run the following in a cell and make sure there is no error (set the environment name and path correctly in the `PREFIX` variable).
 
 ```python
-import lxml.etree as etree
-import snappy 
-from snappy import GPF
-import logging
+import os
+os.environ['PREFIX'] = '/opt/anaconda/envs/env_burned_area/'
+import sys
+sys.path.append(os.path.join(os.environ['PREFIX'], 'conda-otb/lib/python'))
+os.environ['OTB_APPLICATION_PATH'] = os.path.join(os.environ['PREFIX'], 'conda-otb/lib/otb/applications')
+os.environ['GDAL_DATA'] =  os.path.join(os.environ['PREFIX'], 'share/gdal')
+os.environ['PROJ_LIB'] = os.path.join(os.environ['PREFIX'], 'share/proj')
+os.environ['GPT_BIN'] = os.path.join(os.environ['PREFIX'], 'snap/bin/gpt')
+import otbApplication
+import gdal
+from shapely.wkt import loads
+from shapely.geometry import box, shape, mapping
+from shapely.errors import ReadingError
+import shutil
+from datetime import datetime
+import xml.etree.ElementTree as ET
 ```
 
 4. If there is an error and you have sufficient privileges on the machine you are working on, transfer the the included file _environment.yml_ there and create a new conda environment and activate that environment using this command:
@@ -28,37 +40,41 @@ $ conda activate env_s3
 
 ## Integration procedure 
 
-1. Open Jupyter Notebook on the virtual machine. [10%]
+1. Open Jupyter Notebook on the virtual machine or within the environment provided through the target site's web interface. [10%]
 
-2. Upload the files scenario code files (_active\_fire.ipynb_ and the two helper _*.py_ files) to the workspace folder using the Jupyter upload functionality. [20%]
+2. Upload the files scenario code files (_burned\_area.ipynb_ and the two helper _*.py_ files) to the workspace folder using the Jupyter upload functionality. [20%]
 
-3. **Using the target site data access and following the documentation available at the target site**, get a relevant Sentinel-3 SLSTR product tile. For instance, the product with the identifier `S3A_SL_1_RBT____20170618T104548_20170618T104848_20181004T040944_0179_019_051______LR1_R_NT_003` of the `18 Jun 2017 10:45:48 GMT` (Portugal) [30%]
+3. **Using the target site data access and following the documentation available at the target site**, get two relevant Sentinel-2 MSI L2A products. For instance, the products with the identifier `S2A_MSIL2A_20201026T112151_N0214_R037_T29TPE_20201027T144218` and `S2B_MSIL2A_20201130T112429_N0214_R037_T29TPE_20201130T131854` of November 2020 (Portugal) [30%]
 
-If the product is not available from the target site, you can download it from the Terradue storage.
+* For **Sobloo**, the download can be operformed using the DirectData API. This is done automatically by the Jupyter notebook, so you can skip this manual step.
+* For **Onda**, ... TBD.
+* For the other DIASes, ... TBD.
 
-```console
-$ curl -L -o S3A_SL_1_RBT____20170618T104548_20170618T104848_20181004T040944_0179_019_051______LR1_R_NT_003.zip "https://store.terradue.com/download/sentinel3/files/v1/S3A_SL_1_RBT____20170618T104548_20170618T104848_20181004T040944_0179_019_051______LR1_R_NT_003"
-```
 
-Make sure the contents of the zipped archive are extracted and available and lolcated in a directory accessible by Jupyter Notebook (adjust the notebook cell under *Data location and properties* as required). [40%]
-
-```console
-$ unzip S3A_SL_1_RBT____20170618T104548_20170618T104848_20181004T040944_0179_019_051______LR1_R_NT_003.zip
-```
-4. Return to Jupyter Notebook, open the notebook with a Python 3 kernel. If you created and new conda environment during the installation procedure, make sure the Python kernel is using that environment. [50%]
-
-5. Execute, one after another, the cells of the notebook, waiting for each cell to complete, ensuring no errors occur. [60%]
-
-6. In the directory of your notebook there should now be a GeoTIFF file named `active_fire_S3A_SL_1_RBT____20170618T104548_20170618T104848_20181004T040944_0179_019_051______LR1_R_NT_003.tif` [90%]
+Make sure the contents of the zipped archive are extracted and available and located in a directory accessible by Jupyter Notebook (adjust the notebook cell under *Data location* as required). [40%]
 
 ```console
-$ ls -l /workspace/active_fire_S3A_SL_1_RBT____20170618T104548_20170618T104848_20181004T040944_0179_019_051______LR1_R_NT_003.tif
--rw-r--r-- 1 user ciop 7946390 Sep 23 14:41 /workspace/active_fire_S3A_SL_1_RBT____20170618T104548_20170618T104848_20181004T040944_0179_019_051______LR1_R_NT_003.tif
+$ unzip S2A_MSIL2A_20201026T112151_N0214_R037_T29TPE_20201027T144218.zip
+$ unzip S2B_MSIL2A_20201130T112429_N0214_R037_T29TPE_20201130T131854.zip
+```
+4. Return to Jupyter Notebook, open the notebook with a Python 3.5 kernel. If you created and new conda environment during the installation procedure, make sure the Python kernel is using that environment. [50%]
+
+5. Make the appropriate settings in the first cell under *Settings* (self-explaining). Then execute, one after another, the cells of the notebook, waiting for each cell to complete, ensuring no errors occur.
+
+   If the data files were downloaded manually (step 3), you can skip the cells for the data download (under *Data Download*). Otherwise you have to execute the appropriate cell. In this case the download time, which is one of the metrics to record, is measured automatically and reported in the output.
+   
+   The total execution time of all cells should be somewhere around 20 minutes. [60%]
+
+6. In the directory of your notebook there should now be two GeoTIFF file whose names start with `burned_area...` [90%]
+
+```console
+$ ls -l /workspace/TBD
+-rw-r--r-- 1 user cdab  13536486 Dec  4 23:13 /workspace/burned_area_20201130_112429_20201130_112429.rgb.tif
+-rw-r--r-- 1 user cdab 161748359 Dec  4 23:08 /workspace/burned_area_20201130_112429_20201130_112429.tif
 ```
 
-8. Download it to your computer and open it with any tool that can visualise TIFF files. Verify that the band/layer `active_fire_detected` show a monochrome image of the detected fires as in the picture below: [100%]
+8. Download them to your computer and open it with any tool that can visualise TIFF files. Verify that the band/layer `TBD` show an image of the detected fires as in the picture below: [100%]
 
-![Active fires seen in the SNAP desktop application](active_fire_S3A_SL_1_RBT____20170618T104548_20170618T104848_20181004T040944_0179_019_051______LR1_R_NT_003.png "Active fires seen in the SNAP desktop application")
 
 
 ## Application build procedure 

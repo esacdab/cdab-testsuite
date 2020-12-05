@@ -1,18 +1,18 @@
-name: env_s3
+name: env_burned_area
 channels:
-  - defaults
   - terradue
   - conda-forge
+  - defaults
 dependencies:
+  - cioppy
   - snap
   - ipykernel
   - otb
   - gdal>2.2.2
   - poppler<0.66
+  - geopandas
   - lxml
   - shapely
   - pyyaml
   - imageio
   - parso=0.7
-  - geopandas
-  - psutil

@@ -176,7 +176,7 @@ def execute_remote_command(compute_config, run, command, display_command = None,
 
     options = [
         'ssh', '-i', compute_config['private_key_file'],
-        "-o", "StrictHostKeyChecking=no", "-o", "UserKnownHostsFile=/dev/null",
+        "-o", "StrictHostKeyChecking=no", "-o", "UserKnownHostsFile=/dev/null", "-o", "IdentitiesOnly=yes",
         "{0}@{1}".format(compute_config['remote_user'], run.public_ip), command
     ]
 
@@ -215,7 +215,7 @@ def copy_file(compute_config, run, local_file, remote_file, to_remote = True, ex
 
     options = [
         "scp", '-i', compute_config['private_key_file'],
-        "-o", "StrictHostKeyChecking=no", "-o", "UserKnownHostsFile=/dev/null"
+        "-o", "StrictHostKeyChecking=no", "-o", "UserKnownHostsFile=/dev/null", "-o", "IdentitiesOnly=yes",
     ]
 
     remote_url = "{0}@{1}:{2}".format(compute_config['remote_user'], run.public_ip, remote_file)
