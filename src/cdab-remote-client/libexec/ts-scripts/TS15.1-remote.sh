@@ -39,10 +39,20 @@ function stage_in() {
     # Temporarily using Terradue catalogue for query
     ref="https://catalog.terradue.com/${index}/search?uid=$id"
 
-    echo "docker run -u root --workdir /res -v ${PWD}:/res -v ${HOME}/config/etc/Stars:/etc/Stars/conf.d -v ${HOME}/config/Stars:/root/.config/Stars \"${stage_in_docker_image}\" Stars copy -v \"${ref}\" -r 4 -si ${provider} -o /res/input_data/"
-    docker run -u root --workdir /res -v ${PWD}:/res -v ${HOME}/config/etc/Stars:/etc/Stars/conf.d -v ${HOME}/config/Stars:/root/.config/Stars "${stage_in_docker_image}" Stars copy -v "${ref}" -r 4 -si ${provider} -o /res/input_data/
-    res=$?
-    [ $res -ne 0 ] && return $res
+    if [ "$provider" == "AMAZON" ] || [ "$provider" == "GOOGLE" ]
+    then
+        download_url=$(curl $ref | xmllint --format - | grep "<link rel=\"enclosure" | grep "scihub" | sed -E "s#.*href=\"(.*?)\".*#\1#g")
+        mkdir -p input_data/$id
+        curl -u $credentials -o "${id}.zip" $download_url
+        unzip -d input_data/$id "${id}.zip"
+        res=$?
+        [ $res -ne 0 ] && return $res
+    else
+        echo "docker run -u root --workdir /res -v ${PWD}:/res -v ${HOME}/config/etc/Stars:/etc/Stars/conf.d -v ${HOME}/config/Stars:/root/.config/Stars \"${stage_in_docker_image}\" Stars copy -v \"${ref}\" -r 4 -si ${provider} -o /res/input_data/ --allow-ordering" >> cdab.stderr
+        docker run -u root --workdir /res -v ${PWD}:/res -v ${HOME}/config/etc/Stars:/etc/Stars/conf.d -v ${HOME}/config/Stars:/root/.config/Stars "${stage_in_docker_image}" Stars copy -v "${ref}" -r 4 -si ${provider} -o /res/input_data/ --allow-ordering >> cdab.stdout 2>> cdab.stderr
+        res=$?
+        [ $res -ne 0 ] && return $res
+    fi
     
     path=$(find ./input_data -type d -name IMG_DATA | grep $id)/
 
@@ -60,6 +70,7 @@ working_dir="$1"
 # 2nd argument is docker image ID, not used
 test_site="$3" # e.g. CREO
 provider="$4"
+credentials="$5"
 index="sentinel2"
 product_type="S2MSI1C"
 product_count=2
@@ -87,7 +98,7 @@ do
 
     echo "Stage in $id" >> cdab.stderr
     # Stage in input product
-    stage_in $id > cdab.stdout 2>> cdab.stderr
+    stage_in $id >> cdab.stdout 2>> cdab.stderr
     res=$?
     echo "EXIT CODE = $res" >> cdab.stderr
 
@@ -100,7 +111,7 @@ do
     # Run tool
 
     echo "CWL Command: cwltool workflow.cwl#wf wfinput.yaml" >> cdab.stderr
-    cwltool workflow.cwl#wf wfinput.yaml > cdab.stdout 2>> cdab.stderr
+    cwltool workflow.cwl#wf wfinput.yaml >> cdab.stdout 2>> cdab.stderr
     res=$?
     echo "EXIT CODE = $res" >> cdab.stderr
 
