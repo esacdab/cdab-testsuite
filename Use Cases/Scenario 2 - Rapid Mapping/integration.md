@@ -47,11 +47,31 @@ $ conda activate env_s3
 3. **Using the target site data access and following the documentation available at the target site**, get two relevant Sentinel-2 MSI L2A products. For instance, the products with the identifier `S2A_MSIL2A_20201026T112151_N0214_R037_T29TPE_20201027T144218` and `S2B_MSIL2A_20201130T112429_N0214_R037_T29TPE_20201130T131854` of November 2020 (Portugal) [30%]
 
 * For **Sobloo**, the download can be operformed using the DirectData API. This is done automatically by the Jupyter notebook, so you can skip this manual step.
-* For **Onda**, ... TBD.
-* For the other DIASes, ... TBD.
 
+* For **ONDA**, do the following:
+  
+  From the shell, mount the data volume as explained in [this page](https://www.onda-dias.eu/cms/knowledge-base/adapi-how-to-mount-unmount/).
+  Set the `$DATA_DIR` variable to the directory  for local copies of the products and copy the .zip files using the following commands:
+  
+  ```console
+  # /local_path is the mountpoint for the data volume
+  mkdir $DATA_PATH/S2A_MSIL2A_20201026T112151_N0214_R037_T29TPE_20201027T144218
+  mkdir $DATA_PATH/S2B_MSIL2A_20201130T112429_N0214_R037_T29TPE_20201130T131854
+  cp /local_path/S2/2A/MSI/LEVEL-2A/S2MSI2A/2020/10/26/S2A_MSIL2A_20201026T112151_N0214_R037_T29TPE_20201027T144218.zip $DATA_DIR/S2A_MSIL2A_20201026T112151_N0214_R037_T29TPE_20201027T144218
+  cp /local_path/S2/2A/MSI/LEVEL-2A/S2MSI2A/2020/11/30/S2B_MSIL2A_20201130T112429_N0214_R037_T29TPE_20201130T131854.zip $DATA_DIR/S2B_MSIL2A_20201130T112429_N0214_R037_T29TPE_20201130T131854
+  ```
 
-Make sure the contents of the zipped archive are extracted and available and located in a directory accessible by Jupyter Notebook (adjust the notebook cell under *Data location* as required). [40%]
+* For **CREODIAS**, make sure your virtual machine has access to the EO Data volume (mounted under `/eo_data/`).
+  Set the `$DATA_DIR` variable to the directory for local copies of the products and copy the directories using the following commands:
+
+  ```console
+  mkdir $DATA_PATH/S2A_MSIL2A_20201026T112151_N0214_R037_T29TPE_20201027T144218
+  mkdir $DATA_PATH/S2B_MSIL2A_20201130T112429_N0214_R037_T29TPE_20201130T131854
+  cp -r /eodata/Sentinel-2/MSI/L2A/2020/10/26/S2A_MSIL2A_20201026T112151_N0214_R037_T29TPE_20201027T144218.SAFE $DATA_PATH/S2A_MSIL2A_20201026T112151_N0214_R037_T29TPE_20201027T144218/
+  cp -r /eodata/Sentinel-2/MSI/L2A/2020/11/30/S2B_MSIL2A_20201130T112429_N0214_R037_T29TPE_20201130T131854.SAFE $DATA_PATH/S2B_MSIL2A_20201130T112429_N0214_R037_T29TPE_20201130T131854/
+  ```
+
+Make sure the contents of the product (if necessary, unzip archive from the correct directory) are available and located in a directory accessible by Jupyter Notebook (adjust the notebook cell under *Data location* as required). [40%]
 
 ```console
 $ unzip S2A_MSIL2A_20201026T112151_N0214_R037_T29TPE_20201027T144218.zip
