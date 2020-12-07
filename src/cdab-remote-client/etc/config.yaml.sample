@@ -1,0 +1,93 @@
+global:
+  # Docker configuration file to be used for docker repository connections on virtual machine
+  docker_config: "docker-config.json"
+  # Number of retries for initial SSH connections
+  connect_retries: 60
+  # Interval between initial SSH connections (in seconds, fraction also possible)
+  connect_interval: 1
+service_providers:
+  ApiHub:
+    # Data Access 
+    data:
+      # Entry Point (usually the URL to the catalogue)
+      url: https://scihub.copernicus.eu/apihub
+      # Credentials (usually username:password/apiKey)
+      # credentials:
+  SciHub:
+    data:
+      url: https://scihub.copernicus.eu/dhus
+      # credentials:
+  IntHub:
+    data:
+      url: https://inthub.copernicus.eu/dhus
+      # credentials:
+  ColHub:
+    data:
+      url: https://colhub.copernicus.eu/dhus
+      # credentials:
+  CREO:
+    data:
+      url: https://finder.creodias.eu/resto/api/collections/describe.xml
+      # credentials:
+    compute:
+      auth_url: https://cf2.cloudferro.com:5000/v3
+      username: "udig4wa@gmail.com"
+      # password: 
+      project_id: 7236455993264b0c8970d22751b23562
+      project_name: "cloud_07455 project_without_eo"
+      user_domain_name: "cloud_07455"
+      region_name: "RegionOne"
+      interface: "public"
+      identity_api_version: 3
+      vm_name: "cdab-test-creo"
+      key_name: "cdab-key"
+      image_name: "CentOS 7"
+      flavor_name: "eo2.large"
+      security_group: "allow_ping_ssh_rdp"
+      floating_ip: True
+      private_key_file: "cdab-key-creodias.pem"
+      remote_user: "eouser"
+  MUNDI:
+    data:
+      url: https://mundiwebservices.com/acdc/catalog/proxy/search
+      # credentials:
+    compute:
+      auth_url: https://iam.eu-de.otc.t-systems.com:443/v3
+      username: "cdab_mundi"
+      # password:
+      project_name: "eu-de"
+      user_domain_name: "OTC-EU-DE-00000000001000041106"
+      interface: "public"
+      identity_api_version: 3
+      vm_name: "cdab-test-mundi"
+      key_name: "cdab-key"
+      image_name: "Standard_CentOS_7_latest"
+      flavor_name: "s2.large.4"
+      security_group: "default"
+      floating_ip: True
+      private_key_file: "cdab-key-mundi.pem"
+      remote_user: "linux"
+      use_volume: True
+  ONDA:
+    data:
+      url: https://catalogue.onda-dias.eu/dias-catalogue/
+      # credentials:
+    compute:
+      auth_url: https://auth.cloud.ovh.net/v3
+      username: "cjEkBasH97Gt"
+      # password:
+      project_id: d6fae7e318114c248623562c0adce408
+      project_name: "6611565740751529"
+      user_domain_name: "Default"
+      region_name: "GRA7"
+      interface: "public"
+      identity_api_version: 3
+      vm_name: "cdab-test-onda"
+      key_name: "cdab-key"
+      image_name: "Centos 7"
+      flavor_name: "b2-7"
+      private_key_file: "cdab-key-ovh.pem"
+      remote_user: "centos"
+  SOBLOO:
+
+reference_target_site: ApiHub  

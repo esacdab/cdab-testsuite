@@ -1,0 +1,19 @@
+#!/bin/sh
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/cdab-client
+
+if [[ $@ == *"TS1"* ]]; then
+    newargs="$@"
+    newargs=${newargs/-tn/-ts}
+    newargs=${newargs/--target_name/-ts}
+    newargs=${newargs/--target_credentials/-tc}
+    newargs=${newargs/-tu/-te}
+    newargs=${newargs/-tsn/-n}
+    newargs=${newargs/--testsite_name/-n}
+    newargs=${newargs/--load_factor/-lf}
+
+    newargs=`echo ${newargs} | sed -e 's/\(-\w*\)\ /\1=/g'`
+
+    exec /usr/bin/cdab-remote-client $newargs
+fi
+
+exec mono $MONO_OPTIONS /usr/lib/cdab-client/bin/cdab-testtools.exe "$@"
