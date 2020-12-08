@@ -22,7 +22,7 @@ class TestClient:
     """Main class for remote execution of the test scenarios TS11, TS12, TS13 and TS15.
     """
 
-    VERSION = "1.31"
+    VERSION = "1.32"
 
     errors = {
         ERR_CONFIG: 'Missing or invalid configuration',
