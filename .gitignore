@@ -398,22 +398,8 @@ build
 mono_crash*
 .directory
 config.yaml
-
-test-cli
-
-config.yaml.old
-
-offlineDataStatusFile copy 2.json
-
-offlineDataStatusFile copy.json
-
-offlineDataStatusFile.json
-
-offlineDataStatusFile.orig.json
-cdab-282908-8d011fc74cdf.json
-
 Resources
 src/cdab-remote-client/pom.xml
-Use Cases/Scenario 1 - NDVI/S2A_MSIL1C_20200507T104031_N0209_R008_T31TFK_20200507T124549.zip
-Use Cases/Scenario 1 - NDVI/S2A_MSIL1C_20200507T104031_N0209_R008_T31TFK_20200507T124549.SAFE
-Use Cases/Scenario 1 - NDVI/T31TFK_20200507T104031_NDVI.tif
+
+# Commits
+commit.txt
