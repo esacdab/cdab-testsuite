@@ -39,11 +39,11 @@ function stage_in() {
     # Temporarily using Terradue catalogue for query
     ref="https://catalog.terradue.com/${index}/search?uid=$id"
 
-    echo "docker run -u root --workdir /res -v ${PWD}:/res -v ${HOME}/config/etc/Stars:/etc/Stars/conf.d -v ${HOME}/config/Stars:/root/.config/Stars \"${stage_in_docker_image}\" Stars copy -v \"${ref}\" -r 4 -si ${provider} -o /res/input_data/ --allow-ordering" >> cdab.stderr
-    docker run -u root --workdir /res -v ${PWD}:/res -v ${HOME}/config/etc/Stars:/etc/Stars/conf.d -v ${HOME}/config/Stars:/root/.config/Stars "${stage_in_docker_image}" Stars copy -v "${ref}" -r 4 -si ${provider} -o /res/input_data/ --allow-ordering >> cdab.stdout 2>> cdab.stderr
+    echo "docker run -u root --workdir /res -v ${PWD}:/res -v ${HOME}/config/etc/Stars:/etc/Stars/conf.d -v ${HOME}/config/Stars:/root/.config/Stars \"${stage_in_docker_image}\" Stars copy -v \"${ref}\" -r 4 -si ${provider} -o /res/input_data/ --allow-ordering --harvest" >> cdab.stderr
+    docker run -u root --workdir /res -v ${PWD}:/res -v ${HOME}/config/etc/Stars:/etc/Stars/conf.d -v ${HOME}/config/Stars:/root/.config/Stars "${stage_in_docker_image}" Stars copy -v "${ref}" -r 4 -si ${provider} -o /res/input_data/ --allow-ordering --harvest >> cdab.stdout 2>> cdab.stderr
     res=$?
     [ $res -ne 0 ] && return $res
-    
+
     path=$(find ./input_data -type d -name IMG_DATA | grep $id)/
 
     cat > wfinput.yaml << EOF
