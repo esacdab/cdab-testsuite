@@ -9,12 +9,12 @@ Copernicus Sentinels Data Access Worldwide Benchmark Test Suite is the software 
 
 The current supported Target Sites are
 
-* Data Access Hubs using [DHuS Data Hub](https://sentineldatahub.github.io):
+* Data Access Hubs using [DHuS Data Hub](https://sentineldatahub.github.io/DataHubSystem/):
   * [Copernicus Open Access Hub (aka SciHub)](https://scihub.copernicus.eu/)
   * [Copernicus Open Access Hub API (aka APIHub)](https://scihub.copernicus.eu/twiki/do/view/SciHubWebPortal/APIHubDescription)
   * [Copernicus Collaborative Data Hub (aka ColHub)](https://colhub.copernicus.eu/)
   * [Copernicus Sentinels International Access Hub (aka IntHub)](https://inthub.copernicus.eu/)
-  * Any Data Access Hubs using [DHuS Data Hub](https://sentineldatahub.github.io) software
+  * Any Data Access Hubs using [DHuS Data Hub](https://sentineldatahub.github.io/DataHubSystem/) software
 * DIASes
   * [CREODIAS](https://creodias.eu/)
   * [Mundi Web Services](https://mundiwebservices.com/)
