@@ -84,7 +84,7 @@
    ssh -N -f -L 8888:localhost:9999 user@hostname
    ```
 
-   Now you can access Jupyter Lab with your browser at https://localhost:8888/lab. Ignore possible browser warnings.
+   Now you can access Jupyter Lab with your browser at https://localhost:8888/lab. Ignore possible browser warnings. Use the previously set password to log in. 
 
 ## Integration procedure 
 
