@@ -12,10 +12,11 @@
 
    Transfer the included file _conda-install.sh_ on the virtual machine.
 
-   Run the following command:
+   Run the following commands:
 
    ```console
    sudo sh conda-install.sh
+   source /opt/conda/etc/profile.d/conda.sh
    ```
 
    Transfer the the included file _environment.yml_ there and create a new conda environment (name **env_burned_area**) and activate that environment using these commands:
@@ -66,6 +67,7 @@
    c.NotebookApp.password = u'<password hash obtained above>'
    c.NotebookApp.open_browser = False
    c.NotebookApp.port = 9999
+   c.NotebookApp.allow_remote_access = False
    ```
 
    Start Jupyter Lab

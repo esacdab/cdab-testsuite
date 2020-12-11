@@ -1,4 +1,4 @@
-name: env_burned_area_3
+name: env_burned_area
 channels:
   - terradue
   - conda-forge
