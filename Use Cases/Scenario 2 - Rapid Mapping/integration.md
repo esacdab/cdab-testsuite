@@ -130,7 +130,9 @@
 
 4. Return to Jupyter Notebook, open the notebook with a Python 3.5 kernel. If you created and new conda environment during the installation procedure, make sure the Python kernel is using that environment. [50%]
 
-5. Make the appropriate settings in the first cell under *Settings* (self-explaining). Then execute, one after another, the cells of the notebook, waiting for each cell to complete, ensuring no errors occur.
+5. Make the appropriate settings in the first cell under *Settings* (self-explaining). **IMPORTANT** Pay particular attention to the value of the PREFIX environment variable (the base path of the conda environment). This variable not being set correctly is a cause of many potential errors.
+
+   Then execute, one after another, the cells of the notebook, waiting for each cell to complete, ensuring no errors occur.
 
    If the data files were downloaded manually (step 3), you can skip the cells for the data download (under *Data Download*). Otherwise you have to execute the appropriate cell. In this case the download time, which is one of the metrics to record, is measured automatically and reported in the output.
    
@@ -140,8 +142,8 @@
 
    ```console
    $ ls -l ~
-   -rw-r--r-- 1 user cdab  13536486 Dec  4 23:13 /workspace/burned_area_20201130_112429_20201130_112429.rgb.tif
-   -rw-r--r-- 1 user cdab 161748359 Dec  4 23:08 /workspace/burned_area_20201130_112429_20201130_112429.tif
+   -rw-rw-r--. 1 eouser eouser  63983890 Dec 11 18:07 burned_area_20201130_112429_20201130_112429.rgb.tif
+   -rw-rw-r--. 1 eouser eouser 276016007 Dec 11 18:04 burned_area_20201130_112429_20201130_112429.tif
    ```
 
 7. Download them to your computer and open it with any tool that can visualise TIFF files. Verify that the band/layer `NBR` shows an RGB image of the burn severity of the area of interest. [100%]
