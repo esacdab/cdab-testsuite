@@ -8,35 +8,81 @@
     - Jupyter Notebook (with Python 3 support)
     - With data offer access if required
   
-2. Open Jupyter Notebook on the provisioned machine.
+2. Install, if necessary, conda on the virtual machine and create the conda environment.
 
-3. Run the following in a cell and make sure there is no error (set the environment name and path correctly in the `PREFIX` variable).
+   Transfer the included file _conda-install.sh_ on the virtual machine.
 
-```python
-import os
-os.environ['PREFIX'] = '/opt/anaconda/envs/env_burned_area/'
-import sys
-sys.path.append(os.path.join(os.environ['PREFIX'], 'conda-otb/lib/python'))
-os.environ['OTB_APPLICATION_PATH'] = os.path.join(os.environ['PREFIX'], 'conda-otb/lib/otb/applications')
-os.environ['GDAL_DATA'] =  os.path.join(os.environ['PREFIX'], 'share/gdal')
-os.environ['PROJ_LIB'] = os.path.join(os.environ['PREFIX'], 'share/proj')
-os.environ['GPT_BIN'] = os.path.join(os.environ['PREFIX'], 'snap/bin/gpt')
-import otbApplication
-import gdal
-from shapely.wkt import loads
-from shapely.geometry import box, shape, mapping
-from shapely.errors import ReadingError
-import shutil
-from datetime import datetime
-import xml.etree.ElementTree as ET
-```
+   Run the following command:
 
-4. If there is an error and you have sufficient privileges on the machine you are working on, transfer the the included file _environment.yml_ there and create a new conda environment and activate that environment using this command:
-```console
-$ conda env create --file environment.yml
-...
-$ conda activate env_s3
-```
+   ```console
+   sudo sh conda-install.sh
+   ```
+
+  Transfer the the included file _environment.yml_ there and create a new conda environment (name **env_burned_area**) and activate that environment using these commands:
+  
+  ```console
+  $ conda env create --file environment.yml
+  ...
+  $ conda activate env_burned_area
+  ```
+
+  You may have to log out and log in again for the changes to take effect.
+
+3. Install and start Jupyter Lab.
+
+  When in the correct environment (shown in the command prompt), you can install Jupyter Lab.
+
+  ```console
+  conda install -c conda-forge jupyterlab
+  ```
+
+  The following steps are taken from [this page](https://agent-jay.github.io/2018/03/jupyterserver/).
+
+  Execute the commands one after another and follow the instructions:
+  
+  ```console
+  # Create a configuration file template
+  jupyter notebook --generate-config
+  
+  # Set a password for accessing Jupyter and remember it,
+  # the password hash is written to a file
+  jupyter notebook password
+  
+  # Create a self-signed certificate for a secure connection
+  openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout mycert.pem -out mycert.pem
+  ```
+
+  Copy the content from the file generated in the password command (usually _~.jupyter/jupyter_notebook_config.json_).
+
+  Edit the configuration file (usually _.jupyter/jupyter_notebook_config.py_).
+
+  Add these lines to the file (setting the appropriate values for _certfile_, _keyfile_ and _password_):
+  ```
+  c.NotebookApp.certfile = u'<path-to-mycert.pem>'
+  c.NotebookApp.keyfile = u'<path-to-mycert.pem>'
+  c.NotebookApp.ip = '*'
+  c.NotebookApp.password = u'<password hash obtained above>'
+  c.NotebookApp.open_browser = False
+  c.NotebookApp.port = 9999
+  ```
+
+  Start Jupyter Lab
+
+  ```console
+  jupyter lab
+  ```
+
+  There should be log messages displayed confirming that Jupyter Lab is running.
+
+4. Connect to Jupyter Lab.
+
+  Using a new shell, use secure port-forwarding (tunnelling). Replace `user` and `hostname` with the values applying to your virtual machine.
+  
+  ```console
+  ssh -N -f -L 8888:localhost:9999 user@hostname
+  ```
+
+  Now you can access Jupyter Lab with your browser at https://localhost:8888/lab. Ignore possible browser warnings.
 
 ## Integration procedure 
 
@@ -51,18 +97,18 @@ $ conda activate env_s3
 * For **ONDA**, do the following:
   
   From the shell, mount the data volume as explained in [this page](https://www.onda-dias.eu/cms/knowledge-base/adapi-how-to-mount-unmount/).
-  Set the `$DATA_DIR` variable to the directory  for local copies of the products and copy the .zip files using the following commands:
+  Set the `$DATA_PATH` variable to the directory  for local copies of the products and copy the .zip files using the following commands:
   
   ```console
   # /local_path is the mountpoint for the data volume
   mkdir $DATA_PATH/S2A_MSIL2A_20201026T112151_N0214_R037_T29TPE_20201027T144218
   mkdir $DATA_PATH/S2B_MSIL2A_20201130T112429_N0214_R037_T29TPE_20201130T131854
-  cp /local_path/S2/2A/MSI/LEVEL-2A/S2MSI2A/2020/10/26/S2A_MSIL2A_20201026T112151_N0214_R037_T29TPE_20201027T144218.zip $DATA_DIR/S2A_MSIL2A_20201026T112151_N0214_R037_T29TPE_20201027T144218
-  cp /local_path/S2/2A/MSI/LEVEL-2A/S2MSI2A/2020/11/30/S2B_MSIL2A_20201130T112429_N0214_R037_T29TPE_20201130T131854.zip $DATA_DIR/S2B_MSIL2A_20201130T112429_N0214_R037_T29TPE_20201130T131854
+  cp /local_path/S2/2A/MSI/LEVEL-2A/S2MSI2A/2020/10/26/S2A_MSIL2A_20201026T112151_N0214_R037_T29TPE_20201027T144218.zip $DATA_PATH/S2A_MSIL2A_20201026T112151_N0214_R037_T29TPE_20201027T144218
+  cp /local_path/S2/2A/MSI/LEVEL-2A/S2MSI2A/2020/11/30/S2B_MSIL2A_20201130T112429_N0214_R037_T29TPE_20201130T131854.zip $DATA_PATH/S2B_MSIL2A_20201130T112429_N0214_R037_T29TPE_20201130T131854
   ```
 
-* For **CREODIAS**, make sure your virtual machine has access to the EO Data volume (mounted under `/eo_data/`).
-  Set the `$DATA_DIR` variable to the directory for local copies of the products and copy the directories using the following commands:
+* For **CREODIAS**, make sure your virtual machine has access to the EO Data volume (mounted under `/eodata/`).
+  Set the `$DATA_PATH` variable to the directory for local copies of the products and copy the directories using the following commands:
 
   ```console
   mkdir $DATA_PATH/S2A_MSIL2A_20201026T112151_N0214_R037_T29TPE_20201027T144218
