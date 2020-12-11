@@ -21,68 +21,70 @@
   Transfer the the included file _environment.yml_ there and create a new conda environment (name **env_burned_area**) and activate that environment using these commands:
   
   ```console
-  $ conda env create --file environment.yml
-  ...
-  $ conda activate env_burned_area
+  conda env create --file environment.yml
+  # This takes a while. Follow the instructions and confirm.
+
+  conda activate env_burned_area
   ```
 
   You may have to log out and log in again for the changes to take effect.
 
 3. Install and start Jupyter Lab.
 
-  When in the correct environment (shown in the command prompt), you can install Jupyter Lab.
+   When in the correct environment (shown in the command prompt), you can install Jupyter Lab.
 
-  ```console
-  conda install -c conda-forge jupyterlab
-  ```
+   ```console
+   conda install -c conda-forge jupyterlab
+   ```
 
-  The following steps are taken from [this page](https://agent-jay.github.io/2018/03/jupyterserver/).
+   The following steps are taken from [this page](https://agent-jay.github.io/2018/03/jupyterserver/).
 
-  Execute the commands one after another and follow the instructions:
+   Execute the commands one after another and follow the instructions:
   
-  ```console
-  # Create a configuration file template
-  jupyter notebook --generate-config
+   ```console
+   # Create a configuration file template
+   jupyter notebook --generate-config
   
-  # Set a password for accessing Jupyter and remember it,
-  # the password hash is written to a file
-  jupyter notebook password
+   # Set a password for accessing Jupyter and remember it,
+   # the password hash is written to a file
+   jupyter notebook password
   
-  # Create a self-signed certificate for a secure connection
-  openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout mycert.pem -out mycert.pem
-  ```
+   # Create a self-signed certificate for a secure connection
+   openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout mycert.pem -out mycert.pem
+   ```
 
-  Copy the content from the file generated in the password command (usually _~.jupyter/jupyter_notebook_config.json_).
+   Copy the content from the file generated in the password command (usually _~.jupyter/jupyter_notebook_config.json_).
 
-  Edit the configuration file (usually _.jupyter/jupyter_notebook_config.py_).
+   Edit the configuration file (usually _.jupyter/jupyter_notebook_config.py_).
 
-  Add these lines to the file (setting the appropriate values for _certfile_, _keyfile_ and _password_):
-  ```
-  c.NotebookApp.certfile = u'<path-to-mycert.pem>'
-  c.NotebookApp.keyfile = u'<path-to-mycert.pem>'
-  c.NotebookApp.ip = '*'
-  c.NotebookApp.password = u'<password hash obtained above>'
-  c.NotebookApp.open_browser = False
-  c.NotebookApp.port = 9999
-  ```
+   Add these lines to the file (setting the appropriate values for _certfile_, _keyfile_ and _password_):
+   
+   ```
+   c.NotebookApp.certfile = u'<path-to-mycert.pem>'
+   c.NotebookApp.keyfile = u'<path-to-mycert.pem>'
+   c.NotebookApp.ip = '*'
+   c.NotebookApp.password = u'<password hash obtained above>'
+   c.NotebookApp.open_browser = False
+   c.NotebookApp.port = 9999
+   ```
 
-  Start Jupyter Lab
+   Start Jupyter Lab
 
-  ```console
-  jupyter lab
-  ```
+   ```console
+   jupyter lab
+   ```
 
-  There should be log messages displayed confirming that Jupyter Lab is running.
+   There should be log messages displayed confirming that Jupyter Lab is running.
 
 4. Connect to Jupyter Lab.
 
-  Using a new shell, use secure port-forwarding (tunnelling). Replace `user` and `hostname` with the values applying to your virtual machine.
+   Using a new shell, use secure port-forwarding (tunnelling). Replace `user` and `hostname` with the values applying to your virtual machine.
   
-  ```console
-  ssh -N -f -L 8888:localhost:9999 user@hostname
-  ```
+   ```console
+   ssh -N -f -L 8888:localhost:9999 user@hostname
+   ```
 
-  Now you can access Jupyter Lab with your browser at https://localhost:8888/lab. Ignore possible browser warnings.
+   Now you can access Jupyter Lab with your browser at https://localhost:8888/lab. Ignore possible browser warnings.
 
 ## Integration procedure 
 
