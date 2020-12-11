@@ -83,10 +83,10 @@
    Using a new shell, use secure port-forwarding (tunnelling). Replace `user` and `hostname` with the values applying to your virtual machine.
   
    ```console
-   ssh -N -f -L 8888:localhost:9999 user@hostname
+   ssh -i yourkey.pem -N -f -L 8888:localhost:9999 user@hostname
    ```
 
-   Now you can access Jupyter Lab with your browser at https://localhost:8888/lab. Ignore possible browser warnings. Use the previously set password to log in. 
+   Now you can access Jupyter Lab with your browser at https://localhost:8888/lab. Ignore possible browser security warnings. Use the previously set password to log in. 
 
 ## Integration procedure 
 
