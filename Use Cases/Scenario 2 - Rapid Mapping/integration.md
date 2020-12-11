@@ -139,12 +139,12 @@
 6. In the directory of your notebook there should now be two GeoTIFF file whose names start with `burned_area...` [90%]
 
    ```console
-   $ ls -l /workspace/TBD
+   $ ls -l ~
    -rw-r--r-- 1 user cdab  13536486 Dec  4 23:13 /workspace/burned_area_20201130_112429_20201130_112429.rgb.tif
    -rw-r--r-- 1 user cdab 161748359 Dec  4 23:08 /workspace/burned_area_20201130_112429_20201130_112429.tif
    ```
 
-7. Download them to your computer and open it with any tool that can visualise TIFF files. Verify that the band/layer `TBD` show an image of the detected fires as in the picture below: [100%]
+7. Download them to your computer and open it with any tool that can visualise TIFF files. Verify that the band/layer `NBR` shows an RGB image of the burn severity of the area of interest. [100%]
 
 
 
