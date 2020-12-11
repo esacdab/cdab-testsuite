@@ -216,7 +216,7 @@ def pre_processing(**kwargs):
         print('Updating Operator {0}'.format(key))
         options[key.replace('_', '-')].update(value)
     
-    mygraph = GraphProcessor('/opt/anaconda/envs/env_ewf_burned_area/snap/bin/gpt')
+    mygraph = GraphProcessor(os.path.join(os.environ['PREFIX'], 'snap/bin/gpt'))
     
     for index, operator in enumerate(operators):
     
@@ -256,7 +256,7 @@ def burned_area(**kwargs):
         print('Updating Operator {0}'.format(key))
         options[key.replace('_', '-')].update(value)
     
-    mygraph = GraphProcessor('/opt/anaconda/envs/env_ewf_burned_area/snap/bin/gpt')
+    mygraph = GraphProcessor(os.path.join(os.environ['PREFIX'], 'snap/bin/gpt'))
     
     for index, operator in enumerate(operators):
     
