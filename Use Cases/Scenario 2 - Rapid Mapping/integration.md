@@ -3,9 +3,9 @@
 ## Development Environment installation procedure
 
 1. Provision a virtual machine on the target site. Preferably with the following specification
-    - 1 CPU, 8GB RAM, 100GB disk
+    - 2 CPUs, 8GB RAM, 30GB disk
     - CentOS 7
-    - Jupyter Notebook (with Python 3 support)
+    - Jupyter Notebook (with Python 3 support), it can also be installed if not present.
     - With data offer access if required
   
 2. Install, if necessary, conda on the virtual machine and create the conda environment.
@@ -136,7 +136,7 @@
 
    If the data files were downloaded manually (step 3), you can skip the cells for the data download (under *Data Download*). Otherwise you have to execute the appropriate cell. In this case the download time, which is one of the metrics to record, is measured automatically and reported in the output.
    
-   The total execution time of all cells should be somewhere around 20 minutes. [60%]
+   The total execution time of all cells should be somewhere around 30 minutes. [60%]
 
 6. In the directory of your notebook there should now be two GeoTIFF file whose names start with `burned_area...` [90%]
 
