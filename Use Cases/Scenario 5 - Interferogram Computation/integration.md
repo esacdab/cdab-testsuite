@@ -151,7 +151,7 @@
       
       Answer *n* (no) to an access test and *y* (yes) to saving the settings.
 
-      Edit the file *~/.s3cdf*.
+      Edit the file *~/.s3cfg*.
 
       Locate the line setting the value for `website_endpoint` and change it to:
       
@@ -169,7 +169,7 @@
       ```console
       mkdir -p input_data/S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD
       s3cmd get s3://s1-l1-slc-2020-q3/2020/08/21/IW/DV/S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD.zip input_data/S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD/
-      ```console
+      ```
       
 
     The Terradue storage can be used as an alternative download source in case of unavailability elsewhere. The download command for above product would be the following:
@@ -248,7 +248,7 @@
     Download and extract the product as in step 4. [35%]
 
 
-6.  Run the graph processor gpt with the arguments explained below.
+6.  Run the graph processor **gpt** with the arguments explained below.
 
     The first argument is the graph definition file as from the use case folder.
     The second argument (**pre_event**) has as value the location of the *.SAFE* folder of the unzipped pre-event product.

@@ -148,7 +148,7 @@
      
      Answer **n** (no) to an access test and **y** (yes) to saving the settings.
 
-     Open the file *~/.s3cdf* for editing.
+     Open the file *~/.s3cfg* for editing.
 
      Locate the line containing the setting for `website_endpoint` and change it to:
      
