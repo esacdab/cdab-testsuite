@@ -131,7 +131,7 @@
       conda install s3cmd
       ```
 
-      Configure the access to the MUNDI object store. The full procedure can be found at [this link](https://docs.otc.t-systems.com/en-us/ugs3cmd/obs/en-us_topic_0051060814.html).
+      Configure the access to the MUNDI object store. Below there are simplified instructions for this, the original procedure can be found at [this link](https://docs.otc.t-systems.com/en-us/ugs3cmd/obs/en-us_topic_0051060814.html.
 
       Run
       ```console
