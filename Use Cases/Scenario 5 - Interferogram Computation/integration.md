@@ -10,7 +10,7 @@
 2.  Open a terminal on the provisioned machine and install some prequisites, in case they are not yet present on the machine.
 
     ```
-    sudo yum install -y vim tree wget unzip libgfortran-4.8.5-39.el7.x86_64
+    sudo yum install -y vim tree wget unzip libgfortran-4.8.5
     ```
 
 3.  Install, if necessary, **conda** on the virtual machine and create the conda environment. Conda is needed as the vehicle to install the SNAP toolbox.
@@ -26,11 +26,13 @@
 
 4.  Install the SNAP toolbox in a new conda environment.
 
-    ```bash
-    conda create -n env_snap -y snap requests
+    Transfer the the included file _environment.yml_ there and create a new conda environment (name **env_snap**) and activate that environment using these commands:
+  
+    ```console
+    conda env create --file environment.yml
     # This takes a while. Follow the instructions and confirm.
 
-    conda activate env_burned_area
+    conda activate env_snap
     ```
 
     You may have to log out and log in again for the changes to take effect.
@@ -258,8 +260,8 @@
 
     ```console
     $ gpt insar.xml \
-    -Ppre_event=input_data/S1A_IW_SLC__1SSV_20200815T095747_20200815T095815_033916_03EF29_E739/download S1A_IW_SLC__1SSV_20200815T095747_20200815T095815_033916_03EF29_E739.SAFE \
-    -Ppost_event=input_data/S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD/download S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD.SAFE
+    -Ppre_event=input_data/S1A_IW_SLC__1SSV_20200815T095747_20200815T095815_033916_03EF29_E739/S1A_IW_SLC__1SSV_20200815T095747_20200815T095815_033916_03EF29_E739.SAFE \
+    -Ppost_event=input_data/S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD/S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD.SAFE
     ```
 
     Make sure the processing starts correctly and does not produce an error within the first minute. [40%]
