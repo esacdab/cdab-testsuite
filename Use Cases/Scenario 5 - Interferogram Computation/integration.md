@@ -131,13 +131,13 @@
       conda install s3cmd
       ```
 
-      Configure the access to the MUNDI object store. Below there are simplified instructions for this, the original procedure can be found at [this link](https://docs.otc.t-systems.com/en-us/ugs3cmd/obs/en-us_topic_0051060814.html).
+      Configure the access to the MUNDI object store. Below there are simplified instructions for this, the original procedure can be found on [this page](https://docs.otc.t-systems.com/en-us/ugs3cmd/obs/en-us_topic_0051060814.html).
 
       Run
       ```console
       s3cmd --configure
       ```
-      Enter the following values:
+      You will be prompted for several settings. Enter the following values:
 
       * Access Key: *enter your MUNDI S3 key ID*
       * Secret Key: *enter your MUNDI S3 secret key*
