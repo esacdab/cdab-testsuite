@@ -127,7 +127,7 @@
       ```
 
     * For **MUNDI**, do the following:
-      Make sure you are in the correct conda environment (*env_burned_area*) and install the **s3cmd** for S3 access:
+      Make sure you are in the correct conda environment (*env_snap*) and install the **s3cmd** for S3 access:
       
       ```console
       conda install s3cmd
