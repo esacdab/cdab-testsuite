@@ -51,6 +51,6 @@ The CDAB Test Suite is released as open source software under the GNU Affero Gen
 
 The CDAB Test Suite is free software: it can be redistributed and/or modified under the terms of the GNU Affero General Public License (AGPLv3) as published by the Free Software Foundation, either version 3 of the License, or any later version.
 
+<hr/>
 <p align="center">Funded by</p>
-----
 <p align="center"><img src="copernicus-logo.png" alt="Copernicus" height="125"/><img src="esa-logo.png" alt="ESA" height="125"/></p>
