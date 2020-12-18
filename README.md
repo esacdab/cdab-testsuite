@@ -30,3 +30,16 @@ The CDAB Test Suite is built automatically providing a docker image available pu
 # Getting Started
 
 You can start now using the Test Suite following the [Getting Started guide](https://github.com/Terradue/cdab-testsuite/wiki)
+
+# Software licenses
+
+The CDAB Test Suite is released as open source software under the GNU Affero General Public License (AGPLv3). This repository contains the source code of an executable DotNet solution combining the unmodified exact copies of the following software packages as dynamic libraries configured as dependencies:
+
+| Software package | Copyright license type | Link to license |
+| log4net | Apache 2.0 | https://logging.apache.org/log4net/license.html |
+| Newtonsoft | MIT | https://github.com/JamesNK/Newtonsoft.Json/blob/master/LICENSE.md |
+| Mono.Options | MIT | https://github.com/mono/mono/blob/master/mcs/class/Mono.Options/Mono.Options/Options.cs (stated in source code) |
+| YamlDotNet | MIT | https://github.com/aaubry/YamlDotNet/blob/master/LICENSE.txt |
+| Terradue.* | AGPL 3.0 | https://github.com/Terradue/DotNetOpenSearch/blob/master/LICENSE (same license for all included Terradue packages) |
+
+The CDAB Test Suite is free software: it can be redistributed and/or modified under the terms of the GNU Affero General Public License (AGPLv3) as published by the Free Software Foundation, either version 3 of the License, or any later version.
