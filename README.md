@@ -42,7 +42,7 @@ The CDAB Test Suite is released as open source software under the GNU Affero Gen
 | Mono.Options | MIT | https://github.com/mono/mono/blob/master/mcs/class/Mono.Options/Mono.Options/Options.cs (stated in source code) |
 | YamlDotNet | MIT | https://github.com/aaubry/YamlDotNet/blob/master/LICENSE.txt |
 | Terradue.OpenSearch | AGPL 3.0 | https://github.com/Terradue/DotNetOpenSearch/blob/master/LICENSE |
-| Terradue.OpenSearch.SciHub | AGPL 3.0 | https://github.com/Terradue/DotNetOpenSearch/blob/master/LICENSE |
+| Terradue.OpenSearch.SciHub | CC BY-NC-ND 3.0 | - |
 | Terradue.GeoJson | AGPL 3.0 | https://github.com/Terradue/DotNetGeoJson/blob/master/LICENSE |
 | Terradue.ServiceModel.Syndication | AGPL 3.0 | https://github.com/Terradue/DotNetSyndication/blob/master/LICENSE |
 | Terradue.Metadata.EarthObservation | AGPL 3.0 | https://github.com/Terradue/DotNetEarthObservation/blob/master/LICENSE |
