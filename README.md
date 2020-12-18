@@ -43,14 +43,13 @@ The CDAB Test Suite is released as open source software under the GNU Affero Gen
 | YamlDotNet | MIT | https://github.com/aaubry/YamlDotNet/blob/master/LICENSE.txt |
 | Terradue.OpenSearch | AGPL 3.0 | https://github.com/Terradue/DotNetOpenSearch/blob/master/LICENSE |
 | Terradue.OpenSearch.SciHub | AGPL 3.0 | https://github.com/Terradue/DotNetOpenSearch/blob/master/LICENSE |
-| Terradue.OpenSearch.Asf | AGPL 3.0 | https://github.com/Terradue/DotNetOpenSearch/blob/master/LICENSE |
-| Terradue.GeoJson | AGPL 3.0 | https://github.com/Terradue/DotNetOpenSearch/blob/master/LICENSE |
-| Terradue.ServiceModel.Syndication | AGPL 3.0 | https://github.com/Terradue/DotNetOpenSearch/blob/master/LICENSE |
-| Terradue.Metadata.EarthObservation | AGPL 3.0 | https://github.com/Terradue/DotNetOpenSearch/blob/master/LICENSE |
-| Terradue.ServiceModel.Ogc | AGPL 3.0 | https://github.com/Terradue/DotNetOpenSearch/blob/master/LICENSE |
+| Terradue.GeoJson | AGPL 3.0 | https://github.com/Terradue/DotNetGeoJson/blob/master/LICENSE |
+| Terradue.ServiceModel.Syndication | AGPL 3.0 | https://github.com/Terradue/DotNetSyndication/blob/master/LICENSE |
+| Terradue.Metadata.EarthObservation | AGPL 3.0 | https://github.com/Terradue/DotNetEarthObservation/blob/master/LICENSE |
+| Terradue.ServiceModel.Ogc | AGPL 3.0 | https://github.com/Terradue/DotNetOgcModel/blob/master/LICENSE |
 
 The CDAB Test Suite is free software: it can be redistributed and/or modified under the terms of the GNU Affero General Public License (AGPLv3) as published by the Free Software Foundation, either version 3 of the License, or any later version.
 
 <hr/>
-<p align="center">Funded by</p>
+<p align="center">Funded by EU</p>
 <p align="center"><img src="copernicus-logo.png" alt="Copernicus" height="125"/><img src="esa-logo.png" alt="ESA" height="125"/></p>
