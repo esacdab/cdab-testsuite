@@ -8,7 +8,7 @@
     - Jupyter Notebook (with Python 3 support), it can also be installed if not present.
     - With data offer access if required
   
-2. Install, if necessary, conda on the virtual machine and create the conda environment.
+2. Open a terminal on the provisioned machine and install some prequisites, and install, if necessary, **conda** on the virtual machine and create the conda environment.
 
    Transfer the included file _conda-install.sh_ on the virtual machine.
 
@@ -121,12 +121,65 @@
      cp -r /eodata/Sentinel-2/MSI/L2A/2020/11/30/S2B_MSIL2A_20201130T112429_N0214_R037_T29TPE_20201130T131854.SAFE $DATA_PATH/S2B_MSIL2A_20201130T112429_N0214_R037_T29TPE_20201130T131854/
      ```
 
+   * For **MUNDI**, do the following:
+     Make sure you are in the correct conda environment (*env_burned_area*) and install the **s3cmd** for S3 access:
+     
+     ```console
+     conda install s3cmd
+     ```
+
+     Configure the access to the MUNDI object store. The full procedure can be found at [this link](https://docs.otc.t-systems.com/en-us/ugs3cmd/obs/en-us_topic_0051060814.html).
+
+     Run
+     ```console
+     s3cmd --configure
+     ```
+     Enter the following values:
+
+     * Access Key: *your S3 key ID*
+     * Secret Key: *your S3 secret key*
+     * Default Region: **eu-de**
+     * S3 Endpoint: **obs.eu-de.otc.t-systems.com**
+     * DNS-style bucket+hostname:port template for accessing a bucket: **%(bucket)s.obs.eu-de.otc.t-systems.com**
+     * Encryption password: *confirm default*
+     * Path to GPG program: *confirm default*
+     * Use HTTPS protocol: *confirm default*
+     * HTTP Proxy server name: *confirm default*
+     
+     Answer *n* (no) to an access test and *y* (yes) to saving the settings.
+
+     Edit the file *~/.s3cdf*.
+
+     Locate the line setting the value for `website_endpoint` and change it to:
+     
+     ```
+     website_endpoint = http://%(bucket)s.obs-website.%(location)s.otc.t-systems.com
+     ```
+     Rerun
+     ```console
+     s3cmd --configure
+     ```
+     Confirm all choices and run answer *Y* (yes) to the access test. It should be successful. Answer *N* (no) to saving the settings as they are already fine.
+
+     Now, set the `$DATA_PATH` variable to the directory for local copies of the products and run the following commands to download the files into the correct location using **s3cmd** (note that not all areas are covered, the file might not be available):
+
+     ```console
+     mkdir -p $DATA_PATH/S2A_MSIL2A_20201026T112151_N0214_R037_T29TPE_20201027T144218
+     mkdir -p $DATA_PATH/S2B_MSIL2A_20201130T112429_N0214_R037_T29TPE_20201130T131854
+     s3cmd get -r s3://s2-l2a-2020-q4/29/T/PE/2020/10/26/S2A_MSIL2A_20201026T112151_N0214_R037_T29TPE_20201027T144218 $DATA_PATH/S2A_MSIL2A_20201026T112151_N0214_R037_T29TPE_20201027T144218/
+     s3cmd get -r s3://s2-l2a-2020-q4/29/T/PE/2020/11/30/S2B_MSIL2A_20201130T112429_N0214_R037_T29TPE_20201130T131854 $DATA_PATH/S2B_MSIL2A_20201130T112429_N0214_R037_T29TPE_20201130T131854/
+     mv $DATA_PATH/S2A_MSIL2A_20201026T112151_N0214_R037_T29TPE_20201027T144218/S2A_MSIL2A_20201026T112151_N0214_R037_T29TPE_20201027T144218 $DATA_PATH/S2A_MSIL2A_20201026T112151_N0214_R037_T29TPE_20201027T144218/S2A_MSIL2A_20201026T112151_N0214_R037_T29TPE_20201027T144218.SAFE
+     mv $DATA_PATH/S2B_MSIL2A_20201130T112429_N0214_R037_T29TPE_20201130T131854/S2B_MSIL2A_20201130T112429_N0214_R037_T29TPE_20201130T131854 $DATA_PATH/S2B_MSIL2A_20201130T112429_N0214_R037_T29TPE_20201130T131854/S2B_MSIL2A_20201130T112429_N0214_R037_T29TPE_20201130T131854.SAFE
+     ```console
+
    Make sure the contents of the product (if necessary, unzip archive from the correct directory) are available and located in a directory accessible by Jupyter Notebook (adjust the notebook cell under *Data location* as required). [40%]
 
    ```console
    $ unzip S2A_MSIL2A_20201026T112151_N0214_R037_T29TPE_20201027T144218.zip
    $ unzip S2B_MSIL2A_20201130T112429_N0214_R037_T29TPE_20201130T131854.zip
    ```
+
+   Make sure the manifest.safe files are in this location for all products: `<product-id>/<product-id>.SAFE/manifest.safe`
 
 4. Return to Jupyter Notebook, open the notebook with a Python 3.5 kernel. If you created and new conda environment during the installation procedure, make sure the Python kernel is using that environment. [50%]
 

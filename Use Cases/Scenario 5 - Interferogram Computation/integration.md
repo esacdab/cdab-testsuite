@@ -7,78 +7,39 @@
     - CentOS 7
     - With data offer access if required
   
-2.  Open a terminal on the provisioned machine.
-
-3.  Install some prequisites, in case they are not yet present on the machine.
+2.  Open a terminal on the provisioned machine and install some prequisites, in case they are not yet present on the machine.
 
     ```
     sudo yum install -y vim tree wget unzip libgfortran-4.8.5-39.el7.x86_64
     ```
 
-4.  It is assumed that **conda** is not available on the virtual machine. Conda is needed as the vehicle to install the SNAP toolbox.
-    Install it via the script below and do point 3 again, in order to verify:
+3.  Install, if necessary, **conda** on the virtual machine and create the conda environment. Conda is needed as the vehicle to install the SNAP toolbox.
 
-    ```bash
-    CONDA_DIR=/opt/anaconda
-    cd $(dirname $0)
-    MINIFORGE_VERSION=4.8.2-1
+    Transfer the included file _conda-install.sh_ on the virtual machine.
 
-    # SHA256 for installers can be obtained from https://github.com/conda-forge/miniforge/releases
-    SHA256SUM="4f897e503bd0edfb277524ca5b6a5b14ad818b3198c2f07a36858b7d88c928db"
-    URL="https://github.com/conda-forge/miniforge/releases/download/${MINIFORGE_VERSION}/Miniforge3-${MINIFORGE_VERSION}-Linux-x86_64.sh"
-    INSTALLER_PATH=/tmp/miniforge-installer.sh
+    Run the following commands:
 
-    # Make sure user's $HOME is not tampered with since this is run as root
-    unset HOME
-    wget --quiet $URL -O ${INSTALLER_PATH}
-    chmod +x ${INSTALLER_PATH}
-    # Check sha256 checksum
-    if ! echo "${SHA256SUM}  ${INSTALLER_PATH}" | sha256sum  --quiet -c -
-    then
-        echo "sha256 mismatch for ${INSTALLER_PATH}, exiting!"
-        exit 1
-    fi
-    bash ${INSTALLER_PATH} -b -p ${CONDA_DIR}
-    export PATH="${CONDA_DIR}/bin:$PATH"
-
-    # Preserve behavior of miniconda - packages come from conda-forge + defaults
-    conda config --system --append channels defaults
-    conda config --system --append channels https://conda.binstar.org/terradue
-    conda config --system --append channels https://conda.binstar.org/eoepca
-    conda config --system --append channels https://conda.binstar.org/r
-
-    # Do not attempt to auto update conda or dependencies
-    conda config --system --set auto_update_conda false
-    conda config --system --set show_channel_urls true
-
-    # Bug in conda 4.3.>15 prevents --set update_dependencies
-    echo 'update_dependencies: false' >> ${CONDA_DIR}/.condarc
-
-    # Avoid future changes to default channel_priority behavior
-    conda config --system --set channel_priority "flexible"
-    ```
-
-    Check that coda is now available:
     ```console
-    $ which conda
-    /opt/anaconda/bin/conda
-    $ conda --version
-    conda 4.8.2
+    sudo sh conda-install.sh
+    source /opt/conda/etc/profile.d/conda.sh
     ```
 
-5.  Install the SNAP toolbox in a new conda environment.
+4.  Install the SNAP toolbox in a new conda environment.
 
     ```bash
-    conda create -n env_snap -y snap
-    export PATH="${CONDA_DIR}/envs/env_snap/snap/bin:${CONDA_DIR}/envs/env_snap/snap/jre/bin:$PATH"
+    conda create -n env_snap -y snap requests
+    # This takes a while. Follow the instructions and confirm.
+
+    conda activate env_burned_area
     ```
 
+    You may have to log out and log in again for the changes to take effect.
 
 ## Integration procedure 
 
 1.  Open a terminal on the previously set-up virtual machine. [5%]
 
-2.  Upload the current use case folder to the user folder using either SCP or the provider upload tool. 
+2.  Upload the current use case folder to the user folder using either *scp* or the provider upload tool. 
     Create the folders *input_data* and *output_data* in that location [10%]
 
 3.  **Using the target site catalogue access and following the documentation available at the target site**, get a relevant Sentinel-1 SLC product.
@@ -92,7 +53,123 @@
     Obtain that product's metadata and extract its download location. [20%]
 
 4.  **Using the target site data access and following the documentation available at the target site**, download the product to the *input_data* folder. This usually requires credentials.
-    In the case of the above product, the command for download from the Terradue storage would be the following:
+
+    * For **Sobloo**, the download can be operformed using the DirectData API.
+
+      Create the following script and run it (set the API key):
+      ```python
+      import requests
+      import re
+      import json
+      from datetime import datetime
+      from pathlib import Path
+
+      sobloo_api_key = ''
+      data_path = 'input_data'
+      url_regex = re.compile('.*\.SAFE(/(?P<dir>[^\?]*))?(/(?P<file>[^/\?]+))(\?.*)?')
+
+      time_start = datetime.utcnow()
+      id = 'S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD'
+      response = requests.post("https://sobloo.eu/api/v1-beta/direct-data/product-links",
+          headers = {'Authorization': 'Apikey {0}'.format(sobloo_api_key)},
+          json={'product': id, "regexp": "(.*)"}
+      )
+      
+      result = json.loads(response.text)
+      
+      download_list = [ l['url'] for l in result['links'] ]
+      for url in download_list:
+          m = url_regex.match(url)
+          if not m:
+              raise('Unrecognised URL pattern: {0}'.format(url))
+
+          file_dir = "{0}/{0}.SAFE{1}{2}".format(id, '/' if m.group('dir') else '', m.group('dir') if m.group('dir') else '')
+          file_name = m.group('file')
+
+          print("- Downloading {0}".format(file_name))
+          Path("{0}/{1}".format(data_path, file_dir)).mkdir(parents=True, exist_ok=True)
+
+          location = "{0}/{1}/{2}".format(data_path, file_dir, file_name)
+          r = requests.get(url, stream=True)
+          with open(location, 'wb') as f:
+              for chunk in r.iter_content(chunk_size=8192): 
+                  f.write(chunk)
+          r.close()
+
+      ```
+
+
+    * For **ONDA**, do the following:
+  
+      From the shell, mount the data volume as explained in [this page](https://www.onda-dias.eu/cms/knowledge-base/adapi-how-to-mount-unmount/).
+      Copy the .zip files using the following commands:
+  
+      ```console
+      # /local_path is the mountpoint for the data volume
+      mkdir input_data/S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD
+      
+      # Locate the file S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD.zip in one of the many subdirectories of /local_path/S1
+      # and set file=<location>
+      cp $file input_data/S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD
+      ```
+
+    * For **CREODIAS**, make sure your virtual machine has access to the EO Data volume (mounted under `/eodata/`).
+      Copy the directories using the following commands:
+
+      ```console
+      mkdir input_data/S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD
+      cp -r /eodata/Sentinel-1/SAR/SLC/2020/08/21/S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD.SAFE input_data/S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD/
+      ```
+
+    * For **MUNDI**, do the following:
+      Make sure you are in the correct conda environment (*env_burned_area*) and install the **s3cmd** for S3 access:
+      
+      ```console
+      conda install s3cmd
+      ```
+
+      Configure the access to the MUNDI object store. The full procedure can be found at [this link](https://docs.otc.t-systems.com/en-us/ugs3cmd/obs/en-us_topic_0051060814.html).
+
+      Run
+      ```console
+      s3cmd --configure
+      ```
+      Enter the following values:
+
+      * Access Key: *your S3 key ID*
+      * Secret Key: *your S3 secret key*
+      * Default Region: **eu-de**
+      * S3 Endpoint: **obs.eu-de.otc.t-systems.com**
+      * DNS-style bucket+hostname:port template for accessing a bucket: **%(bucket)s.obs.eu-de.otc.t-systems.com**
+      * Encryption password: *confirm default*
+      * Path to GPG program: *confirm default*
+      * Use HTTPS protocol: *confirm default*
+      * HTTP Proxy server name: *confirm default*
+      
+      Answer *n* (no) to an access test and *y* (yes) to saving the settings.
+
+      Edit the file *~/.s3cdf*.
+
+      Locate the line setting the value for `website_endpoint` and change it to:
+      
+      ```
+      website_endpoint = http://%(bucket)s.obs-website.%(location)s.otc.t-systems.com
+      ```
+      Rerun
+      ```console
+      s3cmd --configure
+      ```
+      Confirm all choices and run answer *Y* (yes) to the access test. It should be successful. Answer *N* (no) to saving the settings as they are already fine.
+
+      Now, run the following commands to download the files into the correct location using **s3cmd** (note that not all areas are covered, the file might not be available):
+
+      ```console
+      mkdir -p input_data/S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD
+      s3cmd get s3://s1-l1-slc-2020-q3/2020/08/21/IW/DV/S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD.zip input_data/S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD/
+      ```console
+      
+
+    The Terradue storage can be used as an alternative download source in case of unavailability elsewhere. The download command for above product would be the following:
 
     ```console
     $ curl -L -o input_data/S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD.zip https://store.terradue.com/download/sentinel1/files/v1/S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD
@@ -108,53 +185,52 @@
 
     ```
     S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD
-    └── download
-        └── S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD.SAFE
-            ├── annotation
-            │   ├── calibration
-            │   │   ├── calibration-s1b-iw1-slc-vh-20200821t095716-20200821t095741-023020-02bb48-001.xml
-            │   │   ├── calibration-s1b-iw1-slc-vv-20200821t095716-20200821t095741-023020-02bb48-004.xml
-            │   │   ├── calibration-s1b-iw2-slc-vh-20200821t095714-20200821t095740-023020-02bb48-002.xml
-            │   │   ├── calibration-s1b-iw2-slc-vv-20200821t095714-20200821t095740-023020-02bb48-005.xml
-            │   │   ├── calibration-s1b-iw3-slc-vh-20200821t095715-20200821t095741-023020-02bb48-003.xml
-            │   │   ├── calibration-s1b-iw3-slc-vv-20200821t095715-20200821t095741-023020-02bb48-006.xml
-            │   │   ├── noise-s1b-iw1-slc-vh-20200821t095716-20200821t095741-023020-02bb48-001.xml
-            │   │   ├── noise-s1b-iw1-slc-vv-20200821t095716-20200821t095741-023020-02bb48-004.xml
-            │   │   ├── noise-s1b-iw2-slc-vh-20200821t095714-20200821t095740-023020-02bb48-002.xml
-            │   │   ├── noise-s1b-iw2-slc-vv-20200821t095714-20200821t095740-023020-02bb48-005.xml
-            │   │   ├── noise-s1b-iw3-slc-vh-20200821t095715-20200821t095741-023020-02bb48-003.xml
-            │   │   └── noise-s1b-iw3-slc-vv-20200821t095715-20200821t095741-023020-02bb48-006.xml
-            │   ├── s1b-iw1-slc-vh-20200821t095716-20200821t095741-023020-02bb48-001.xml
-            │   ├── s1b-iw1-slc-vv-20200821t095716-20200821t095741-023020-02bb48-004.xml
-            │   ├── s1b-iw2-slc-vh-20200821t095714-20200821t095740-023020-02bb48-002.xml
-            │   ├── s1b-iw2-slc-vv-20200821t095714-20200821t095740-023020-02bb48-005.xml
-            │   ├── s1b-iw3-slc-vh-20200821t095715-20200821t095741-023020-02bb48-003.xml
-            │   └── s1b-iw3-slc-vv-20200821t095715-20200821t095741-023020-02bb48-006.xml
-            ├── manifest.safe
-            ├── measurement
-            │   ├── s1b-iw1-slc-vh-20200821t095716-20200821t095741-023020-02bb48-001.tiff
-            │   ├── s1b-iw1-slc-vv-20200821t095716-20200821t095741-023020-02bb48-004.tiff
-            │   ├── s1b-iw2-slc-vh-20200821t095714-20200821t095740-023020-02bb48-002.tiff
-            │   ├── s1b-iw2-slc-vv-20200821t095714-20200821t095740-023020-02bb48-005.tiff
-            │   ├── s1b-iw3-slc-vh-20200821t095715-20200821t095741-023020-02bb48-003.tiff
-            │   └── s1b-iw3-slc-vv-20200821t095715-20200821t095741-023020-02bb48-006.tiff
-            ├── preview
-            │   ├── icons
-            │   │   └── logo.png
-            │   ├── map-overlay.kml
-            │   ├── product-preview.html
-            │   ├── quick-look.png
-            │   └── thumbnail.png
-            ├── S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD.SAFE-report-20200821T130013.pdf
-            └── support
-                ├── s1-level-1-calibration.xsd
-                ├── s1-level-1-measurement.xsd
-                ├── s1-level-1-noise.xsd
-                ├── s1-level-1-product.xsd
-                ├── s1-level-1-quicklook.xsd
-                ├── s1-map-overlay.xsd
-                ├── s1-object-types.xsd
-                └── s1-product-preview.xsd
+    └── S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD.SAFE
+        ├── annotation
+        │   ├── calibration
+        │   │   ├── calibration-s1b-iw1-slc-vh-20200821t095716-20200821t095741-023020-02bb48-001.xml
+        │   │   ├── calibration-s1b-iw1-slc-vv-20200821t095716-20200821t095741-023020-02bb48-004.xml
+        │   │   ├── calibration-s1b-iw2-slc-vh-20200821t095714-20200821t095740-023020-02bb48-002.xml
+        │   │   ├── calibration-s1b-iw2-slc-vv-20200821t095714-20200821t095740-023020-02bb48-005.xml
+        │   │   ├── calibration-s1b-iw3-slc-vh-20200821t095715-20200821t095741-023020-02bb48-003.xml
+        │   │   ├── calibration-s1b-iw3-slc-vv-20200821t095715-20200821t095741-023020-02bb48-006.xml
+        │   │   ├── noise-s1b-iw1-slc-vh-20200821t095716-20200821t095741-023020-02bb48-001.xml
+        │   │   ├── noise-s1b-iw1-slc-vv-20200821t095716-20200821t095741-023020-02bb48-004.xml
+        │   │   ├── noise-s1b-iw2-slc-vh-20200821t095714-20200821t095740-023020-02bb48-002.xml
+        │   │   ├── noise-s1b-iw2-slc-vv-20200821t095714-20200821t095740-023020-02bb48-005.xml
+        │   │   ├── noise-s1b-iw3-slc-vh-20200821t095715-20200821t095741-023020-02bb48-003.xml
+        │   │   └── noise-s1b-iw3-slc-vv-20200821t095715-20200821t095741-023020-02bb48-006.xml
+        │   ├── s1b-iw1-slc-vh-20200821t095716-20200821t095741-023020-02bb48-001.xml
+        │   ├── s1b-iw1-slc-vv-20200821t095716-20200821t095741-023020-02bb48-004.xml
+        │   ├── s1b-iw2-slc-vh-20200821t095714-20200821t095740-023020-02bb48-002.xml
+        │   ├── s1b-iw2-slc-vv-20200821t095714-20200821t095740-023020-02bb48-005.xml
+        │   ├── s1b-iw3-slc-vh-20200821t095715-20200821t095741-023020-02bb48-003.xml
+        │   └── s1b-iw3-slc-vv-20200821t095715-20200821t095741-023020-02bb48-006.xml
+        ├── manifest.safe
+        ├── measurement
+        │   ├── s1b-iw1-slc-vh-20200821t095716-20200821t095741-023020-02bb48-001.tiff
+        │   ├── s1b-iw1-slc-vv-20200821t095716-20200821t095741-023020-02bb48-004.tiff
+        │   ├── s1b-iw2-slc-vh-20200821t095714-20200821t095740-023020-02bb48-002.tiff
+        │   ├── s1b-iw2-slc-vv-20200821t095714-20200821t095740-023020-02bb48-005.tiff
+        │   ├── s1b-iw3-slc-vh-20200821t095715-20200821t095741-023020-02bb48-003.tiff
+        │   └── s1b-iw3-slc-vv-20200821t095715-20200821t095741-023020-02bb48-006.tiff
+        ├── preview
+        │   ├── icons
+        │   │   └── logo.png
+        │   ├── map-overlay.kml
+        │   ├── product-preview.html
+        │   ├── quick-look.png
+        │   └── thumbnail.png
+        ├── S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD.SAFE-report-20200821T130013.pdf
+        └── support
+            ├── s1-level-1-calibration.xsd
+            ├── s1-level-1-measurement.xsd
+            ├── s1-level-1-noise.xsd
+            ├── s1-level-1-product.xsd
+            ├── s1-level-1-quicklook.xsd
+            ├── s1-map-overlay.xsd
+            ├── s1-object-types.xsd
+            └── s1-product-preview.xsd
     ```
     [30%]
 
