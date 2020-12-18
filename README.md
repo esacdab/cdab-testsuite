@@ -41,6 +41,14 @@ The CDAB Test Suite is released as open source software under the GNU Affero Gen
 | Newtonsoft | MIT | https://github.com/JamesNK/Newtonsoft.Json/blob/master/LICENSE.md |
 | Mono.Options | MIT | https://github.com/mono/mono/blob/master/mcs/class/Mono.Options/Mono.Options/Options.cs (stated in source code) |
 | YamlDotNet | MIT | https://github.com/aaubry/YamlDotNet/blob/master/LICENSE.txt |
-| Terradue.* | AGPL 3.0 | https://github.com/Terradue/DotNetOpenSearch/blob/master/LICENSE (same license for all included Terradue packages) |
+| Terradue.OpenSearch | AGPL 3.0 | https://github.com/Terradue/DotNetOpenSearch/blob/master/LICENSE |
+| Terradue.OpenSearch.SciHub | AGPL 3.0 | https://github.com/Terradue/DotNetOpenSearch/blob/master/LICENSE |
+| Terradue.OpenSearch.Asf | AGPL 3.0 | https://github.com/Terradue/DotNetOpenSearch/blob/master/LICENSE |
+| Terradue.GeoJson | AGPL 3.0 | https://github.com/Terradue/DotNetOpenSearch/blob/master/LICENSE |
+| Terradue.ServiceModel.Syndication | AGPL 3.0 | https://github.com/Terradue/DotNetOpenSearch/blob/master/LICENSE |
+| Terradue.Metadata.EarthObservation | AGPL 3.0 | https://github.com/Terradue/DotNetOpenSearch/blob/master/LICENSE |
+| Terradue.ServiceModel.Ogc | AGPL 3.0 | https://github.com/Terradue/DotNetOpenSearch/blob/master/LICENSE |
 
 The CDAB Test Suite is free software: it can be redistributed and/or modified under the terms of the GNU Affero General Public License (AGPLv3) as published by the Free Software Foundation, either version 3 of the License, or any later version.
+
+Funded by EU   ![Copernicus](copernicus-logo.png "Copernicus") ![ESA](esa-logo.png "ESA")
