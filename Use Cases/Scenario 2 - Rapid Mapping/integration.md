@@ -134,10 +134,10 @@
      ```console
      s3cmd --configure
      ```
-     Enter the following values:
+     You will be prompted for several settings. Enter the following values:
 
-     * Access Key: *your S3 key ID*
-     * Secret Key: *your S3 secret key*
+     * Access Key: *enter your MUNDI S3 key ID*
+     * Secret Key: *enter your MUNDI S3 secret key*
      * Default Region: **eu-de**
      * S3 Endpoint: **obs.eu-de.otc.t-systems.com**
      * DNS-style bucket+hostname:port template for accessing a bucket: **%(bucket)s.obs.eu-de.otc.t-systems.com**
@@ -146,11 +146,11 @@
      * Use HTTPS protocol: *confirm default*
      * HTTP Proxy server name: *confirm default*
      
-     Answer *n* (no) to an access test and *y* (yes) to saving the settings.
+     Answer **n** (no) to an access test and **y** (yes) to saving the settings.
 
-     Edit the file *~/.s3cdf*.
+     Open the file *~/.s3cdf* for editing.
 
-     Locate the line setting the value for `website_endpoint` and change it to:
+     Locate the line containing the setting for `website_endpoint` and change it to:
      
      ```
      website_endpoint = http://%(bucket)s.obs-website.%(location)s.otc.t-systems.com
@@ -159,7 +159,7 @@
      ```console
      s3cmd --configure
      ```
-     Confirm all choices and run answer *Y* (yes) to the access test. It should be successful. Answer *N* (no) to saving the settings as they are already fine.
+     Confirm all choices and run answer **Y** (yes) to the access test. It should be successful. Answer **N** (no) to saving the settings as they are already fine.
 
      Now, set the `$DATA_PATH` variable to the directory for local copies of the products and run the following commands to download the files into the correct location using **s3cmd** (note that not all areas are covered, the file might not be available):
 

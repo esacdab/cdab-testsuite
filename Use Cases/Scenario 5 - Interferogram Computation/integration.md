@@ -56,7 +56,7 @@
 
     * For **Sobloo**, the download can be operformed using the DirectData API.
 
-      Create the following script and run it (set the API key):
+      Create the following script (make sure the API key is set correctly):
       ```python
       import requests
       import re
@@ -98,6 +98,8 @@
 
       ```
 
+      Run that script with *python3* to download the files.
+
 
     * For **ONDA**, do the following:
   
@@ -108,7 +110,8 @@
       # /local_path is the mountpoint for the data volume
       mkdir input_data/S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD
       
-      # Locate the file S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD.zip in one of the many subdirectories of /local_path/S1
+      # Locate the file S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD.zip
+      # in one of the many subdirectories of /local_path/S1
       # and set file=<location>
       cp $file input_data/S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD
       ```
@@ -136,8 +139,8 @@
       ```
       Enter the following values:
 
-      * Access Key: *your S3 key ID*
-      * Secret Key: *your S3 secret key*
+      * Access Key: *enter your MUNDI S3 key ID*
+      * Secret Key: *enter your MUNDI S3 secret key*
       * Default Region: **eu-de**
       * S3 Endpoint: **obs.eu-de.otc.t-systems.com**
       * DNS-style bucket+hostname:port template for accessing a bucket: **%(bucket)s.obs.eu-de.otc.t-systems.com**
