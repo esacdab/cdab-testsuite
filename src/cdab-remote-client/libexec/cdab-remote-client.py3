@@ -1149,10 +1149,10 @@ class TestClient:
         stdout_file = "cdab{0}.stdout".format(run.suffix)
         stderr_file = "cdab{0}.stderr".format(run.suffix)
 
-        copy_file(self.compute_config, run, run.cdab_json_file, "{0}/{1}".format(working_dir, self.remote_cdab_json_file), False)
-        copy_file(self.compute_config, run, run.junit_file, "{0}/junit.xml".format(working_dir), False)
-        copy_file(self.compute_config, run, stdout_file, "{0}/cdab.stdout".format(working_dir), False)
-        copy_file(self.compute_config, run, stderr_file, "{0}/cdab.stderr".format(working_dir), False)
+        copy_file(self.compute_config, run, run.cdab_json_file, "{0}/{1}".format(working_dir, self.remote_cdab_json_file), False, ignore_error=True)
+        copy_file(self.compute_config, run, run.junit_file, "{0}/junit.xml".format(working_dir), False, ignore_error=True)
+        copy_file(self.compute_config, run, stdout_file, "{0}/cdab.stdout".format(working_dir), False, ignore_error=True)
+        copy_file(self.compute_config, run, stderr_file, "{0}/cdab.stderr".format(working_dir), False, ignore_error=True)
         run.files_downloaded_time = datetime.datetime.utcnow()
 
         Logger.log(LogLevel.INFO, "Test result files received", run=run)
