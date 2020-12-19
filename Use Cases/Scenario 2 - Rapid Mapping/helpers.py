@@ -9,6 +9,8 @@ import otbApplication
 
 import gdal
 import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib import pyplot
 import math
 from PIL import Image, ImageDraw
 from struct import unpack
@@ -216,7 +218,7 @@ def pre_processing(**kwargs):
         print('Updating Operator {0}'.format(key))
         options[key.replace('_', '-')].update(value)
     
-    mygraph = GraphProcessor('/opt/anaconda/envs/env_ewf_burned_area/snap/bin/gpt')
+    mygraph = GraphProcessor(os.path.join(os.environ['PREFIX'], 'snap/bin/gpt'))
     
     for index, operator in enumerate(operators):
     
@@ -232,6 +234,7 @@ def pre_processing(**kwargs):
                          options[operator], source_node_id)
     
     mygraph.view_graph()
+    mygraph.save_graph('pre_graph.xml')
     
     mygraph.run()
     
@@ -256,7 +259,7 @@ def burned_area(**kwargs):
         print('Updating Operator {0}'.format(key))
         options[key.replace('_', '-')].update(value)
     
-    mygraph = GraphProcessor('/opt/anaconda/envs/env_ewf_burned_area/snap/bin/gpt')
+    mygraph = GraphProcessor(os.path.join(os.environ['PREFIX'], 'snap/bin/gpt'))
     
     for index, operator in enumerate(operators):
     
@@ -354,4 +357,34 @@ def raster2rgb(raster_file, color_table, out_file_name, raster_band=1, discrete=
     
     ds_rgb = None
 
+
+def view_colormap(colors, cmap, legend_file):
     
+    #matplotlib.rcParams['font.weight']= 'bold'
+    
+    cmap = plt.cm.get_cmap(cmap)
+    colors = cmap(np.arange(cmap.N))
+        
+    fig = pyplot.figure(figsize=(14, 2))
+
+    fig.set_size_inches(100,20)
+    
+    axes = fig.add_axes([0.1, 0.3, 0.8, 0.6]) # main axes
+
+    axes.set_xticks([0.2,1.8,3.4,5,6.6,8.2,9.8])
+    
+    axes.set_xticklabels(['regrowth high', 'regrowth low', 'unburned', 'low', 'moderate low','moderate high', 'high'])
+
+    axes.tick_params(labelsize=190)
+    
+    axes = pyplot.imshow([colors], extent=[0,10,0,1])
+    
+    pyplot.xticks(rotation=15)
+    
+    pyplot.title('BURN SEVERITY LEVELS', fontsize=220, fontweight='bold')
+        
+    pyplot.yticks([])
+
+    pyplot.savefig(legend_file)
+
+

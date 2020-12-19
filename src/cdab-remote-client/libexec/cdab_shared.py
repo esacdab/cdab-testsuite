@@ -187,7 +187,7 @@ def execute_remote_command(compute_config, run, command, display_command = None,
 
 
 
-def copy_file(compute_config, run, local_file, remote_file, to_remote = True, exit_code = None, quiet = False):
+def copy_file(compute_config, run, local_file, remote_file, to_remote = True, exit_code = None, quiet = False, ignore_error = False):
     """Transfers a file between the local machine and the remote virtual machine
     via the scp command.
 
@@ -225,7 +225,15 @@ def copy_file(compute_config, run, local_file, remote_file, to_remote = True, ex
     else:
         options.extend([remote_url, local_file])
 
-    execute_local_command(run, options, exit_code=exit_code, quiet=quiet)
+    try:
+        execute_local_command(run, options, exit_code=exit_code, quiet=quiet)
+    except Exception as e:
+        if ignore_failure:
+            if quiet:  # nothing logged in execute_local_command()
+                Logger.log(LogLevel.ERROR, "Error during file transfer: {0}".format(str(e)), run=run)
+        else:
+            raise
+    
 
 
 

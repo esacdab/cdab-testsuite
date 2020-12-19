@@ -1,0 +1,8 @@
+name: env_snap
+channels:
+  - terradue
+  - conda-forge
+  - defaults
+dependencies:
+  - requests
+  - snap
