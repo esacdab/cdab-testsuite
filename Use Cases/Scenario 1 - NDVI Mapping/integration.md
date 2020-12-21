@@ -3,7 +3,7 @@
 ## Development Environment installation procedure
 
 1. Provision a virtual machine on the target site. Preferably with the following specification:
-   - 2 CPU, 8GB RAM, 100GB disk
+   - 2 CPU, 8GB RAM, 50GB disk
    - Debian or similar (Ubuntu)
    - with data offer access if required
   
