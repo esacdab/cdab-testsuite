@@ -500,6 +500,8 @@ EOF
         then
             ((wrong_processings++))
         fi
+
+        rm -rf $output_base_dir
     fi
 }
 
