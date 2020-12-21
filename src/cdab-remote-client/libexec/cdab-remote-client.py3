@@ -1,5 +1,30 @@
 #!/usr/bin/env python
 
+# cdab-client is part of the software suite used to run Test Scenarios 
+# for bechmarking various Copernicus Data Provider targets.
+# 
+# Copyright (C) 2020 Terradue Ltd, www.terradue.com
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#
+# Exception
+#
+# If you modify this file, or any covered work, by linking or combining it
+# with Terradue.OpenSearch.SciHub (or a modified version of that library),
+# containing parts covered by the terms of CC BY-NC-ND 3.0, the licensors
+# of this Program grant you additional permission to convey or distribute
+# the resulting work.
+
+
 from cdab_shared import *
 from connectors import openstack
 import datetime
@@ -22,7 +47,7 @@ class TestClient:
     """Main class for remote execution of the test scenarios TS11, TS12, TS13 and TS15.
     """
 
-    VERSION = "1.30"
+    VERSION = "1.33"
 
     errors = {
         ERR_CONFIG: 'Missing or invalid configuration',
@@ -1128,10 +1153,10 @@ class TestClient:
         stdout_file = "cdab{0}.stdout".format(run.suffix)
         stderr_file = "cdab{0}.stderr".format(run.suffix)
 
-        copy_file(self.compute_config, run, run.cdab_json_file, "{0}/{1}".format(working_dir, self.remote_cdab_json_file), False)
-        copy_file(self.compute_config, run, run.junit_file, "{0}/junit.xml".format(working_dir), False)
-        copy_file(self.compute_config, run, stdout_file, "{0}/cdab.stdout".format(working_dir), False)
-        copy_file(self.compute_config, run, stderr_file, "{0}/cdab.stderr".format(working_dir), False)
+        copy_file(self.compute_config, run, run.cdab_json_file, "{0}/{1}".format(working_dir, self.remote_cdab_json_file), False, ignore_error=True)
+        copy_file(self.compute_config, run, run.junit_file, "{0}/junit.xml".format(working_dir), False, ignore_error=True)
+        copy_file(self.compute_config, run, stdout_file, "{0}/cdab.stdout".format(working_dir), False, ignore_error=True)
+        copy_file(self.compute_config, run, stderr_file, "{0}/cdab.stderr".format(working_dir), False, ignore_error=True)
         run.files_downloaded_time = datetime.datetime.utcnow()
 
         Logger.log(LogLevel.INFO, "Test result files received", run=run)

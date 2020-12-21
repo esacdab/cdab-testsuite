@@ -1,3 +1,4 @@
+
 %define debug_package %{nil}
 %define __jar_repack  %{nil}
 %define _python_bytecompile_errors_terminate_build 0
@@ -7,7 +8,7 @@ Name:           cdab-remote-client
 Url:            https://github.com/Terradue/cdab-testsuite
 License:        AGPLv3
 Group:          Productivity/Networking/Web/Servers
-Version:        1.30
+Version:        1.33
 Release:        %{_release}
 Summary:        Copernicus Sentinels Data Access Worldwide Benchmark Test Remote Client
 BuildArch:      noarch
