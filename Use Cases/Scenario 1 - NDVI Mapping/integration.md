@@ -14,7 +14,7 @@
    ```console
    $ which python3
    /usr/bin/python3
-    $ python3 --version
+   $ python3 --version
    Python 3.7.4
    ```
 
