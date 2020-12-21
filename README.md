@@ -35,7 +35,7 @@ You can start now using the Test Suite following the [Getting Started guide](htt
 
 The CDAB Test Suite is released as open source software under the GNU Affero General Public License (AGPLv3). This repository contains the source code of an executable DotNet solution combining the unmodified exact copies of the following software packages as dynamic libraries configured as dependencies:
 
-| Software package | Copyright license type | Link to copyright statement and license |
+| Software package | License type | Link to license |
 | --- | --- | --- |
 | log4net | Apache 2.0 | https://logging.apache.org/log4net/license.html |
 | Newtonsoft | MIT | https://github.com/JamesNK/Newtonsoft.Json/blob/master/LICENSE.md |
