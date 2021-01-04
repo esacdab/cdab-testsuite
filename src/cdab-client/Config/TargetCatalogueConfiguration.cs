@@ -28,5 +28,8 @@ namespace cdabtesttools.Config
 
         public List<OpenSearchParameter> LocalParameters { get; set; }
 
+        public string AoiFilterWkt { get; set; }
+
+        public string AoiFilterDescription { get; set; }
     }
 }

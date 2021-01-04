@@ -83,11 +83,27 @@ namespace cdabtesttools.Data
                 "GRD", "Ground Range Detected (GRD)",
                 Mission.GetIdentifierValidator(new Regex(@"^S1.*_GRD._.*")), null);
 
-            var geom = wktreader.Read("POLYGON((-5.664 14.532,-5.196 13.991,-4.854 13.969,-4.877 13.637,-4.114 13.938,-3.96 13.378,-3.443 13.158,-3.27 13.698,-2.874 13.654,-2.839 14.054,-2.474 14.299,-2 14.191,-1.98 14.476,-0.745 15.066,-1.686 15.431,-2.532 15.322,-2.816 15.774,-3.262 15.857,-3.8 15.491,-4.135 15.81,-5.23 15.674,-5.1 15.196,-5.546 14.931,-5.664 14.532))");
+            string aoiFilterWkt = target.TargetSiteConfig.Data.Catalogue.AoiFilterWkt;
+            string aoiFilterDescription = target.TargetSiteConfig.Data.Catalogue.AoiFilterDescription;
+
+            if (aoiFilterWkt == null)
+            {
+                aoiFilterWkt = "POLYGON((-5.664 14.532,-5.196 13.991,-4.854 13.969,-4.877 13.637,-4.114 13.938,-3.96 13.378,-3.443 13.158,-3.27 13.698,-2.874 13.654,-2.839 14.054,-2.474 14.299,-2 14.191,-1.98 14.476,-0.745 15.066,-1.686 15.431,-2.532 15.322,-2.816 15.774,-3.262 15.857,-3.8 15.491,-4.135 15.81,-5.23 15.674,-5.1 15.196,-5.546 14.931,-5.664 14.532))";
+                aoiFilterDescription = "over Mopti floodable area in Mali";
+            }
+            if (aoiFilterDescription == null)
+            {
+                int pos = aoiFilterWkt.IndexOf(',');
+                if (pos > 0) aoiFilterDescription = String.Format("AOI: {0}...", aoiFilterWkt.Substring(0, pos));
+                else aoiFilterDescription = "AOI: unknown area";
+            }
+            
+
+            var geom = wktreader.Read(aoiFilterWkt);
 
             _filtersDefinition.AddFilter("geom", "{http://a9.com/-/opensearch/extensions/geo/1.0/}geometry",
-                "POLYGON((-5.664 14.532,-5.196 13.991,-4.854 13.969,-4.877 13.637,-4.114 13.938,-3.96 13.378,-3.443 13.158,-3.27 13.698,-2.874 13.654,-2.839 14.054,-2.474 14.299,-2 14.191,-1.98 14.476,-0.745 15.066,-1.686 15.431,-2.532 15.322,-2.816 15.774,-3.262 15.857,-3.8 15.491,-4.135 15.81,-5.23 15.674,-5.1 15.196,-5.546 14.931,-5.664 14.532))",
-                "over Mopti floodable area in Mali",
+                aoiFilterWkt,
+                aoiFilterDescription,
                 Mission.GetGeometryValidator(geom), null);
 
             var now = DateTime.UtcNow.Subtract(TimeSpan.FromDays(7)).ToUniversalTime();
