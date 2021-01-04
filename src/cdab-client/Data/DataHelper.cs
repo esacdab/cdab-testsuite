@@ -98,7 +98,6 @@ namespace cdabtesttools.Data
                 else aoiFilterDescription = "AOI: unknown area";
             }
             
-
             var geom = wktreader.Read(aoiFilterWkt);
 
             _filtersDefinition.AddFilter("geom", "{http://a9.com/-/opensearch/extensions/geo/1.0/}geometry",
@@ -106,13 +105,19 @@ namespace cdabtesttools.Data
                 aoiFilterDescription,
                 Mission.GetGeometryValidator(geom), null);
 
-            var now = DateTime.UtcNow.Subtract(TimeSpan.FromDays(7)).ToUniversalTime();
+            int periodFilterDays = target.TargetSiteConfig.Data.Catalogue.PeriodFilterDays;
+            if (periodFilterDays == 0)
+            {
+                periodFilterDays = 7;
+            }
+
+            var since = DateTime.UtcNow.Subtract(TimeSpan.FromDays(periodFilterDays)).ToUniversalTime();
 
             // _filtersDefinition.AddFilter("{http://purl.org/dc/elements/1.1/}modified",
             _filtersDefinition.AddFilter("modified", "{http://purl.org/dc/terms/}modified",
-                now.ToString("s") + "Z",
-                "ingested since " + now.ToString(),
-                Mission.GetIngestionDateValidator(now), null);
+                since.ToString("s") + "Z",
+                "ingested since " + since.ToString(),
+                Mission.GetIngestionDateValidator(since), null);
 
             // _filtersDefinition.AddFilter("archiveStatus", "{http://a9.com/-/opensearch/extensions/eo/1.0/}statusSubType", "online", "Online", null, null);
 

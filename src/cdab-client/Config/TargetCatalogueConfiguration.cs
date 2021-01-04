@@ -31,5 +31,7 @@ namespace cdabtesttools.Config
         public string AoiFilterWkt { get; set; }
 
         public string AoiFilterDescription { get; set; }
+
+        public int PeriodFilterDays { get; set; }
     }
 }
