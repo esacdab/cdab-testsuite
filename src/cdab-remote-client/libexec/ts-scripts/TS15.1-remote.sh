@@ -75,8 +75,7 @@ index="sentinel2"
 product_type="S2MSI1C"
 product_count=2
 
-stage_in_docker_image=terradue/stars-t2:latest
-
+stage_in_docker_image=terradue/stars-t2:0.5.38
 cd "$1"
 
 # Install
