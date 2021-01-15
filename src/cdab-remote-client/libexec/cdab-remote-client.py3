@@ -46,7 +46,7 @@ class TestClient:
     """Main class for remote execution of the test scenarios TS11, TS12, TS13 and TS15.
     """
 
-    VERSION = "1.33"
+    VERSION = "1.34"
 
     errors = {
         ERR_CONFIG: 'Missing or invalid configuration',
@@ -1084,7 +1084,7 @@ class TestClient:
                     execute_remote_command(self.compute_config, run, "sudo mv /usr/lib/opensearch-client/bin/opensearch-client /usr/bin/")
 
                 if 'Stars' in self.test_scenario['tools']:
-                    execute_remote_command(self.compute_config, run, "docker pull terradue/stars-t2:latest")
+                    execute_remote_command(self.compute_config, run, "docker pull terradue/stars-t2:0.5.38")
                     execute_remote_command(self.compute_config, run, "mkdir -p config/Stars")
                     execute_remote_command(self.compute_config, run, "mkdir -p config/etc/Stars")
 

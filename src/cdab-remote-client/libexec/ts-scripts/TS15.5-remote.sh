@@ -6,7 +6,7 @@ function prepare() {
     echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Creating conda environment with snap and cwltool" >> cdab.stderr
     CONDA_DIR="/opt/anaconda"
     CONDA_PREFIX="${PWD}/env_snap"
-    sudo $CONDA_DIR/bin/conda create -p ${CONDA_PREFIX} -y snap cwltool >> cdab.stderr 2>&1
+    sudo $CONDA_DIR/bin/conda create -p ${CONDA_PREFIX} -y snap=7.0.0 cwltool >> cdab.stderr 2>&1
     sudo ln -s "${PWD}/env_snap" "${CONDA_DIR}/envs/env_snap"
     export PATH="${CONDA_DIR}/bin:${CONDA_PREFIX}/bin:${CONDA_PREFIX}/snap/bin:${CONDA_PREFIX}/snap/jre/bin:$PATH"
     echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Done (conda environment)" >> cdab.stderr
@@ -63,7 +63,7 @@ function process_interferogram() {
         return
     fi
 
-    end_time=$(($(date +%s) + 1 * 60 * 60))   # Timeout after 1 hour
+    end_time=$(($(date +%s) + 4 * 60 * 60))   # Timeout after 4 hour
 
     echo $pre_id > if-ids.list
     echo $post_id >> if-ids.list
@@ -550,7 +550,7 @@ function process_stack() {
 
     stack_size=$(cat stack-ids.list | wc -l)
 
-    end_time=$(($(date +%s) + 20 * 60))   # Timeout after 20 minutes
+    end_time=$(($(date +%s) + 30 * 60))   # Timeout after 30 minutes
 
     while [ $(date +%s) -lt $end_time ]
     do
@@ -653,7 +653,7 @@ provider="$4"
 credentials="$5"
 cat_creds=""
 
-stage_in_docker_image=terradue/stars-t2:latest
+stage_in_docker_image=terradue/stars-t2:0.5.38
 
 case "$provider" in
     CREO)
