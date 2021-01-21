@@ -483,7 +483,7 @@ EOF
         output_base_dir=$(dirname $dim_file)
 
         echo "Result" >> cdab.stderr
-        tree $output_base_dir >> cdab.stderr
+        tree --charset ascii $output_base_dir >> cdab.stderr
         find $output_base_dir -type f >> cdab.stderr
 
         count=0
