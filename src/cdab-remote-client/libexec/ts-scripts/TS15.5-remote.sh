@@ -596,8 +596,24 @@ function download() {
             if [ $res -ne 0 ]
             then
                 echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Error during download" >> cdab.stderr
-                ((missing++))
-                continue
+                present=
+                # MUNDI workaround
+                if [ ${provider} == "MUNDI" ] && [ -s "${PWD}/input_data/${id}/${id}.zip" ]
+                then
+                    echo "Previous error can be ignored, .zip file is present" >> cdab.stderr
+                    sudo chown -R $USER "${PWD}/input_data/${id}"
+                    product_folder=$(find ${PWD}/input_data -type d -name "${id}.SAFE")
+                    if [ -z "$product_folder" ]
+                    then
+                        unzip -d "${PWD}/input_data/${id}" "${PWD}/input_data/${id}/${id}.zip" >> cdab.stderr 2>> cdab.stderr
+                        present=true
+                    fi
+                fi
+                if [ -z "$present" ]
+                then
+                    ((missing++))
+                    continue
+                fi
             fi
 
             product_folder=$(find ${PWD}/input_data -type d -name "${id}.SAFE")
