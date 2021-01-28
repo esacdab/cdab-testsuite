@@ -673,7 +673,7 @@ stage_in_docker_image=terradue/stars-t2:0.5.38
 
 case "$provider" in
     CREO)
-        catalogue_base_url="https://finder.creodias.eu/resto/api/collections/describe.xml"
+        catalogue_base_url="https://finder.creodias.eu/resto/api/collections/Sentinel1/describe.xml"
         ;;
     MUNDI)
         catalogue_base_url="https://mundiwebservices.com/acdc/catalog/proxy/search"
