@@ -193,7 +193,8 @@ namespace cdabtesttools.Target
 
             if (target_uri.Host.EndsWith("copernicus.eu") || target_uri.AbsolutePath.EndsWith("/dhus"))
             {
-                if (filters != null && filters.GetFilters().Any(f => f.Key == "archiveStatus"))
+                // OData API only for copernicus.eu, not other similar providers
+                if (target_uri.Host.EndsWith("copernicus.eu") && filters != null && filters.GetFilters().Any(f => f.Key == "archiveStatus"))
                 {
                     UriBuilder urib = new UriBuilder(target_uri);
                     urib.Path += target_uri.AbsolutePath.Replace("/search", "").TrimEnd('/').EndsWith("odata/v1") ? "" : "/odata/v1";

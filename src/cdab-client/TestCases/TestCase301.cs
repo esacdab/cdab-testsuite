@@ -361,9 +361,13 @@ namespace cdabtesttools.TestCases
             metrics.Add(new DateTimeMetric(MetricName.endTime, timeStop, "dateTime"));
             metrics.Add(new LongMetric(MetricName.endGetResponseTime, DateTime.UtcNow.Ticks, "ticks"));
             if (respTime.Count() > 0)
-                metrics.Add(new LongMetric(MetricName.responseTime, Convert.ToInt64(respTime.Average()), "ms"));
+            {
+                foreach (var r in respTime) metrics.Add(new LongMetric(MetricName.responseTime, r, "ms"));
+            }
             else
+            {
                 metrics.Add(new LongMetric(MetricName.responseTime, 0, "ms"));
+            }
             metrics.Add(new LongMetric(MetricName.size, totalByteCounter, "bytes"));
             metrics.Add(new LongMetric(MetricName.downloadElapsedTime, stopWatchDownloadElaspedTime.ElapsedMilliseconds, "ms"));
             metrics.Add(new LongMetric(MetricName.maxTotalResults, 1, "#"));
