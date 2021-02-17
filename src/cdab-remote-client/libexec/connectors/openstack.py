@@ -3,7 +3,6 @@ import datetime
 from enum import Enum
 import io
 import json
-import netifaces as ni
 import os
 from os import path
 import re
