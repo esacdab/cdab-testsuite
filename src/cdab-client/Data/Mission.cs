@@ -321,9 +321,18 @@ namespace cdabtesttools.Data
                     log.WarnFormat("No geometry found for item {0}", item.Identifier);
                     return false;
                 }
-                return feature.Geometry.Buffer(0.5).Intersects(wktreader.Read(geom.ToWkt()));
+                Geometry geom2 = wktreader.Read(geom.ToWkt());
+
+                // Invert coordinates if necessary
+                if (AdjustGeometry(geom2));
+                {
+                    log.DebugFormat("Coordinates adjusted for item {0}", item.Identifier);
+                }
+                
+                return feature.Geometry.Buffer(0.5).Intersects(geom2);
             };
         }
+
 
         public static Func<IOpenSearchResultItem, bool> GetGeometryValidator(Geometry feature)
         {
@@ -588,6 +597,30 @@ namespace cdabtesttools.Data
             }
             return _filtersDefinition;
         }
+
+        private static bool AdjustGeometry(Geometry geometry)
+        {
+            // Invert coordinates if Y values are intended as X values (< -90 or > 90)
+            bool inverted = false;
+            foreach (var c in geometry.Coordinates)
+            {
+                if (c.Y < -90 || c.Y > 90 && !inverted) {
+                    inverted = true;
+                    break;
+                }
+            }
+            if (inverted)
+            {
+                foreach (var c in geometry.Coordinates)
+                {
+                    double x = c.X;
+                    c.X = c.Y;
+                    c.Y = x;
+                }
+            }
+            return inverted;
+        }
+
 
     }
 }
