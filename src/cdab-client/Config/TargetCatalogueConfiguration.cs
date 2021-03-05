@@ -28,10 +28,19 @@ namespace cdabtesttools.Config
 
         public List<OpenSearchParameter> LocalParameters { get; set; }
 
-        public string AoiFilterWkt { get; set; }
+        public string SystematicSearchMission { get; set; }
 
-        public string AoiFilterDescription { get; set; }
+        public string SystematicSearchMissionRegex { get; set; }
 
-        public int PeriodFilterDays { get; set; }
+        public string SystematicSearchProductType { get; set; }
+
+        public string SystematicSearchProductTypeRegex { get; set; }
+
+        public string SystematicSearchAoiWkt { get; set; }
+
+        public string SystematicSearchAoiDescription { get; set; }
+
+        public int SystematicSearchDays { get; set; }
+
     }
 }
