@@ -255,6 +255,23 @@ namespace cdabtesttools.Data
 
             missions.Add(s3Mission);
 
+            Mission s5pMission = new Mission("Sentinel-5P", new LabelString("Sentinel-5 Precursor", "Sentinel-5 Precursor", GetIdentifierValidator(new Regex(@"^S5P.*"))));
+            s5pMission.Lifetime = new TimeRange("{http://a9.com/-/opensearch/extensions/time/1.0/}start", "{http://a9.com/-/opensearch/extensions/time/1.0/}end", new DateTime(2015, 07, 01), DateTime.UtcNow);
+            s5pMission.ProductLevels = new StringListChoice("productType", "{http://a9.com/-/opensearch/extensions/eo/1.0/}processingLevel",
+                new LabelString[] {
+                    new LabelString("L1B", "Level-1B", GetIdentifierValidator(new Regex(@"^S5P.*_L1B_.*"))),
+                    new LabelString("L2", "Level-2", GetIdentifierValidator(new Regex(@"^S5P.*_L2__.*"))),
+                });
+            s5pMission.ArchivingStatus = new StringListChoice("archiveStatus", "{http://a9.com/-/opensearch/extensions/eo/1.0/}statusSubType",
+                new LabelString[] {
+                    new LabelString("Online", "Online", GetArchivingStatusValidator(Terradue.ServiceModel.Ogc.Eop21.StatusSubTypeValueEnumerationType.ONLINE), null),
+                    new LabelString("Offline", "Offline", GetArchivingStatusValidator(Terradue.ServiceModel.Ogc.Eop21.StatusSubTypeValueEnumerationType.OFFLINE), null),
+                });
+
+            s5pMission.Geometries = new GeometryFilterCollection("geom", "{http://a9.com/-/opensearch/extensions/geo/1.0/}geometry", features);
+
+            missions.Add(s5pMission);
+
             return missions;
         }
 
@@ -480,7 +497,7 @@ namespace cdabtesttools.Data
                 }
                 catch (Exception e)
                 {
-                    log.ErrorFormat("Error shuffling filters : {0}", e.Message);
+                    log.ErrorFormat("Error shuffling filters: {0}", e.Message);
                     log.Debug(e.StackTrace);
                 }
             }
