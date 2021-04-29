@@ -1,5 +1,9 @@
 echo "Installing conda"
-CONDA_DIR=/opt/anaconda
+
+CONDA_DIR="/opt/anaconda"
+CONDA_INSTALL_DIR=$1
+[ -z "$CONDA_INSTALL_DIR" ] && CONDA_INSTALL_DIR=$CONDA_DIR
+
 cd $(dirname $0)
 MINIFORGE_VERSION=4.8.2-1
 # SHA256 for installers can be obtained from https://github.com/conda-forge/miniforge/releases
@@ -17,7 +21,11 @@ then
     echo "sha256 mismatch for ${INSTALLER_PATH}, exiting!"
     exit 1
 fi
-bash ${INSTALLER_PATH} -b -p ${CONDA_DIR} > /dev/null 2> /dev/null
+bash ${INSTALLER_PATH} -b -p ${CONDA_INSTALL_DIR} > /dev/null 2> /dev/null
+if [ "$CONDA_INSTALL_DIR" != "$CONDA_DIR" ]
+then
+    ln -fs $CONDA_INSTALL_DIR $CONDA_DIR
+fi
 export PATH="${CONDA_DIR}/bin:$PATH"
 # Preserve behavior of miniconda - packages come from conda-forge + defaults
 conda config --system --append channels defaults

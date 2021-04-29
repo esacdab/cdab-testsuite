@@ -259,7 +259,7 @@ class OpenStackConnector:
                 options.extend(self.cloud_base_options)
                 options.extend([
                     "--size", "50",
-                    "{0}{1}-volume".format(self.compute_config['vm_name'], run.suffix)
+                    "{0}{1}-tmp-volume".format(self.compute_config['vm_name'], run.suffix)
                 ])
                 response = execute_local_command(run, options, True)
 

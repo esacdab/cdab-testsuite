@@ -88,6 +88,18 @@ class TestClient:
             'docker_run_command': 'PROCESSING',
             'test_target_url': '',
             'tools': [ 'conda', 'opensearch-client', 'Stars' ],
+            'cwl_file': True,
+            'timeout': 2 * 60 * 60,
+        },
+        'TS15.3': {
+            'test_scenario_description': 'Mosaicking of S3 L2 OLCI',
+            'test_case_name': 'TC415',
+            'docker_image_id': None,
+            'docker_run_command': 'PROCESSING',
+            'test_target_url': '',
+            'tools': [ 'conda', 'opensearch-client', 'Stars' ],
+            'files': [ 's3-olci.tgz', 'stage-in.py' ],
+            'cwl_file': False,
             'timeout': 2 * 60 * 60,
         },
         'TS15.5': {
@@ -97,6 +109,7 @@ class TestClient:
             'docker_run_command': 'PROCESSING',
             'test_target_url': '',
             'tools': [ 'conda', 'opensearch-client', 'Stars' ],
+            'cwl_file': True,
             'timeout': 6 * 60 * 60,
         },
     }
@@ -105,18 +118,30 @@ class TestClient:
         'ndvi',
     ]
 
-    target_site_uri_prefixes = {
-        'CREO': 'https://auth.creodias.eu/',
-        'MUNDI': 'https://mundiwebservices.com',
-        'ONDA': 'https://catalogue.onda-dias.eu/',
-        'SOBLOO': 'https://sobloo.eu/',
-        'AMAZON': 'https://scihub.copernicus.eu/',
-        'GOOGLE': 'https://scihub.copernicus.eu/',
-    }
-
-    target_site_s3_uri_prefixes = {
-        'MUNDI': 'https://obs.eu-de.otc.t-systems.com/',
-        'AMAZON': 'https://aws.amazon.com',
+    target_site_classes = {
+        'CREO': {
+            'uri_prefix': 'https://auth.creodias.eu/'
+        },
+        'MUNDI': {
+            'uri_prefix': 'https://mundiwebservices.com',
+            's3_uri_prefix': 'https://obs.eu-de.otc.t-systems.com/',
+            'tools': [ 's3cmd' ]
+        },
+        'ONDA': {
+            'uri_prefix': 'https://catalogue.onda-dias.eu/',
+            'tools': [ 'onda-eodata' ]
+        },
+        'SOBLOO': {
+            'uri_prefix': 'https://sobloo.eu/'
+        },
+        'AMAZON': {
+            'uri_prefix': 'https://scihub.copernicus.eu/',
+            's3_uri_prefix': 'https://aws.amazon.com',
+            'tools': [ 's3cmd' ]
+        },
+        'GOOGLE': {
+            'uri_prefix': 'https://scihub.copernicus.eu/'
+        },
     }
 
     command_line = [
@@ -262,9 +287,8 @@ class TestClient:
         self.target_site = None
         self.target_endpoint = None
         self.target_credentials = None
+        self.target_site_class_name = None
         self.target_site_class = None
-        self.target_site_uri_prefix = None
-        self.target_site_s3_uri_prefix = None
         self.target_site_s3_key_id = None
         self.target_site_s3_secret_key = None
         self.docker_config = None
@@ -692,10 +716,7 @@ class TestClient:
             self.get_target_site_access()
 
             if not self.target_site_class:
-                exit_client(ERR_CONFIG, "Service provider '{0}' configuration does not contain target site class ('class')".format(self.target_site))
-
-            if not self.target_site_uri_prefix:
-                exit_client(ERR_CONFIG, "Service provider '{0}' class is invalid (must be among {1})".format(self.target_site, ", ".join([s for s in TestClient.target_site_uri_prefixes])))
+                exit_client(ERR_CONFIG, "Service provider '{0}' class is invalid (must be among {1})".format(self.target_site, ", ".join([s for s in TestClient.target_site_classes])))
 
             credential_regex = re.compile('^([^:]+):(.*)')
             match = credential_regex.match(self.target_credentials)
@@ -708,11 +729,12 @@ class TestClient:
 
             if self.test_scenario_id == "TS15":
 
-                if not self.processing_scenario_cwl_file:
-                    self.processing_scenario_cwl_file = "{0}/ts-scripts/workflow.{1}.cwl".format(os.path.dirname(sys.argv[0]), self.processing_scenario_id)
+                if 'cwl_file' in self.test_scenario and self.test_scenario['cwl_file'] == True:
+                    if not self.processing_scenario_cwl_file:
+                        self.processing_scenario_cwl_file = "{0}/ts-scripts/workflow.{1}.cwl".format(os.path.dirname(sys.argv[0]), self.processing_scenario_id)
 
-                if not path.exists(self.processing_scenario_cwl_file) or not path.isfile(self.processing_scenario_cwl_file):
-                    exit_client(ERR_CONFIG, "Processing scenario CWL workflow file {0} does not exist".format(self.processing_scenario_cwl_file))
+                    if not path.exists(self.processing_scenario_cwl_file) or not path.isfile(self.processing_scenario_cwl_file):
+                        exit_client(ERR_CONFIG, "Processing scenario CWL workflow file {0} does not exist".format(self.processing_scenario_cwl_file))
 
                 if self.processing_scenario_input_file:
                     if not path.exists(self.processing_scenario_input_file) or not path.isfile(self.processing_scenario_input_file):
@@ -760,11 +782,9 @@ class TestClient:
             exit_client(ERR_CONFIG, "Service provider '{0}' configuration does not contain target credentials".format(self.target_site))
 
         if 'class' in data_config:
-            self.target_site_class = data_config['class']
-            if self.target_site_class in TestClient.target_site_uri_prefixes:
-                self.target_site_uri_prefix = TestClient.target_site_uri_prefixes[self.target_site_class]
-            if self.target_site_class in TestClient.target_site_s3_uri_prefixes:
-                self.target_site_s3_uri_prefix = TestClient.target_site_s3_uri_prefixes[self.target_site_class]
+            self.target_site_class_name = data_config['class']
+            if self.target_site_class_name in TestClient.target_site_classes:
+                self.target_site_class = TestClient.target_site_classes[self.target_site_class_name]
 
         if 's3_key_id' in data_config and 's3_secret_key' in data_config:
             self.target_site_s3_key_id = data_config['s3_key_id']
@@ -1064,61 +1084,81 @@ class TestClient:
         elif self.docker_run_command == 'PROCESSING':
             if self.test_scenario_id == "TS15":
                 script_name = "{0}.{1}-remote.sh".format(self.test_scenario_id, self.processing_scenario_id)
-                copy_file(self.compute_config, run, self.processing_scenario_cwl_file, "{0}/workflow.cwl".format(working_dir))
+                if 'cwl_file' in self.test_scenario and self.test_scenario['cwl_file'] == True:
+                    copy_file(self.compute_config, run, self.processing_scenario_cwl_file, "{0}/workflow.cwl".format(working_dir))
                 if self.processing_scenario_input_file:
                     copy_file(self.compute_config, run, self.processing_scenario_input_file, "{0}/input".format(working_dir))
             else:
                 script_name = "{0}-remote.sh".format(self.test_scenario_id)
-            
+
+            # Install tools specific for test scenarios and provider
+            tools = []
             if 'tools' in self.test_scenario:
-                if 'conda' in self.test_scenario['tools']:
-                    copy_file(self.compute_config, run, "{0}/ts-scripts/conda-install.sh".format(os.path.dirname(sys.argv[0])), "conda-install.sh")
-                    execute_remote_command(self.compute_config, run, "sudo sh conda-install.sh")
+                tools.extend(self.test_scenario['tools'])
+            if 'tools' in self.target_site_class:
+                tools.extend(self.target_site_class['tools'])
 
-                if 'opensearch-client' in self.test_scenario['tools']:
-                    execute_remote_command(self.compute_config, run, "sudo yum install -y unzip yum-utils")
-                    execute_remote_command(self.compute_config, run, "sudo yum-config-manager --add-repo http://download.mono-project.com/repo/centos/")
-                    execute_remote_command(self.compute_config, run, "sudo yum install -y mono-devel --nogpgcheck > /dev/null 2> /dev/null")
-                    copy_file(self.compute_config, run, "{0}/ts-scripts/opensearch-client.zip".format(os.path.dirname(sys.argv[0])), "opensearch-client.zip")
-                    execute_remote_command(self.compute_config, run, "sudo unzip -d /usr/lib/ opensearch-client.zip")
-                    execute_remote_command(self.compute_config, run, "sudo mv /usr/lib/opensearch-client/bin/opensearch-client /usr/bin/")
+            if 'conda' in tools:
+                if self.compute_config['use_volume']:
+                    conda_dir = "/mnt/cdab-volume/opt/anaconda"
+                else:
+                    conda_dir = "/opt/anaconda"
 
-                if 'Stars' in self.test_scenario['tools']:
-                    execute_remote_command(self.compute_config, run, "docker pull terradue/stars-t2:0.5.38")
-                    execute_remote_command(self.compute_config, run, "mkdir -p config/Stars")
-                    execute_remote_command(self.compute_config, run, "mkdir -p config/etc/Stars")
+                copy_file(self.compute_config, run, "{0}/ts-scripts/conda-install.sh".format(os.path.dirname(sys.argv[0])), "conda-install.sh")
+                execute_remote_command(self.compute_config, run, "sudo sh conda-install.sh {0}".format(conda_dir))
 
-                    # Add specific supplier
-                    self.connector.add_supplier(TestClient.stars_plugins['Plugins']['Terradue']['Suppliers'])
+            if 'opensearch-client' in tools:
+                execute_remote_command(self.compute_config, run, "sudo yum install -y unzip yum-utils")
+                execute_remote_command(self.compute_config, run, "sudo yum-config-manager --add-repo http://download.mono-project.com/repo/centos/")
+                execute_remote_command(self.compute_config, run, "sudo yum install -y mono-devel --nogpgcheck > /dev/null 2> /dev/null")
+                copy_file(self.compute_config, run, "{0}/ts-scripts/opensearch-client.zip".format(os.path.dirname(sys.argv[0])), "opensearch-client.zip")
+                execute_remote_command(self.compute_config, run, "sudo unzip -d /usr/lib/ opensearch-client.zip")
+                execute_remote_command(self.compute_config, run, "sudo mv /usr/lib/opensearch-client/bin/opensearch-client /usr/bin/")
 
-                    with open("stars-terradue.json", 'w') as stars_file:
-                        stars_file.write(json.dumps(TestClient.stars_plugins, indent=4))
-                        stars_file.close()
-                    copy_file(self.compute_config, run, "stars-terradue.json", "config/etc/Stars/terradue.json")
+            if 'Stars' in tools:
+                execute_remote_command(self.compute_config, run, "docker pull terradue/stars-t2:0.5.38")
+                execute_remote_command(self.compute_config, run, "mkdir -p config/Stars")
+                execute_remote_command(self.compute_config, run, "mkdir -p config/etc/Stars")
 
-                    credential_config = {
-                        'Credentials': {
-                            'supplier': {
-                                'Type': "Basic",
-                                'UriPrefix': self.target_site_uri_prefix,
-                                'Username': self.target_site_username,
-                                'Password': self.target_site_password,
-                            }
+                # Add specific supplier
+                self.connector.add_supplier(TestClient.stars_plugins['Plugins']['Terradue']['Suppliers'])
+
+                with open("stars-terradue.json", 'w') as stars_file:
+                    stars_file.write(json.dumps(TestClient.stars_plugins, indent=4))
+                    stars_file.close()
+                copy_file(self.compute_config, run, "stars-terradue.json", "config/etc/Stars/terradue.json")
+
+                credential_config = {
+                    'Credentials': {
+                        'supplier': {
+                            'Type': "Basic",
+                            'UriPrefix': self.target_site_class['uri_prefix'],
+                            'Username': self.target_site_username,
+                            'Password': self.target_site_password,
                         }
                     }
+                }
 
-                    if self.target_site_s3_key_id and self.target_site_s3_secret_key and self.target_site_s3_uri_prefix:
-                        credential_config['Credentials']['s3_supplier'] = {
-                            'AuthType': "S3",
-                            'UriPrefix': self.target_site_s3_uri_prefix,
-                            "Username": self.target_site_s3_key_id,
-                            "Password": self.target_site_s3_secret_key
-                        }
+                if self.target_site_s3_key_id and self.target_site_s3_secret_key and 's3_uri_prefix' in self.target_site_class:
+                    credential_config['Credentials']['s3_supplier'] = {
+                        'AuthType': "S3",
+                        'UriPrefix': self.target_site_class['s3_uri_prefix'],
+                        "Username": self.target_site_s3_key_id,
+                        "Password": self.target_site_s3_secret_key
+                    }
 
-                    with open("stars-usersettings.json", 'w') as stars_file:
-                        stars_file.write(json.dumps(credential_config, indent=4))
-                        stars_file.close()
-                    copy_file(self.compute_config, run, "stars-usersettings.json", "config/Stars/usersettings.json")
+                with open("stars-usersettings.json", 'w') as stars_file:
+                    stars_file.write(json.dumps(credential_config, indent=4))
+                    stars_file.close()
+                copy_file(self.compute_config, run, "stars-usersettings.json", "config/Stars/usersettings.json")
+
+            if 's3cmd' in tools and 'conda' in tools and self.target_site_s3_key_id and self.target_site_s3_secret_key:
+                copy_file(self.compute_config, run, "{0}/ts-scripts/s3cmd-install.sh".format(os.path.dirname(sys.argv[0])), "s3cmd-install.sh")
+                execute_remote_command(self.compute_config, run, "sh s3cmd-install.sh {0} {1} {2}".format(self.compute_config['remote_user'], self.target_site_s3_key_id, self.target_site_s3_secret_key))
+
+            if 'onda-eodata' in tools:
+                copy_file(self.compute_config, run, "{0}/ts-scripts/link-onda-eodata.sh".format(os.path.dirname(sys.argv[0])), "link-onda-eodata.sh")
+                execute_remote_command(self.compute_config, run, "sh link-onda-eodata.sh")
 
             if 'files' in self.test_scenario:
                 for f in self.test_scenario['files']:
@@ -1137,7 +1177,7 @@ class TestClient:
                     working_dir,
                     self.docker_image_id,
                     self.test_site_name,
-                    self.target_site_class,
+                    self.target_site_class_name,
                     self.target_credentials
                 ),
                 display_command="nohup sh {0} {1} \"{2}\" {3} {4} {5} > /dev/null 2>&1 &".format(
@@ -1145,7 +1185,7 @@ class TestClient:
                     working_dir,
                     self.docker_image_id,
                     self.test_site_name,
-                    self.target_site_class,
+                    self.target_site_class_name,
                     re.sub(':.*', ':xxxxxxxx', self.target_credentials),
                 )
             )
