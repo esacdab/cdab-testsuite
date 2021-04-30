@@ -29,9 +29,6 @@
    sudo ln -s ${PWD}/env_s3 /opt/anaconda/envs/env_s3
    ```
 
-   You may have to log out and log in again for the changes to take effect.
-
-3. 
 
 ## Integration procedure 
 
@@ -55,10 +52,11 @@
 
 4.  Make the Sentinel-3 OLCI products available for the processing (stage-in).
    
-    Create a directory `input_data` and download the files, if possible from the closest provider-specific source. A Python script is provided to simplify, but this can be done also using simple shell commands in some cases.
+    Create a directory `input_data` and download the files, if possible from the closest provider-specific source. A Python script is provided to simplify the procedure of making the data available, but this can be done also using simple shell commands in some cases. Create also the `output_data` directory which will contain the results of the processing.
    
     ```console
     mkdir input_data
+    mkdir output_data
     ```
 
     * For **CREODIAS**, make sure your virtual machine has access to the EO Data volume (mounted under `/eodata/`). This is automatically the case for certain configurations/projects.
@@ -89,7 +87,7 @@
       ```
       Configure the access to the MUNDI object store. The full procedure can be found at [this link](https://docs.otc.t-systems.com/en-us/ugs3cmd/obs/en-us_topic_0051060814.html).
 
-      Run
+      Run the following command:
       ```console
       opt/anaconda/bin/s3cmd --configure
       ```
@@ -204,9 +202,9 @@
 
         Not recommended as it consists in complicated steps and many individual downloads.
     
-
+    
     At the end of this, the `input_data` directory should contain a number of directories with names ending in `.SEN3`, containing the actual files that compose each product.
-
+    
     ```
     input_data
     ├── S3A_OL_2_LFR____20210213T101140_20210213T101440_20210214T162238_0179_068_236_2520_LN1_O_NT_002.SEN3
@@ -230,7 +228,7 @@
 
     [50%]
 
-6.  At this point the mosaicking algorithm **`s3_olci_mosaic`** can be launched.
+6.  At this point the mosaicking algorithm **`s3_olci_mosaic.py`** can be launched.
     
     It takes three parameters:
   
@@ -238,13 +236,13 @@
     * the maximum cloud coverage above which a product is discarded (expressed as a floating-point value value between 0 and 1)
     * the output directory
 
-    For example, with a maximum cloud coverage of 50%:
+    For example, with a maximum cloud coverage of 50% the command would be this (it has to be launched from within the correct environment):
 
     ```console
     /opt/anaconda/envs/env_s3/bin/python s3_olci_mosaic.py input_data/ 0.5 output_data/
     ```
 
-    This may take a while, on a typical VM approximately 10 minutes per processed input file.
+    This may take a while; on a typical VM approximately 10 minutes per processed input file.
     Wait until the process has finished and check that there has been no error. [80%]
 
 7. In the output directory there should be two files (the sizes vary depending on the number and nature of the input products) [90%]
@@ -255,7 +253,7 @@
    -rw-rw-r--. 1 linux linux 335049108 Apr 30 10:00 ndvi_rgba.tif
    ```
 
-8. Download the file `ndvi_rgba.tif` to your computer and open it with a tool such as QGIS. Verify that it shows the desired information (NDVI in the current configuration) of the area of interest. [100%]
+8. Download the file `ndvi_rgba.tif` onto your computer and open it with a tool such as QGIS. Verify that it shows the desired information (NDVI in the current configuration) of the area of interest. [100%]
 
    An typical image could look like this:
    ![Sentinel-3 OLCI mosaic in QGIS](s3-olci-mosaic.png "Sentinel-3 OLCI mosaic in QGIS")
@@ -263,4 +261,4 @@
 
 ## Application build procedure 
 
-A Docker image can be added if necessary. However, the application can already be run fully automatically via the `cdab-remote-client` tool.
+A procedure for building a Docker image can be added if deemed necessary. However, the application can already be run fully automatically via the `cdab-remote-client` tool.
