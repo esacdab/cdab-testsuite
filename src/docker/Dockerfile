@@ -52,11 +52,13 @@ RUN echo 'export PS1="[\u@docker] \W # "' >> /root/.bash_profile
 # enable networking
 RUN echo 'NETWORKING=yes' >> /etc/sysconfig/network
 
-# Install Python
+# install EPEL release repo
+RUN yum -y install epel-release python-setuptools
+
+# install Python
 RUN yum install -y python python-all python-pip
 
 # install supervisord
-RUN yum -y install epel-release python-setuptools
 RUN pip install supervisor
 RUN /usr/bin/echo_supervisord_conf > /etc/supervisord.conf
 RUN mkdir -p /var/log/supervisor
