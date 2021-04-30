@@ -54,7 +54,7 @@ RUN echo 'NETWORKING=yes' >> /etc/sysconfig/network
 
 # install supervisord
 RUN yum -y install epel-release python-setuptools
-RUN easy_install supervisor
+RUN pip install supervisor
 RUN /usr/bin/echo_supervisord_conf > /etc/supervisord.conf
 RUN mkdir -p /var/log/supervisor
 
