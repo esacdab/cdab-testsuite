@@ -27,7 +27,7 @@ function select_input() {
         return
     else
         ref_date_sec=$(date +%s)
-        start_date=$(date -d@$((ref_date_sec - 15 * 24 * 60 * 60)) +%Y-"%m-%dT00:00:00Z")
+        start_date=$(date -d@$((ref_date_sec - 14 * 24 * 60 * 60)) +%Y-"%m-%dT00:00:00Z")
         end_date=$(date -d@$((ref_date_sec + 0)) +%Y-"%m-%dT00:00:00Z")
         geom="POLYGON((-20 5,10 5,10 35,-20 35,-20 5))"
         count=20
@@ -58,6 +58,12 @@ function select_input() {
 
     echo "opensearch-client -m Scihub -p start=${start_date} -p stop=${end_date} -p \"geom=${geom}\" $search_params -p count=$count \"${catalogue_base_url}\" {}" >> cdab.stderr
     opensearch-client $cat_creds -m Scihub -p start=${start_date} -p stop=${end_date} -p "geom=${geom}" $search_params -p count=$count "${catalogue_base_url}" {} | xmllint --format - > result.atom.xml
+    if [ $? -ne 0 ]
+    then
+        echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Invalid or empty result from ${catalogue_base_url}" >> cdab.stderr
+        return 1
+    fi
+
     grep "<dc:identifier>" result.atom.xml | sed -E "s#.*<.*?>(.*)<.*>.*#\1#g" > ids.list
 
     # if [ ${provider} == "ONDA" ] && [ $(grep -E "^S3[AB]_OL_2_LFR____" ids.list | wc -l) -eq 0 ]
@@ -71,8 +77,6 @@ function select_input() {
 
 
 function process_mosaic() {
-    product_count=$(wc -l ids.list)
-
     max_attempts=1
     attempt=0
 
@@ -101,25 +105,19 @@ function process_mosaic() {
             break
         fi
     done
-
-    if [ $missing -ne 0 ]
-    then
-        wrong_processings=1
-        return 1
-    fi
+    errors=$missing
 
     tree --charset ascii $PWD/input_data >> cdab.stderr
 
-    $PWD/env_s3/bin/python s3_olci_mosaic.py $PWD/input_data/ 0.5 $PWD/output_data/
+    $PWD/env_s3/bin/python s3_olci_mosaic.py $PWD/input_data/ 0.5 $PWD/output_data/ 
 
     tree --charset ascii $PWD/output_data >> cdab.stderr
     ls -l $PWD/output_data >> cdab.stderr
 
-    output_file=output_data/mosaic.tif
-    if [ -s $output_file ]
-    then 
-        size=$(stat -c %s $output_file)
-        [ $size -lt 250000000 ] && errors=1
+    if [ ! -s output_data/mosaic.tif ] || [ ! -s output_data/ndvi_rgba.tif ]
+    then
+        echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Output files missing" >> cdab.stderr
+        errors=$product_count
     fi
 
     return
@@ -153,58 +151,8 @@ function download() {
             continue
         fi
 
-        echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Not successful, attempting using Stack" >> cdab.stderr
-        product_folder=$(find ${PWD}/input_data -type d -name "${id}.SEN3")
-        if [ -z "$product_folder" ]
-        then
-            atom_file="file:///res/${id}.atom.xml"
-            echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Downloading product ${count}/${size} using Stack" >> cdab.stderr
-            echo "docker run -u root --workdir /res -v ${PWD}:/res -v ${HOME}/config/etc/Stars:/etc/Stars/conf.d -v ${HOME}/config/Stars:/root/.config/Stars \"${stage_in_docker_image}\" Stars copy -v \"${atom_file}\" -r 4 -si ${provider} -o /res/input_data/ --allow-ordering --harvest" >> cdab.stderr
-            docker run -u root --workdir /res -v ${PWD}:/res -v ${HOME}/config/etc/Stars:/etc/Stars/conf.d -v ${HOME}/config/Stars:/root/.config/Stars "${stage_in_docker_image}" Stars copy -v "${atom_file}" -r 4 -si ${provider} -o /res/input_data/ --allow-ordering --harvest >> cdab.stdout 2>> cdab.stderr
-            res=$?
-            if [ $res -ne 0 ]
-            then
-                echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Error during download" >> cdab.stderr
-                present=
-                # MUNDI workaround
-                if [ ${provider} == "MUNDI" ] && [ -s "${PWD}/input_data/${id}/${id}.zip" ]
-                then
-                    echo "Previous error can be ignored, .zip file is present" >> cdab.stderr
-                    sudo chown -R $USER "${PWD}/input_data/${id}"
-                    product_folder=$(find ${PWD}/input_data -type d -name "${id}.SEN3")
-                    if [ -z "$product_folder" ]
-                    then
-                        unzip -d "${PWD}/input_data" "${PWD}/input_data/${id}.zip" >> cdab.stderr 2>> cdab.stderr
-                        present=true
-                    fi
-                fi
-                if [ -z "$present" ]
-                then
-                    ((missing++))
-                    continue
-                fi
-            fi
+        ((missing++))
 
-            product_folder=$(find ${PWD}/input_data -type d -name "${id}.SEN3")
-            if [ -z "$product_folder" ]
-            then
-                order_file=$(find ${PWD}/input_data -type f -name "${id}.order.json")
-                if [ -n "$order_file" ]
-                then
-                    echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Order for product exists" >> cdab.stderr
-                else
-                    echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Stack product data not downloaded correctly" >> cdab.stderr
-                fi
-                ((missing++))
-                continue
-            fi
-
-            echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Done (product $count/$size downloaded)" >> cdab.stderr
-            ls -l $product_folder
-            find $product_folder -type f
-        else
-            echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Done (product $count/$size already downloaded)" >> cdab.stderr
-        fi
     done
 
     return $missing
@@ -260,6 +208,8 @@ then
     res=$?
 fi
 
+product_count=0
+
 # Process inputs
 
 echo "--------------------------------" >> cdab.stderr
@@ -271,6 +221,7 @@ start_time_mosaic=$(date +%s%N)
 
 if [ $res -eq 0 ]
 then
+    product_count=$(cat ids.list | wc -l)
     process_mosaic
 fi
 
@@ -280,12 +231,16 @@ process_duration_mosaic=$(((end_time_mosaic - start_time_mosaic) / 1000000))
 
 total_processings_mosaic=1
 
-if [ ${errors} -eq 0 ]
+if [ ${product_count} -eq 0 ]
+then
+    error_rate_mosaic=100.0
+elif [ ${errors} -eq 0 ]
 then
     error_rate_mosaic=0.0
 else
-    error_rate_mosaic=100.0
-fi
+    r=$(echo "scale=4; (${errors}*100)/${product_count}+0.04999" | bc)
+    error_rate_mosaic=$(printf "%.1f" $r)
+fi  
 avg_process_duration_mosaic=$process_duration_mosaic
 
 

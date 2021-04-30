@@ -1154,11 +1154,11 @@ class TestClient:
 
             if 's3cmd' in tools and 'conda' in tools and self.target_site_s3_key_id and self.target_site_s3_secret_key:
                 copy_file(self.compute_config, run, "{0}/ts-scripts/s3cmd-install.sh".format(os.path.dirname(sys.argv[0])), "s3cmd-install.sh")
-                execute_remote_command(self.compute_config, run, "sh s3cmd-install.sh {0} {1} {2}".format(self.compute_config['remote_user'], self.target_site_s3_key_id, self.target_site_s3_secret_key))
+                execute_remote_command(self.compute_config, run, "sudo sh s3cmd-install.sh {0} {1} {2}".format(self.compute_config['remote_user'], self.target_site_s3_key_id, self.target_site_s3_secret_key))
 
             if 'onda-eodata' in tools:
                 copy_file(self.compute_config, run, "{0}/ts-scripts/link-onda-eodata.sh".format(os.path.dirname(sys.argv[0])), "link-onda-eodata.sh")
-                execute_remote_command(self.compute_config, run, "sh link-onda-eodata.sh")
+                execute_remote_command(self.compute_config, run, "sudo sh link-onda-eodata.sh")
 
             if 'files' in self.test_scenario:
                 for f in self.test_scenario['files']:
