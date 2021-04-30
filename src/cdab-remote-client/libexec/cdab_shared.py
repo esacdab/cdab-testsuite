@@ -228,7 +228,7 @@ def copy_file(compute_config, run, local_file, remote_file, to_remote = True, ex
     try:
         execute_local_command(run, options, exit_code=exit_code, quiet=quiet)
     except Exception as e:
-        if ignore_failure:
+        if ignore_error:
             if quiet:  # nothing logged in execute_local_command()
                 Logger.log(LogLevel.ERROR, "Error during file transfer: {0}".format(str(e)), run=run)
         else:
