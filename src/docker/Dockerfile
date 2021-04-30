@@ -52,6 +52,11 @@ RUN echo 'export PS1="[\u@docker] \W # "' >> /root/.bash_profile
 # enable networking
 RUN echo 'NETWORKING=yes' >> /etc/sysconfig/network
 
+# Install Python
+RUN yum install -y \
+    python \
+    python-all
+
 # install supervisord
 RUN yum -y install epel-release python-setuptools
 RUN pip install supervisor
@@ -125,11 +130,6 @@ ARG CDAB_REMOTE_CLIENT_RPM
 RUN yum install -y centos-release-scl
 ADD $CDAB_REMOTE_CLIENT_RPM /tmp/$CDAB_REMOTE_CLIENT_RPM
 RUN yum localinstall -y /tmp/$CDAB_REMOTE_CLIENT_RPM
-
-# Install Python
-RUN yum install -y \
-    python \
-    python-all
 
 # Install traceroute
 RUN yum install -y traceroute
