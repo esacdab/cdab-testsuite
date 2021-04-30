@@ -20,7 +20,7 @@
    source /opt/conda/etc/profile.d/conda.sh
    ```
 
-   Transfer the the included file _environment.yml_ there and create a new conda environment (name **env_s3**) and activate that environment using these commands:
+   Transfer the the included file _environment.yml_ there and create a new conda environment (name **env_s3**). The conda environment should be created on a larger disk and should be manually linked from the conda installation directory:
   
    ```console
    sudo /opt/anaconda/bin/conda  env create -p $PWD/env_s3 --file environment.yml
@@ -28,6 +28,8 @@
 
    sudo ln -s ${PWD}/env_s3 /opt/anaconda/envs/env_s3
    ```
+
+   The application can be run without intitialising and activating the environment by simply launching the python executable from that directory.
 
 
 ## Integration procedure 
@@ -112,7 +114,9 @@
       ```
       website_endpoint = http://%(bucket)s.obs-website.%(location)s.otc.t-systems.com
       ```
+      
       Rerun
+      
       ```console
       opt/anaconda/bin/s3cmd --configure
       ```
