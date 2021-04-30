@@ -53,9 +53,7 @@ RUN echo 'export PS1="[\u@docker] \W # "' >> /root/.bash_profile
 RUN echo 'NETWORKING=yes' >> /etc/sysconfig/network
 
 # Install Python
-RUN yum install -y \
-    python \
-    python-all
+RUN yum install -y python python-all python-pip
 
 # install supervisord
 RUN yum -y install epel-release python-setuptools
