@@ -1,4 +1,4 @@
-# Use Case Scenario #2 - Rapid mapping - Integration Procedures
+# Use Case Scenario #3 - Rapid mosaicking - Integration Procedures
 
 ## Development Environment installation procedure
 
