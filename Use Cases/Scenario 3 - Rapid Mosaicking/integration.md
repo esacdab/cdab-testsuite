@@ -17,7 +17,7 @@
 
    ```console
    sudo sh conda-install.sh
-   source /opt/conda/etc/profile.d/conda.sh
+   source /opt/anaconda/etc/profile.d/conda.sh
    ```
 
    Transfer the the included file _environment.yml_ there and create a new conda environment (name **env_s3**). The conda environment should be created on a larger disk and should be manually linked from the conda installation directory:
@@ -85,13 +85,13 @@
       Install the **s3cmd** for S3 access:
      
       ```console
-      opt/anaconda/bin/s3cmd install s3cmd
+      /opt/anaconda/bin/s3cmd install s3cmd
       ```
       Configure the access to the MUNDI object store. The full procedure can be found at [this link](https://docs.otc.t-systems.com/en-us/ugs3cmd/obs/en-us_topic_0051060814.html).
 
       Run the following command:
       ```console
-      opt/anaconda/bin/s3cmd --configure
+      /opt/anaconda/bin/s3cmd --configure
       ```
       You will be prompted for several settings. Enter the following values:
 
@@ -118,7 +118,7 @@
       Rerun
       
       ```console
-      opt/anaconda/bin/s3cmd --configure
+      /opt/anaconda/bin/s3cmd --configure
       ```
       Confirm all choices and run answer **Y** (yes) to the access test. It should be successful. Answer **N** (no) to saving the settings as they are already fine.
 
@@ -137,7 +137,7 @@
         # Replace <yyyy>, <mm>, <dd> and <identifier> with the appropriate values,
         # as in s3://s3-olci/LFR/2021/02/13/S3A_OL_2_LFR____20210213T101140_20210213T101440_20210214T162238_0179_068_236_2520_LN1_O_NT_002.zip/
 
-        s3cmd get -r s3://s3-olci/LFR/<yyyy>/<mm>/<dd>/<identifier>.zip input_data/
+        /opt/anaconda/bin/s3cmd get -r s3://s3-olci/LFR/<yyyy>/<mm>/<dd>/<identifier>.zip input_data/
         unzip -d input_data input_data/<identifier>.zip
         rm input_data/<identifier>.zip
         ```
@@ -232,7 +232,7 @@
 
     [50%]
 
-6.  At this point the mosaicking algorithm **`s3_olci_mosaic.py`** can be launched.
+5.  At this point the mosaicking algorithm **`s3_olci_mosaic.py`** can be launched.
     
     It takes three parameters:
   
@@ -249,7 +249,7 @@
     This may take a while; on a typical VM approximately 10 minutes per processed input file.
     Wait until the process has finished and check that there has been no error. [80%]
 
-7. In the output directory there should be two files (the sizes vary depending on the number and nature of the input products) [90%]
+6. In the output directory there should be two files (the sizes vary depending on the number and nature of the input products) [90%]
 
    ```console
    $ ls -l output_data/
@@ -257,7 +257,7 @@
    -rw-rw-r--. 1 linux linux 335049108 Apr 30 10:00 ndvi_rgba.tif
    ```
 
-8. Download the file `ndvi_rgba.tif` onto your computer and open it with a tool such as QGIS. Verify that it shows the desired information (NDVI in the current configuration) of the area of interest. [100%]
+7. Download the file `ndvi_rgba.tif` onto your computer and open it with a tool such as QGIS. Verify that it shows the desired information (NDVI in the current configuration) of the area of interest. [100%]
 
    An typical image could look like this:
    ![Sentinel-3 OLCI mosaic in QGIS](s3-olci-mosaic.png "Sentinel-3 OLCI mosaic in QGIS")
