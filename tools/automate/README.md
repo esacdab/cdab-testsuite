@@ -19,9 +19,10 @@ A `config.json` file is provided and has to be placed in the same directory as t
 * scenarios: test scenarios to be run, the possible values are "TS01", "TS02", "TS03", "TS04", "TS05", "TS06", "TS07"
 * config: the path to the [config.yaml](https://github.com/esa-cdab/cdab-testsuite/blob/master/src/cdab-client/config.sample.yaml) file needed by the `cdab-client`, if `null` the script will look for it in the current directory.
 * targets: target sites where the test scenarios specified will be run, the possible values are "SciHub", "CREO", "ONDA", "MUNDI", "SOBLOO"
+* repetitions: specifies how many times the execution will be performed
 
 ## Output
-The results will be saved as tar files in the current directory with the following naming convention targetsite_scenario.tar and the container will be removed after the execution of the last scenario.
+The results will be saved as tar files in the current directory with the following naming convention targetsite_scenario_executionNumber.tar and the container will be removed after the execution of the last scenario.
 
 ## Credits
 This work has been performed in the frame of an internship at the European Space Agency

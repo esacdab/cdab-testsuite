@@ -7,6 +7,5 @@
 	"targets" : [
 		"SciHub"
 	],
-	"email": "insertYourMail@here.com",
-	"password": "Password"
+	"repetitions" : 1
 }
