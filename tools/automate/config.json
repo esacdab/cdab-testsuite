@@ -1,0 +1,12 @@
+{
+	"containername" : "testsite",
+	"config" : null,
+	"scenarios" : [
+		"TS01"
+	],
+	"targets" : [
+		"SciHub"
+	],
+	"email": "insertYourMail@here.com",
+	"password": "Password"
+}
