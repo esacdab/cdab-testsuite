@@ -1,14 +1,18 @@
 function prepare() {
-    echo "Installing cwltool" >> cdab.stderr
+    echo "Installing tools" >> cdab.stderr
     sudo yum install -y bc unzip gcc python3-devel
-    sudo pip3 install cwltool
     echo "Done" >> cdab.stderr
 
     echo "Installing Stars docker image" >> cdab.stderr
     docker pull $stage_in_docker_image
     echo "Done" >> cdab.stderr
 
-    mkdir input_data
+    echo "Installing application docker image" >> cdab.stderr
+    docker pull $application_docker_image
+    echo "Done" >> cdab.stderr
+
+    mkdir -p input_data
+    mkdir -p output_data
 
     touch cdab.stdout
     touch cdab.stderr
@@ -41,7 +45,7 @@ function stage_in() {
 
     if [ "$provider" == "AMAZON" ] || [ "$provider" == "GOOGLE" ]
     then
-        download_url=$(curl $ref | xmllint --format - | grep "<link rel=\"enclosure" | grep "scihub" | sed -E "s#.*href=\"(.*?)\".*#\1#g")
+        download_url=$(curl $ref | xmllint --format - | grep "<link rel=\"enclosure" | grep -E "scihub|apihub|copernicus\.eu" | sed -E "s#.*href=\"(.*?)\".*#\1#g")
         mkdir -p input_data/$id
         curl -u $credentials -o "${id}.zip" $download_url
         unzip -d input_data/$id "${id}.zip"
@@ -54,20 +58,13 @@ function stage_in() {
         [ $res -ne 0 ] && return $res
     fi
     
-    path=$(find ./input_data -type d -name IMG_DATA | grep $id)/
-
-    cat > wfinput.yaml << EOF
-s2_img_data_folder:
-  class: Directory
-  path: $path
-EOF
     return $res
 }
 
 
 # Read parameters
 working_dir="$1"
-# 2nd argument is docker image ID, not used
+application_docker_image="$2"
 test_site="$3" # e.g. CREO
 provider="$4"
 credentials="$5"
@@ -76,6 +73,8 @@ product_type="S2MSI1C"
 product_count=2
 
 stage_in_docker_image=terradue/stars-t2:0.5.38
+[ -z "$application_docker_image" ] && application_docker_image=docker.terradue.com/cdab-ndvi:latest
+
 cd "$1"
 
 # Install
@@ -109,8 +108,10 @@ do
     fi
     # Run tool
 
-    echo "CWL Command: cwltool workflow.cwl#wf wfinput.yaml" >> cdab.stderr
-    cwltool workflow.cwl#wf wfinput.yaml >> cdab.stdout 2>> cdab.stderr
+    path=$(find ./input_data -type d -name IMG_DATA | grep $id)/
+
+    echo "Docker command: docker run -i --user=1000:1005 --workdir /workdir -v ${PWD}:/workdir $application_docker_image /ndvi.py \"${path}\" /workdir/output_data " >> cdab.stderr
+    docker run -i --user=1000:1005 --workdir /workdir -v ${PWD}:/workdir $application_docker_image /ndvi.py "${path}" /workdir/output_data >> cdab.stdout 2>> cdab.stderr
     res=$?
     echo "EXIT CODE = $res" >> cdab.stderr
 
@@ -119,10 +120,10 @@ do
         ((wrong_processings++))
         echo "Processing of $id FAILED" >> cdab.stderr
     else
-        ls -l *.tif >> cdab.stderr
+        ls -l output_data/*.tif >> cdab.stderr
         errors=0
         count=0
-        for file in $(ls *.tif)
+        for file in $(ls output_data/*.tif)
         do
             ((count++))
             [ ! -s $file ] && errors=1
@@ -133,7 +134,7 @@ do
             ((wrong_processings++))
         fi
     fi
-    rm -f *.tif
+    rm -f output_data/*.tif
 done
 
 end_time=$(date +%s%N)

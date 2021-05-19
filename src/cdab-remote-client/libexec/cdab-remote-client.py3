@@ -88,7 +88,7 @@ class TestClient:
             'docker_run_command': 'PROCESSING',
             'test_target_url': '',
             'tools': [ 'conda', 'opensearch-client', 'Stars' ],
-            'cwl_file': True,
+            'cwl_file': False,
             'timeout': 2 * 60 * 60,
         },
         'TS15.3': {
@@ -1060,7 +1060,7 @@ class TestClient:
                 "nohup sh {0} {1} {2} {3} {4} {5} {6} {7} {8} > /dev/null 2>&1 &".format(
                     script_name,
                     working_dir,
-                    self.docker_image_id,
+                    self.docker_image_id if self.docker_image_id else '""',
                     self.target_site,
                     self.target_endpoint,
                     self.target_credentials,
@@ -1071,7 +1071,7 @@ class TestClient:
                 display_command="nohup sh {0} {1} {2} {3} {4} {5} {6} {7} {8} > /dev/null 2>&1 &".format(
                     script_name,
                     working_dir,
-                    self.docker_image_id,
+                    self.docker_image_id if self.docker_image_id else '""',
                     self.target_site,
                     self.target_endpoint,
                     re.sub(':.*', ':xxxxxxxx', self.target_credentials),
@@ -1172,18 +1172,18 @@ class TestClient:
             execute_remote_command(
                 self.compute_config,
                 run,
-                "nohup sh {0} {1} \"{2}\" {3} {4} {5} > /dev/null 2>&1 &".format(
+                "nohup sh {0} {1} {2} {3} {4} {5} > /dev/null 2>&1 &".format(
                     script_name,
                     working_dir,
-                    self.docker_image_id,
+                    self.docker_image_id if self.docker_image_id else '""',
                     self.test_site_name,
                     self.target_site_class_name,
                     self.target_credentials
                 ),
-                display_command="nohup sh {0} {1} \"{2}\" {3} {4} {5} > /dev/null 2>&1 &".format(
+                display_command="nohup sh {0} {1} {2} {3} {4} {5} > /dev/null 2>&1 &".format(
                     script_name,
                     working_dir,
-                    self.docker_image_id,
+                    self.docker_image_id if self.docker_image_id else '""',
                     self.test_site_name,
                     self.target_site_class_name,
                     re.sub(':.*', ':xxxxxxxx', self.target_credentials),
