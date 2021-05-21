@@ -106,8 +106,6 @@ namespace cdabtesttools.TestCases
 
         public override TestCaseResult CompleteTest(Task<IEnumerable<TestUnitResult>> tasks)
         {
-
-
             List<IMetric> _testCaseMetric = new List<IMetric>();
 
             try
