@@ -202,7 +202,7 @@ namespace cdabtesttools.Data
                     // We check that the baseline exists
                     if (!Configuration.Current.Data.Sets.ContainsKey(referenceSetId))
                     {
-                        log.WarnFormat("Target Site Catalogue Set named '{0}' reference an catalogue reference not found '{1}', skipping!", setName, setConfiguration.ReferenceSetId);
+                        log.WarnFormat("Target Site Catalogue Set named '{0}' reference a catalogue reference not found '{1}', skipping!", setName, setConfiguration.ReferenceSetId);
                         return null;
                     }
                     return Configuration.Current.Data.Sets[referenceSetId];

@@ -88,7 +88,7 @@ class TestClient:
             'docker_run_command': 'PROCESSING',
             'test_target_url': '',
             'tools': [ 'conda', 'opensearch-client', 'Stars' ],
-            'cwl_file': True,
+            'cwl_file': False,
             'timeout': 2 * 60 * 60,
         },
         'TS15.3': {
@@ -513,26 +513,26 @@ class TestClient:
             if 'global' not in full_config:
                 exit_client(ERR_CONFIG, "Global configuration section not found")
 
-            global_config = full_config['global']
+            self.global_config = full_config['global']
 
-            if 'docker_config' in global_config:
+            if 'docker_config' in self.global_config:
                 if not self.docker_config:
-                    self.docker_config = global_config['docker_config']
+                    self.docker_config = self.global_config['docker_config']
             else:
                 exit_client(ERR_CONFIG, "No global configuration for docker authentication file found, and none specified in command (-a)")
 
-            if 'ca_certificate' in global_config:
-                if isinstance(global_config['ca_certificate'], list):
-                    self.ca_certificates.extend(global_config['ca_certificate'])
+            if 'ca_certificate' in self.global_config:
+                if isinstance(self.global_config['ca_certificate'], list):
+                    self.ca_certificates.extend(self.global_config['ca_certificate'])
                 else:
-                    self.ca_certificates.append(global_config['ca_certificate'])
+                    self.ca_certificates.append(self.global_config['ca_certificate'])
 
-            if 'connect_retries' in global_config:
-                self.connect_retries = global_config['connect_retries']
-            if 'connect_interval' in global_config:
-                self.connect_interval = global_config['connect_interval']
-            if 'max_retention_hours' in global_config:
-                self.max_retention_hours = global_config['max_retention_hours']
+            if 'connect_retries' in self.global_config:
+                self.connect_retries = self.global_config['connect_retries']
+            if 'connect_interval' in self.global_config:
+                self.connect_interval = self.global_config['connect_interval']
+            if 'max_retention_hours' in self.global_config:
+                self.max_retention_hours = self.global_config['max_retention_hours']
 
             # Set service provider parameters
             if 'service_providers' in full_config:
@@ -659,6 +659,7 @@ class TestClient:
         if not self.test_scenario_id in TestClient.test_scenarios:
             exit_client(ERR_CONFIG, "Test scenario '{0}' not configured".format(self.test_scenario_id))
 
+        orig_test_scenario_id = self.test_scenario_id
         self.test_scenario = TestClient.test_scenarios[self.test_scenario_id]
 
         if self.test_scenario_id[0:4] == 'TS15':
@@ -761,6 +762,10 @@ class TestClient:
         if 'test_target_url' in self.test_scenario:
             self.test_target_url = self.test_scenario['test_target_url']
 
+        if 'scenarios' in self.global_config:
+            if orig_test_scenario_id in self.global_config['scenarios']:
+                for key in self.global_config['scenarios'][orig_test_scenario_id]:
+                    self.test_scenario[key] = self.global_config['scenarios'][orig_test_scenario_id][key]
 
 
     def get_target_site_access(self):
@@ -1060,7 +1065,7 @@ class TestClient:
                 "nohup sh {0} {1} {2} {3} {4} {5} {6} {7} {8} > /dev/null 2>&1 &".format(
                     script_name,
                     working_dir,
-                    self.docker_image_id,
+                    self.docker_image_id if self.docker_image_id else '""',
                     self.target_site,
                     self.target_endpoint,
                     self.target_credentials,
@@ -1071,7 +1076,7 @@ class TestClient:
                 display_command="nohup sh {0} {1} {2} {3} {4} {5} {6} {7} {8} > /dev/null 2>&1 &".format(
                     script_name,
                     working_dir,
-                    self.docker_image_id,
+                    self.docker_image_id if self.docker_image_id else '""',
                     self.target_site,
                     self.target_endpoint,
                     re.sub(':.*', ':xxxxxxxx', self.target_credentials),
@@ -1172,24 +1177,23 @@ class TestClient:
             execute_remote_command(
                 self.compute_config,
                 run,
-                "nohup sh {0} {1} \"{2}\" {3} {4} {5} > /dev/null 2>&1 &".format(
+                "nohup sh {0} {1} {2} {3} {4} {5} > /dev/null 2>&1 &".format(
                     script_name,
                     working_dir,
-                    self.docker_image_id,
+                    self.docker_image_id if self.docker_image_id else '""',
                     self.test_site_name,
                     self.target_site_class_name,
                     self.target_credentials
                 ),
-                display_command="nohup sh {0} {1} \"{2}\" {3} {4} {5} > /dev/null 2>&1 &".format(
+                display_command="nohup sh {0} {1} {2} {3} {4} {5} > /dev/null 2>&1 &".format(
                     script_name,
                     working_dir,
-                    self.docker_image_id,
+                    self.docker_image_id if self.docker_image_id else '""',
                     self.test_site_name,
                     self.target_site_class_name,
                     re.sub(':.*', ':xxxxxxxx', self.target_credentials),
                 )
             )
-
         if 'timeout' in self.test_scenario:
             timeout = self.test_scenario['timeout']
         else:

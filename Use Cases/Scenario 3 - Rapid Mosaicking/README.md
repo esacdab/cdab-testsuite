@@ -1,3 +1,3 @@
-# Use Case Scenario #2 - Rapid Mosaicking
+# Use Case Scenario #3 - Rapid Mosaicking
 
-Documentation coming soon.
+Click [here](integration.md) to see the integration procedure for manual execution.
