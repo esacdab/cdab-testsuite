@@ -57,7 +57,8 @@ RUN yum -y install epel-release python-setuptools
 
 # install Python
 RUN yum install -y python python-all python-pip
-RUN pip install --upgrade pip
+# upgrade breaks pip, deactivated temporarily (produces error: No module named typing)
+# RUN pip install --upgrade pip
 
 # install supervisord
 RUN pip install supervisor
