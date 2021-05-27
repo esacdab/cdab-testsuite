@@ -109,6 +109,7 @@ class TestClient:
             'docker_run_command': 'PROCESSING',
             'test_target_url': '',
             'tools': [ 'conda', 'opensearch-client', 'Stars' ],
+            'files': [ 'get-poeorb.py' ],
             'cwl_file': True,
             'timeout': 6 * 60 * 60,
         },
