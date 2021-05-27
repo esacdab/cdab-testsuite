@@ -341,7 +341,7 @@ namespace cdabtesttools.Data
                 Geometry geom2 = wktreader.Read(geom.ToWkt());
 
                 // Invert coordinates if necessary
-                if (AdjustGeometry(geom2));
+                if (AdjustGeometry(geom2))
                 {
                     log.DebugFormat("Coordinates adjusted for item {0}", item.Identifier);
                 }
