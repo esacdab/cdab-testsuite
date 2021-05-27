@@ -15,7 +15,7 @@ else:
 
 bands = {'B04.jp2': None, 'B08.jp2': None}
 
-for root, dirs, files in os.walk('.'):
+for root, dirs, files in os.walk(input_dir):
     for f in files:
         for b in bands:
             if b == f[-7:]:

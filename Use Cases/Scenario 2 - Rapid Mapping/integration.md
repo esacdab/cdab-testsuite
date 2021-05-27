@@ -16,7 +16,7 @@
 
    ```console
    sudo sh conda-install.sh
-   source /opt/conda/etc/profile.d/conda.sh
+   source /opt/anaconda/etc/profile.d/conda.sh
    ```
 
    Transfer the the included file _environment.yml_ there and create a new conda environment (name **env_burned_area**) and activate that environment using these commands:

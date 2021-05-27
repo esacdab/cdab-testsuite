@@ -68,6 +68,8 @@ function process_interferogram() {
     echo $pre_id > if-ids.list
     echo $post_id >> if-ids.list
 
+    /opt/anaconda/envs/env_snap/bin/python get-poeorb.py /opt/anaconda/envs/env_snap $pre_id $post_id
+
     while [ $(date +%s) -lt $end_time ]
     do
         download "if-ids.list" 2 true
