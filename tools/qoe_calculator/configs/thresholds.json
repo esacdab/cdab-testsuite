@@ -1,0 +1,10 @@
+{
+	"M001" : {"satisfied" : 100, "frustrated" : 2000},
+	"M002" : {"satisfied" : 1000, "frustrated" : 4000},
+	"M003" : {"satisfied" : 1, "frustrated" : 10},
+	"M005" : {"satisfied" : 8000000, "frustrated" : 1000000},
+	"M012" : {"satisfied" : 1, "frustrated" : 30},
+	"M013" : {"satisfied" : 21600, "frustrated" : 86400},
+	"M017" : {"satisfied" : 60, "frustrated" : 1440},	
+	"M024" : {"satisfied" : 99, "frustrated" : 90}
+}
