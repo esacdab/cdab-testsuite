@@ -175,7 +175,7 @@
    -rw-rw-r--. 1 centos centos 10451496 May 31 16:40 rgba_S3B_SL_2_LST____20210425T102904_20210425T103204_20210426T210428_0179_051_336_2340_LN2_O_NT_004.tif
    ```
 
-7. Download the file `ndvi_rgba.tif` onto your computer and open it with a tool such as QGIS. Verify that it shows the desired information (NDVI in the current configuration) of the area of interest. [100%]
+7. Download the files `rgba_*.tif` onto your computer and open it with a tool such as QGIS. Verify that it shows the desired information (land surface temperature) of the area of interest. [100%]
 
    An typical image could look like this:
    ![Sentinel-3 SLSTR result image QGIS](s3-slstr-lst.png "Sentinel-3 SLSTR result image QGIS")
