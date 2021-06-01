@@ -36,11 +36,11 @@
 
 1.  Connect to a shell on the virtual machine. [5%]
 
-2.  Upload the three python files used for the scenario (_s3\_olci\_mosaic.py_, _snap\_util\_helpers.py_ and _stage-in.py_) to folder using the _scp_ tool. [10%]
+2.  Upload the three python files used for the scenario (_s3\_olci\_mosaic.py_, _snap\_util\_helpers.py_ and _stage-in.py_) to the working directory using the _scp_ tool. [10%]
 
 3.  **Using the target site data access and following the documentation available at the target site**, get the identifiers of a list of relevant Sentinel-3 OLCI Level 2 LFR products. [20%]
    
-    For instance the following list contains the identifiers of products covering an area of Western Africa 
+    For instance the following list contains the identifiers of products covering an area of Western Africa:
 
     ```
     S3A_OL_2_LFR____20210213T101140_20210213T101440_20210214T162238_0179_068_236_2520_LN1_O_NT_002
@@ -154,45 +154,20 @@
   
       - Automatic procedure
 
-        This would be the procedure as soon as the ENS file system is fully available:
-
         ```console
         # Replace <identifier> with a product identifier from the list
   
         /opt/anaconda/bin/python stage-in.py id OL_2_LFR___ ONDA <identifier> input_data/ ''
         ```
 
-        Until then, the download as to be done using product download URLs, like this:
-
-        ```console
-        # Replace <url> with a download URL (e.g. https://catalogue.onda-dias.eu/dias-catalogue/Products(fa7a8470-152c-4f80-bad5-65d9f6fe8fa6)/$value)
-        # and <username>:<password> with the correct ONDA credentials.
-  
-        /opt/anaconda/bin/python stage-in.py url OL_2_LFR___ ONDA <url> input_data/ <username>:<password>
-        ```
-
       - Manual procedure
     
-        This would be the procedure as soon as the ENS file system is fully available:
-
         ```console
         # Replace <yyyy>, <mm>, <dd> and <identifier> with the appropriate values,
         # as in /eodata/S3/OLCI/LEVEL-2/OL_2_LFR___/2021/02/13/S3A_OL_2_LFR____20210213T101140_20210213T101440_20210214T162238_0179_068_236_2520_LN1_O_NT_002.zip/S3A_OL_2_LFR____20210213T101140_20210213T101440_20210214T162238_0179_068_236_2520_LN1_O_NT_002.SEN3
-  
-        cp -r /eodata/S3/OLCI/LEVEL-2/OL_2_LFR___/<yyyy>/<mm>/<dd>/<identifier>.SEN3.zip/{3}<identifier>.SEN3 input_data/
-        ```
-        Until then, the download as to be done using product download URLs, like this:
-
-        ```console
-        # Replace <url> with a download URL (e.g. https://catalogue.onda-dias.eu/dias-catalogue/Products(fa7a8470-152c-4f80-bad5-65d9f6fe8fa6)/$value)
-        # and <username>:<password> with the correct ONDA credentials.
-  
-        curl -o tmp.zip -u <username>:<password> <url> input_data/ <username>:<password>
-        unzip -d input_data tmp.zip
-        rm tmp.zip
         ```
 
-   * For **Sobloo**, the download can be operformed using the DirectData API.
+   * For **Sobloo**, the download can be performed using the DirectData API.
 
       - Automatic procedure
 

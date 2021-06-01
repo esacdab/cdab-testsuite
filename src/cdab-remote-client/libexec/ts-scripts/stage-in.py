@@ -20,7 +20,8 @@ def copy_tree(source, destination, file_check=None):
 
 
 product_types = {
-    'OL_2_LFR___': re.compile(r'^(?P<id>S3[AB]_OL_2_LFR____(?P<yyyy>\d{4})(?P<mm>\d{2})(?P<dd>\d{2}).*_\d{3})(\.SEN3)?') # e.g.S3A_OL_2_LFR____20210214T094829_20210214T095129_20210215T150946_0179_068_250_2700_LN1_O_NT_002
+    'OL_2_LFR___': re.compile(r'^(?P<id>S3[AB]_OL_2_LFR____(?P<yyyy>\d{4})(?P<mm>\d{2})(?P<dd>\d{2}).*_\d{3})(\.SEN3)?'),   # e.g.S3A_OL_2_LFR____20210214T094829_20210214T095129_20210215T150946_0179_068_250_2700_LN1_O_NT_002
+    'SL_2_LST___': re.compile(r'^(?P<id>S3[AB]_SL_2_LST____(?P<yyyy>\d{4})(?P<mm>\d{2})(?P<dd>\d{2}).*_\d{3})(\.SEN3)?')    # e.g.S3B_SL_2_LST____20210425T102904_20210425T103204_20210426T210428_0179_051_336_2340_LN2_O_NT_004
 }
 credentials_regex = re.compile(r'((?P<username>[^:]+):)?(?P<password>.*)')
 
@@ -63,6 +64,15 @@ try:
                 product_type_match.group('id')
             )
             copy_tree(source, "{0}/{1}.SEN3".format(input_dir, product_type_match.group('id')), "xfdumanifest.xml")
+
+        elif product_type == 'SL_2_LST___':
+            source = "/eodata/Sentinel-3/SLSTR/SL_2_LST/{0}/{1}/{2}/{3}.SEN3".format(
+                product_type_match.group('yyyy'),
+                product_type_match.group('mm'),
+                product_type_match.group('dd'),
+                product_type_match.group('id')
+            )
+            copy_tree(source, "{0}/{1}.SEN3".format(input_dir, product_type_match.group('id')), "xfdumanifest.xml")
         else:
             raise Exception("No matching type found")
 
@@ -87,6 +97,10 @@ try:
             with zipfile.ZipFile(destination, 'r') as zip_ref:
                 zip_ref.extractall(input_dir)
             os.remove(destination)
+
+        elif product_type == 'SL_2_LST___':
+            raise Exception("Type not provided by MUNDI")
+
         else:
             raise Exception("No matching type found")
 
@@ -94,51 +108,55 @@ try:
     elif provider == 'ONDA':
         # Use NFS-linked directory (manually linked previously)
 
-        if product_type == 'OL_2_LFR___':
-            if item_type == 'id':
-                source = "/eodata/S3/OLCI/LEVEL-2/OL_2_LFR___/{0}/{1}/{2}/{3}.zip".format(
+        if item_type == 'id':
+            if product_type == 'OL_2_LFR___':
+                source_base_1 = "/eodata/S3/OLCI/LEVEL-2/OL_2_LFR___/{0}/{1}/{2}/{3}.zip"
+                source_base_2 = "/eodata/S3/OLCI/LEVEL-2/OL_2_LFR___/{0}/{1}/{2}/{3}.zip/{3}.SEN3"
+            elif product_type == 'SL_2_LST___':
+                source_base_1 = "/eodata/S3/SLSTR/LEVEL-2/SL_2_LST___/{0}/{1}/{2}/{3}.zip"
+                source_base_2 = "/eodata/S3/SLSTR/LEVEL-2/SL_2_LST___/{0}/{1}/{2}/{3}.zip/{3}.SEN3"
+            else:
+                raise Exception("No matching type found")
+                
+            source = source_base_1.format(
+                product_type_match.group('yyyy'),
+                product_type_match.group('mm'),
+                product_type_match.group('dd'),
+                product_type_match.group('id')
+            )
+            if os.path.isfile(source):
+                destination = "{0}/{1}.zip".format(input_dir, product_type_match.group('id'))
+
+                shutil.copy(source, destination)
+
+                with zipfile.ZipFile(destination, 'r') as zip_ref:
+                    zip_ref.extractall(input_dir)
+                os.remove(destination)
+
+            elif os.path.isdir(source):
+                source = source_base_2.format(
                     product_type_match.group('yyyy'),
                     product_type_match.group('mm'),
                     product_type_match.group('dd'),
                     product_type_match.group('id')
                 )
-                if os.path.isfile(source):
-                    destination = "{0}/{1}.zip".format(input_dir, product_type_match.group('id'))
-
-                    shutil.copy(source, destination)
-
-                    with zipfile.ZipFile(destination, 'r') as zip_ref:
-                        zip_ref.extractall(input_dir)
-                    os.remove(destination)
-                elif os.path.isdir(source):
-                    source = "/eodata/S3/OLCI/LEVEL-2/OL_2_LFR___/{0}/{1}/{2}/{3}.zip/{3}.SEN3".format(
-                        product_type_match.group('yyyy'),
-                        product_type_match.group('mm'),
-                        product_type_match.group('dd'),
-                        product_type_match.group('id')
-                    )
-                    copy_tree(source, "{0}/{1}.SEN3".format(input_dir, product_type_match.group('id')), "xfdumanifest.xml")
-                else:
-                    raise("No appropriate download source found")
-            else:
-                r = requests.get(input_id, auth=(credentials_match.group('username'), credentials_match.group('password')), stream=True)
-                destination = "{0}/tmp.zip".format(input_dir)
-                with open(destination, 'wb') as f:
-                    for chunk in r.iter_content(chunk_size=8192): 
-                        f.write(chunk)
-                r.close()
-                with zipfile.ZipFile(destination, 'r') as zip_ref:
-                    zip_ref.extractall(input_dir)
-                os.remove(destination)
-
+                copy_tree(source, "{0}/{1}.SEN3".format(input_dir, product_type_match.group('id')), "xfdumanifest.xml")
         else:
-            raise Exception("No matching type found")
+            r = requests.get(input_id, auth=(credentials_match.group('username'), credentials_match.group('password')), stream=True)
+            destination = "{0}/tmp.zip".format(input_dir)
+            with open(destination, 'wb') as f:
+                for chunk in r.iter_content(chunk_size=8192): 
+                    f.write(chunk)
+            r.close()
+            with zipfile.ZipFile(destination, 'r') as zip_ref:
+                zip_ref.extractall(input_dir)
+            os.remove(destination)
 
     elif provider == 'SOBLOO':
         # Use DirectData API (with API key, passed as the credentials password)
 
         sobloo_api_key = credentials_match.group('password')
-        if product_type == 'OL_2_LFR___':
+        if product_type == 'OL_2_LFR___' or product_type == 'SL_2_LST___':
             url_regex = re.compile(r'.*\.SEN3(/(?P<dir>[^\?]*))?(/(?P<file>[^/\?]+))(\?.*)?')
 
             response = requests.post("https://sobloo.eu/api/v1-beta/direct-data/product-links",
@@ -166,6 +184,7 @@ try:
                     for chunk in r.iter_content(chunk_size=8192): 
                         f.write(chunk)
                 r.close()
+
         else:
             raise Exception("No matching type found")
 

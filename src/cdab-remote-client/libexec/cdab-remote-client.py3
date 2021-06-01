@@ -102,6 +102,17 @@ class TestClient:
             'cwl_file': False,
             'timeout': 2 * 60 * 60,
         },
+        'TS15.4': {
+            'test_scenario_description': 'Trends mapping of S3 L2 SLSTR',
+            'test_case_name': 'TC415',
+            'docker_image_id': None,
+            'docker_run_command': 'PROCESSING',
+            'test_target_url': '',
+            'tools': [ 'conda', 'opensearch-client', 'Stars' ],
+            'files': [ 's3-slstr.tgz', 'stage-in.py' ],
+            'cwl_file': False,
+            'timeout': 2 * 60 * 60,
+        },
         'TS15.5': {
             'test_scenario_description': 'Remote execution of a predefined processing scenario test (interferogram)',
             'test_case_name': 'TC415',
