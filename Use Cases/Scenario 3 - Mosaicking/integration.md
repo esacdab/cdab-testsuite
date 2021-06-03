@@ -1,4 +1,4 @@
-# Use Case Scenario #3 - Rapid mosaicking - Integration Procedures
+# Use Case Scenario #3 - Mosaicking/Land Monitoring - Integration Procedures
 
 ## Development Environment installation procedure
 
