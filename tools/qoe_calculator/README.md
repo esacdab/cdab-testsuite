@@ -76,3 +76,5 @@ The final script in the process, given a data file as input it calculates the co
     * -q3, path to the `q3_data.json` file produced by `exctract_q.py`, if specified Q3 will be calculated.
     * -q4, path to the `q4_data.json` file produced by `exctract_q.py`, if specified Q4 will be calculated.
 
+## Credits
+This work has been performed in the frame of an internship at the European Space Agency

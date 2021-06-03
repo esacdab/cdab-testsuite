@@ -2,7 +2,7 @@
 	"host" : "localhost",
 	"user" : "root",
 	"database" : "testcases",
-	"password" : "bz6$oYYx9nY444W!Xt4223U62",
+	"password" : "password",
 	"q1" : false,
 	"q2" : true,
 	"q3" : false,
