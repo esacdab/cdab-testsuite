@@ -51,7 +51,6 @@ def get_args():
 		help="Path of the file containing the data to calculate q4"
 		)
 
-	parser.add_argument("n")
 	return parser.parse_args()
 
 def calculate_apdex(metric, satisf_tresh, tolerating_tresh):
@@ -98,7 +97,7 @@ def q1(q1_data, thresholds, weights):
 		json.dump(result, output)
 
 
-def q2(q2_data, thresholds, weights, samples=0):
+def q2(q2_data, thresholds, weights):
 	with open(q2_data) as f:
 		data = json.load(f)
 
@@ -112,7 +111,7 @@ def q2(q2_data, thresholds, weights, samples=0):
 	result["APDEXM003"] = apdexm3
 	result["QoE"] = weights["APDEXM001"]*apdexm1 + weights["APDEXM002"]*apdexm2 + weights["APDEXM003"]*apdexm3 
 
-	with open("q2_{}.json".format(samples), "w") as output:
+	with open("q2.json", "w") as output:
 		json.dump(result, output)
 
 def q3(q3_data, thresholds, weights):
@@ -173,7 +172,7 @@ def main():
 	if args.q1 is not None:
 		q1(args.q1, thresholds, weights["Q1"])
 	if args.q2 is not None:
-		q2(args.q2, thresholds, weights["Q2"], args.n)
+		q2(args.q2, thresholds, weights["Q2"])
 	if args.q3 is not None:
 		q3(args.q3, thresholds, weights["Q3"])
 	if args.q4 is not None:
