@@ -46,7 +46,7 @@ class TestClient:
     """Main class for remote execution of the test scenarios TS11, TS12, TS13 and TS15.
     """
 
-    VERSION = "1.44"
+    VERSION = "1.45"
 
     errors = {
         ERR_CONFIG: 'Missing or invalid configuration',
@@ -658,7 +658,7 @@ class TestClient:
             exit_client(ERR_CONFIG, "{0} value(s) required for hourly cost (as per flavour):".format(self.flavor_count))
 
         if TestClient.keep_vm:
-            self.compute_config['vm_name'] = "K-{0}".format(self.compute_config['vm_name'])
+            self.compute_config['vm_name'] = "k-{0}".format(self.compute_config['vm_name'])
 
 
 

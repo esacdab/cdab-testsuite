@@ -34,7 +34,7 @@ using Terradue.OpenSearch.DataHub.Dias;
 using Terradue.OpenSearch.Engine;
 using Terradue.OpenSearch.DataHub.Aws;
 using Terradue.OpenSearch.DataHub.GoogleCloud;
-
+using Terradue.OpenSearch.Usgs;
 
 namespace cdabtesttools.Target
 {
@@ -126,6 +126,12 @@ namespace cdabtesttools.Target
                 return TargetType.ASF;
             }
 
+            if (Wrapper.Settings.ServiceUrl.Host == "m2m.cr.usgs.gov")
+            {
+                log.DebugFormat("TARGET TYPE: USGS");
+                return TargetType.USGS;
+            }
+
             if (Wrapper.Settings.ServiceUrl.Host.EndsWith("copernicus.eu") || Wrapper.Settings.ServiceUrl.AbsolutePath.Contains("/dhus"))
             {
                 log.DebugFormat("TARGET TYPE: DATAHUB");
@@ -149,7 +155,6 @@ namespace cdabtesttools.Target
 
         public static IDataHubSourceWrapper CreateDataAccessWrapper(TargetSiteConfiguration targetSiteConfig, FiltersDefinition filters = null)
         {
-
             var target_uri = targetSiteConfig.GetDataAccessUri();
             var target_creds = targetSiteConfig.GetDataAccessNetworkCredentials();
 
@@ -189,6 +194,11 @@ namespace cdabtesttools.Target
             if (target_uri.Host == "api.daac.asf.alaska.edu")
             {
                 return new AsfApiWrapper(target_uri, (NetworkCredential)target_creds);
+            }
+
+            if (target_uri.Host == "m2m.cr.usgs.gov")
+            {
+                return new UsgsDataWrapper(new Uri(string.Format("https://m2m.cr.usgs.gov/api/api")), (NetworkCredential)target_creds);
             }
 
             if (target_uri.Host.EndsWith("copernicus.eu") || target_uri.AbsolutePath.EndsWith("/dhus"))

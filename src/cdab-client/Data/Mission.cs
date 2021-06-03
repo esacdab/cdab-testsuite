@@ -98,6 +98,7 @@ namespace cdabtesttools.Data
         public static IEnumerable<Mission> GenerateExistingDataDictionary(TargetSiteWrapper target)
         {
             List<Mission> missions = new List<Mission>();
+            IEnumerable<Feature> features = ShapeFileLoader.Load(Configuration.Current.Global.CountryShapefilePath);
 
             // Sentinel1
             Mission s1Mission = new Mission("Sentinel-1", new LabelString("Sentinel-1", "Sentinel-1", GetIdentifierValidator(new Regex(@"^S1.*"))));
@@ -160,45 +161,55 @@ namespace cdabtesttools.Data
             s1Mission.Count = new ItemNumberRange("count", "{http://a9.com/-/spec/opensearch/1.1/}count", 1, 50, 1, "{0}",
                 new Regex(@"([0-9]+(\\.[0-9]+)?)"), "Count", null, GetCountValidator);
 
-            IEnumerable<Feature> features = ShapeFileLoader.Load(Configuration.Current.Global.CountryShapefilePath);
             s1Mission.Geometries = new GeometryFilterCollection("geom", "{http://a9.com/-/opensearch/extensions/geo/1.0/}geometry", features);
 
-            missions.Add(s1Mission);
-
-            if (target != null && target.Type == TargetType.ASF)
-                return missions;
+            if (target.Type != TargetType.USGS) missions.Add(s1Mission);
 
             // Sentinel2
-            Mission s2Mission = new Mission("Sentinel-2", new LabelString("Sentinel-2", "Sentinel-2", GetIdentifierValidator(new Regex(@"^S2.*"))));
-            s2Mission.Lifetime = new TimeRange("{http://a9.com/-/opensearch/extensions/time/1.0/}start", "{http://a9.com/-/opensearch/extensions/time/1.0/}end", new DateTime(2015, 07, 01), DateTime.UtcNow);
-            s2Mission.PlatformIdentifiers = new StringListChoice("platformSerialIdentifier", "{http://a9.com/-/opensearch/extensions/eo/1.0/}platformSerialIdentifier",
-                new LabelString[] {
-                    new LabelString("2015-028A", "A", GetIdentifierValidator(new Regex(@"^S2A.*"))),
-                    new LabelString("2017-013A", "B", GetIdentifierValidator(new Regex(@"^S2B.*")))
-                });
-            s2Mission.ProductTypes = new StringListChoice("productType", "{http://a9.com/-/opensearch/extensions/eo/1.0/}productType",
-                new LabelString[] {
-                    new LabelString("S2MSI1C", "Level-1C", GetIdentifierValidator(new Regex(@"^S2.*_MSIL1C_.*"))),
-                    new LabelString("S2MSI2A", "Level-2A", GetIdentifierValidator(new Regex(@"^S2.*_MSIL2A_.*"))),
-                });
-            s2Mission.RelativeOrbit = new ItemNumberRange("track", "{http://a9.com/-/opensearch/extensions/eo/1.0/}track", 1, 143, 1, "[{0},{1}]",
-                new Regex(@"\[([0-9]+(\\.[0-9]+)?),([0-9]+(\\.[0-9]+)?)\]"), "Track", GetTrackValidator, null);
+            Mission s2Mission;
 
-            s2Mission.Count = new ItemNumberRange("count", "{http://a9.com/-/spec/opensearch/1.1/}count", 1, 50, 1, "{0}",
-                new Regex(@"([0-9]+(\\.[0-9]+)?)"), "Count", null, GetCountValidator);
+            if (target.Type == TargetType.USGS) {
+                s2Mission = new Mission("Sentinel-2", new LabelString("Sentinel-2", "Sentinel-2", GetIdentifierValidator(new Regex(@"^L1C_.*"))));
+                s2Mission.Lifetime = new TimeRange("{http://a9.com/-/opensearch/extensions/time/1.0/}start", "{http://a9.com/-/opensearch/extensions/time/1.0/}end", new DateTime(2020, 01, 01), DateTime.UtcNow);
+                s2Mission.ProductTypes = new StringListChoice("productType", "{http://a9.com/-/opensearch/extensions/eo/1.0/}productType",
+                    new LabelString[] {
+                        new LabelString("sentinel_2a", "Level-1C", GetIdentifierValidator(new Regex(@"^L1C_.*"))),
+                    });
+                s2Mission.Count = new ItemNumberRange("count", "{http://a9.com/-/spec/opensearch/1.1/}count", 1, 10, 1, "{0}",
+                    new Regex(@"([0-9]+(\\.[0-9]+)?)"), "Count", null, GetCountValidator);
 
-            // s2Mission.Timeliness = new StringListChoice("timeliness", "{http://a9.com/-/opensearch/extensions/eo/1.0/}timeliness",
-            //     new LabelString[] {
-            //         new LabelString("Fast-1.5h", "Fast 1.5h", null, GetMultiFiltersConditioner("productType", new string[]{"S2MSI1C"})),
-            //     });
+            } else {
+                s2Mission = new Mission("Sentinel-2", new LabelString("Sentinel-2", "Sentinel-2", GetIdentifierValidator(new Regex(@"^S2.*"))));
+                s2Mission.Lifetime = new TimeRange("{http://a9.com/-/opensearch/extensions/time/1.0/}start", "{http://a9.com/-/opensearch/extensions/time/1.0/}end", new DateTime(2015, 07, 01), DateTime.UtcNow);
+                s2Mission.PlatformIdentifiers = new StringListChoice("platformSerialIdentifier", "{http://a9.com/-/opensearch/extensions/eo/1.0/}platformSerialIdentifier",
+                    new LabelString[] {
+                        new LabelString("2015-028A", "A", GetIdentifierValidator(new Regex(@"^S2A.*"))),
+                        new LabelString("2017-013A", "B", GetIdentifierValidator(new Regex(@"^S2B.*")))
+                    });
+                s2Mission.ProductTypes = new StringListChoice("productType", "{http://a9.com/-/opensearch/extensions/eo/1.0/}productType",
+                    new LabelString[] {
+                        new LabelString("S2MSI1C", "Level-1C", GetIdentifierValidator(new Regex(@"^S2.*_MSIL1C_.*"))),
+                        new LabelString("S2MSI2A", "Level-2A", GetIdentifierValidator(new Regex(@"^S2.*_MSIL2A_.*"))),
+                    });
+                s2Mission.RelativeOrbit = new ItemNumberRange("track", "{http://a9.com/-/opensearch/extensions/eo/1.0/}track", 1, 143, 1, "[{0},{1}]",
+                    new Regex(@"\[([0-9]+(\\.[0-9]+)?),([0-9]+(\\.[0-9]+)?)\]"), "Track", GetTrackValidator, null);
 
-            s2Mission.ArchivingStatus = new StringListChoice("archiveStatus", "{http://a9.com/-/opensearch/extensions/eo/1.0/}statusSubType",
-                new LabelString[] {
-                    new LabelString("Online", "Online", GetArchivingStatusValidator(Terradue.ServiceModel.Ogc.Eop21.StatusSubTypeValueEnumerationType.ONLINE), null),
-                    new LabelString("Offline", "Offline", GetArchivingStatusValidator(Terradue.ServiceModel.Ogc.Eop21.StatusSubTypeValueEnumerationType.OFFLINE), null),
-                });
+                s2Mission.Count = new ItemNumberRange("count", "{http://a9.com/-/spec/opensearch/1.1/}count", 1, 50, 1, "{0}",
+                    new Regex(@"([0-9]+(\\.[0-9]+)?)"), "Count", null, GetCountValidator);
 
-            s2Mission.Geometries = new GeometryFilterCollection("geom", "{http://a9.com/-/opensearch/extensions/geo/1.0/}geometry", features);
+                // s2Mission.Timeliness = new StringListChoice("timeliness", "{http://a9.com/-/opensearch/extensions/eo/1.0/}timeliness",
+                //     new LabelString[] {
+                //         new LabelString("Fast-1.5h", "Fast 1.5h", null, GetMultiFiltersConditioner("productType", new string[]{"S2MSI1C"})),
+                //     });
+
+                s2Mission.ArchivingStatus = new StringListChoice("archiveStatus", "{http://a9.com/-/opensearch/extensions/eo/1.0/}statusSubType",
+                    new LabelString[] {
+                        new LabelString("Online", "Online", GetArchivingStatusValidator(Terradue.ServiceModel.Ogc.Eop21.StatusSubTypeValueEnumerationType.ONLINE), null),
+                        new LabelString("Offline", "Offline", GetArchivingStatusValidator(Terradue.ServiceModel.Ogc.Eop21.StatusSubTypeValueEnumerationType.OFFLINE), null),
+                    });
+
+                s2Mission.Geometries = new GeometryFilterCollection("geom", "{http://a9.com/-/opensearch/extensions/geo/1.0/}geometry", features);
+            }
 
             missions.Add(s2Mission);
 
@@ -253,7 +264,7 @@ namespace cdabtesttools.Data
                     new LabelString("Offline", "Offline", GetArchivingStatusValidator(Terradue.ServiceModel.Ogc.Eop21.StatusSubTypeValueEnumerationType.OFFLINE), null),
                 });
 
-            missions.Add(s3Mission);
+            if (target.Type != TargetType.USGS) missions.Add(s3Mission);
 
             Mission s5pMission = new Mission("Sentinel-5P", new LabelString("Sentinel-5 Precursor", "Sentinel-5 Precursor", GetIdentifierValidator(new Regex(@"^S5P.*"))));
             s5pMission.Lifetime = new TimeRange("{http://a9.com/-/opensearch/extensions/time/1.0/}start", "{http://a9.com/-/opensearch/extensions/time/1.0/}end", new DateTime(2015, 07, 01), DateTime.UtcNow);
@@ -268,9 +279,17 @@ namespace cdabtesttools.Data
                     new LabelString("Offline", "Offline", GetArchivingStatusValidator(Terradue.ServiceModel.Ogc.Eop21.StatusSubTypeValueEnumerationType.OFFLINE), null),
                 });
 
+            if (true) {
+                s3Mission.Timeliness = new StringListChoice("timeliness", "{http://a9.com/-/opensearch/extensions/eo/1.0/}timeliness",
+                    new LabelString[] {
+                        new LabelString("Near Real Time", "Near Real Time", GetTimelinessValidator("NRT")),
+                        new LabelString("Offline", "Offline", GetTimelinessValidator("OFFL")),
+                });
+            }
+
             s5pMission.Geometries = new GeometryFilterCollection("geom", "{http://a9.com/-/opensearch/extensions/geo/1.0/}geometry", features);
 
-            missions.Add(s5pMission);
+            if (target.Type != TargetType.USGS) missions.Add(s5pMission);
 
             return missions;
         }

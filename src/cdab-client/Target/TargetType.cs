@@ -27,6 +27,8 @@ namespace cdabtesttools.Target
 
         ASF = 4,
 
-        THIRDPARTY = 5
+        USGS = 5,
+
+        THIRDPARTY = 6
     }
 }
