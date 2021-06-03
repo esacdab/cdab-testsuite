@@ -1,6 +1,7 @@
 {
 	"host" : "localhost",
 	"user" : "root",
+	"database" : "testcases",
 	"password" : "bz6$oYYx9nY444W!Xt4223U62",
 	"q1" : false,
 	"q2" : true,

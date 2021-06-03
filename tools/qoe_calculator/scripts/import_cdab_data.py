@@ -40,7 +40,7 @@ def open_db(config):
 		  host=data["host"],
 		  user=data["user"],
 		  password=data["password"],
-		  database="selfcase"
+		  database=data["database"]
 		)
 	except mysql.connector.Error as err:
 		print("Something went wrong: {}".format(err))
@@ -71,11 +71,12 @@ def update_db(cursor, input_dir):
 
 				for metric in test_case["metrics"]:
 					if not isinstance(metric["value"], list):
-						cursor.execute("INSERT IGNORE INTO Runs \
+						cursor.execute(
+							"INSERT IGNORE INTO Runs \
 							(metricId, testcaseId, value) VALUES \
-							((SELECT id FROM Metrics WHERE name=%s)\
-							, %s, %s)", 
+							((SELECT id FROM Metrics WHERE name=%s), %s, %s)", 
 							(metric["name"], test_id, metric["value"]))
+
 					elif metric["uom"] != "string":
 						cursor.execute("SELECT id FROM Metrics WHERE name=%s", (metric["name"],))
 						metric_id = cursor.fetchone()[0]

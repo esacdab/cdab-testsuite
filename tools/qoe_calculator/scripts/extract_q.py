@@ -32,7 +32,7 @@ def open_db(config):
 		  host=config["host"],
 		  user=config["user"],
 		  password=config["password"],
-		  database="selfcase"
+		  database=data["database"]
 		)
 	except mysql.connector.Error as err:
 		print("Something went wrong: {}".format(err))
@@ -44,7 +44,8 @@ def fetch_metric(cursor, metric):
 	# standard fetch function, given a metric name retrieves all the values
 	# in the database associated with that metric
 
-	cursor.execute("SELECT value FROM Runs WHERE metricId = \
+	cursor.execute(
+		"SELECT value FROM Runs WHERE metricId = \
 		(SELECT id FROM Metrics WHERE name=%s)", (metric,))
 	res = [d[0] for d in cursor.fetchall()]
 	return res
