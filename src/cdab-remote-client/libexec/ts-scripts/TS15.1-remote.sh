@@ -110,8 +110,8 @@ do
 
     path=$(find ./input_data -type d -name IMG_DATA | grep $id)/
 
-    echo "Docker command: docker run -i --user=1000:1005 --workdir /workdir -v ${PWD}:/workdir $application_docker_image /ndvi.py \"${path}\" /workdir/output_data " >> cdab.stderr
-    docker run -i --user=1000:1005 --workdir /workdir -v ${PWD}:/workdir $application_docker_image /ndvi.py "${path}" /workdir/output_data >> cdab.stdout 2>> cdab.stderr
+    echo "Docker command: docker run -i --user=root --workdir /workdir -v ${PWD}:/workdir $application_docker_image /ndvi.py \"${path}\" /workdir/output_data " >> cdab.stderr
+    docker run -i --user=root --workdir /workdir -v ${PWD}:/workdir $application_docker_image /ndvi.py "${path}" /workdir/output_data >> cdab.stdout 2>> cdab.stderr
     res=$?
     echo "EXIT CODE = $res" >> cdab.stderr
 

@@ -312,8 +312,10 @@ class TestClient:
         self.processing_scenario_id = None
         self.cdab_client_test_scenario_id = None
         self.test_scenario_description = None
-        self.processing_scenario_cwl_file = None
-        self.processing_scenario_input_file = None
+        self.processing_cwl_file = None
+        self.processing_input_file = None
+        self.processing_backup_download_source = None
+        self.backup_download_credentials = None
         self.test_case_name = None
         self.test_target_url = None
         self.start_time = None
@@ -486,9 +488,9 @@ class TestClient:
         elif name == '-tc':
             self.target_credentials = value
         elif name == '-psw':
-            self.processing_scenario_cwl_file = value
+            self.processing_cwl_file = value
         elif name == '-psi':
-            self.processing_scenario_input_file = value
+            self.processing_input_file = value
         elif name == '-i':
             self.docker_image_id = value
         elif name == '-a':
@@ -674,6 +676,12 @@ class TestClient:
         orig_test_scenario_id = self.test_scenario_id
         self.test_scenario = TestClient.test_scenarios[self.test_scenario_id]
 
+        # Override default values with values from config file
+        if 'scenarios' in self.global_config:
+            if orig_test_scenario_id in self.global_config['scenarios']:
+                for key in self.global_config['scenarios'][orig_test_scenario_id]:
+                    self.test_scenario[key] = self.global_config['scenarios'][orig_test_scenario_id][key]
+
         if self.test_scenario_id[0:4] == 'TS15':
             self.processing_scenario_id = self.test_scenario_id[5:]
             self.test_scenario_id = 'TS15'
@@ -701,33 +709,17 @@ class TestClient:
 
             if self.target_endpoint is None or self.target_credentials is None:
 
-                if self.target_site not in self.service_provider_configs:
-                    exit_client(ERR_CONFIG, "No configuration found for target '{0}'".format(self.target_site))
-
-                self.target_site_config = self.service_provider_configs[self.target_site]
-
-                if 'data' not in self.target_site_config:
-                    exit_client(ERR_CONFIG, "Service provider '{0}' does not contain a 'data' configuration".format(self.target_site))
-
-                self.get_target_site_access()
-
+                self.get_target_site_access(self.target_site)
+    
             self.remote_cdab_json_file = "{0}Results.json".format(self.cdab_client_test_scenario_id)
 
         elif self.docker_run_command == 'PROCESSING':
 
             if not self.target_site:
                 self.target_site = self.service_provider
+
+            self.get_target_site_access(self.target_site)
                 
-            if self.target_site not in self.service_provider_configs:
-                exit_client(ERR_CONFIG, "No configuration found for target '{0}'".format(self.target_site))
-
-            self.target_site_config = self.service_provider_configs[self.target_site]
-
-            if 'data' not in self.target_site_config:
-                exit_client(ERR_CONFIG, "Service provider '{0}' does not contain a 'data' configuration".format(self.target_site))
-
-            self.get_target_site_access()
-
             if not self.target_site_class:
                 exit_client(ERR_CONFIG, "Service provider '{0}' class is invalid (must be among {1})".format(self.target_site, ", ".join([s for s in TestClient.target_site_classes])))
 
@@ -743,15 +735,19 @@ class TestClient:
             if self.test_scenario_id == "TS15":
 
                 if 'cwl_file' in self.test_scenario and self.test_scenario['cwl_file'] == True:
-                    if not self.processing_scenario_cwl_file:
-                        self.processing_scenario_cwl_file = "{0}/ts-scripts/workflow.{1}.cwl".format(os.path.dirname(sys.argv[0]), self.processing_scenario_id)
+                    if not self.processing_cwl_file:
+                        self.processing_cwl_file = "{0}/ts-scripts/workflow.{1}.cwl".format(os.path.dirname(sys.argv[0]), self.processing_scenario_id)
 
-                    if not path.exists(self.processing_scenario_cwl_file) or not path.isfile(self.processing_scenario_cwl_file):
-                        exit_client(ERR_CONFIG, "Processing scenario CWL workflow file {0} does not exist".format(self.processing_scenario_cwl_file))
+                    if not path.exists(self.processing_cwl_file) or not path.isfile(self.processing_cwl_file):
+                        exit_client(ERR_CONFIG, "Processing scenario CWL workflow file {0} does not exist".format(self.processing_cwl_file))
 
-                if self.processing_scenario_input_file:
-                    if not path.exists(self.processing_scenario_input_file) or not path.isfile(self.processing_scenario_input_file):
-                        exit_client(ERR_CONFIG, "Processing scenario input YAML file {0} does not exist".format(self.processing_scenario_input_file))
+                if self.processing_input_file:
+                    if not path.exists(self.processing_input_file) or not path.isfile(self.processing_input_file):
+                        exit_client(ERR_CONFIG, "Processing scenario input YAML file {0} does not exist".format(self.processing_input_file))
+
+                if 'backup_download_source' in self.test_scenario:
+                    self.processing_backup_download_source = self.test_scenario['backup_download_source']
+                    self.get_target_site_access(self.processing_backup_download_source, True)
 
                         
             if 'cdab_client_test_scenario_id' in self.test_scenario:
@@ -774,38 +770,52 @@ class TestClient:
         if 'test_target_url' in self.test_scenario:
             self.test_target_url = self.test_scenario['test_target_url']
 
-        if 'scenarios' in self.global_config:
-            if orig_test_scenario_id in self.global_config['scenarios']:
-                for key in self.global_config['scenarios'][orig_test_scenario_id]:
-                    self.test_scenario[key] = self.global_config['scenarios'][orig_test_scenario_id][key]
 
 
-    def get_target_site_access(self):
+    def get_target_site_access(self, target_site, for_backup_download_source=False):
         """Gets endpoint and credentials of target site (data section).
         """
-        data_config = self.target_site_config['data']
+        if target_site not in self.service_provider_configs:
+            exit_client(ERR_CONFIG, "No configuration found for target '{0}'".format(target_site))
+
+        target_site_config = self.service_provider_configs[target_site]
+
+        if 'data' not in target_site_config:
+            exit_client(ERR_CONFIG, "Service provider '{0}' does not contain a 'data' configuration".format(target_site))
+
+
+        data_config = target_site_config['data']
 
         if not isinstance(data_config, dict):
-            exit_client(ERR_CONFIG, "'data' configuration for service provider '{0}' is empty or invalid".format(self.target_site))
+            exit_client(ERR_CONFIG, "'data' configuration for service provider '{0}' is empty or invalid".format(target_site))
 
-        if 'url' in data_config:
-            self.target_endpoint = data_config['url']
+        if for_backup_download_source:
+            if 'credentials' in data_config:
+                self.backup_download_credentials = data_config['credentials']
+            else:
+                exit_client(ERR_CONFIG, "Service provider '{0}' configuration does not contain target credentials".format(target_site))
+
         else:
-            exit_client(ERR_CONFIG, "Service provider '{0}' configuration does not contain target endpoint ('url')".format(self.target_site))
+            if 'url' in data_config:
+                self.target_endpoint = data_config['url']
+            else:
+                exit_client(ERR_CONFIG, "Service provider '{0}' configuration does not contain target endpoint ('url')".format(target_site))
 
-        if 'credentials' in data_config:
-            self.target_credentials = data_config['credentials']
-        else:
-            exit_client(ERR_CONFIG, "Service provider '{0}' configuration does not contain target credentials".format(self.target_site))
+            if 'credentials' in data_config:
+                self.target_credentials = data_config['credentials']
+            else:
+                exit_client(ERR_CONFIG, "Service provider '{0}' configuration does not contain target credentials".format(target_site))
 
-        if 'class' in data_config:
-            self.target_site_class_name = data_config['class']
-            if self.target_site_class_name in TestClient.target_site_classes:
-                self.target_site_class = TestClient.target_site_classes[self.target_site_class_name]
+            if 'class' in data_config:
+                self.target_site_class_name = data_config['class']
+                if self.target_site_class_name in TestClient.target_site_classes:
+                    self.target_site_class = TestClient.target_site_classes[self.target_site_class_name]
 
-        if 's3_key_id' in data_config and 's3_secret_key' in data_config:
-            self.target_site_s3_key_id = data_config['s3_key_id']
-            self.target_site_s3_secret_key = data_config['s3_secret_key']
+            if 's3_key_id' in data_config and 's3_secret_key' in data_config:
+                self.target_site_s3_key_id = data_config['s3_key_id']
+                self.target_site_s3_secret_key = data_config['s3_secret_key']
+
+
 
             
 
@@ -1102,9 +1112,9 @@ class TestClient:
             if self.test_scenario_id == "TS15":
                 script_name = "{0}.{1}-remote.sh".format(self.test_scenario_id, self.processing_scenario_id)
                 if 'cwl_file' in self.test_scenario and self.test_scenario['cwl_file'] == True:
-                    copy_file(self.compute_config, run, self.processing_scenario_cwl_file, "{0}/workflow.cwl".format(working_dir))
-                if self.processing_scenario_input_file:
-                    copy_file(self.compute_config, run, self.processing_scenario_input_file, "{0}/input".format(working_dir))
+                    copy_file(self.compute_config, run, self.processing_cwl_file, "{0}/workflow.cwl".format(working_dir))
+                if self.processing_input_file:
+                    copy_file(self.compute_config, run, self.processing_input_file, "{0}/input".format(working_dir))
             else:
                 script_name = "{0}-remote.sh".format(self.test_scenario_id)
 
@@ -1189,21 +1199,23 @@ class TestClient:
             execute_remote_command(
                 self.compute_config,
                 run,
-                "nohup sh {0} {1} {2} {3} {4} {5} > /dev/null 2>&1 &".format(
+                "nohup sh {0} {1} {2} {3} {4} {5} {6} > /dev/null 2>&1 &".format(
                     script_name,
                     working_dir,
                     self.docker_image_id if self.docker_image_id else '""',
                     self.test_site_name,
                     self.target_site_class_name,
-                    self.target_credentials
+                    self.target_credentials,
+                    self.backup_download_credentials,
                 ),
-                display_command="nohup sh {0} {1} {2} {3} {4} {5} > /dev/null 2>&1 &".format(
+                display_command="nohup sh {0} {1} {2} {3} {4} {5} {6} > /dev/null 2>&1 &".format(
                     script_name,
                     working_dir,
                     self.docker_image_id if self.docker_image_id else '""',
                     self.test_site_name,
                     self.target_site_class_name,
                     re.sub(':.*', ':xxxxxxxx', self.target_credentials),
+                    re.sub(':.*', ':xxxxxxxx', self.backup_download_credentials),
                 )
             )
         if 'timeout' in self.test_scenario:

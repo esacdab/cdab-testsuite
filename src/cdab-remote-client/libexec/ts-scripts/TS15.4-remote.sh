@@ -21,9 +21,14 @@ function prepare() {
 
 function select_input() {
     # If no inputs are given, select random files from a week to two weeks ago
-    if [ -s "$PWD/input" ] && ! grep -q = "$PWD/input"   # input exists and contains only identifiers (no '=' signs)
+    if [ -s "$PWD/input" ] && ! grep -vq geom= "$PWD/input" | grep -q =   # input exists and contains only identifiers (no '=' signs)
     then
-        cp "$PWD/input" ids.list
+        grep -v = "$PWD/input" > ids.list
+        eval $(grep geom= input)
+        if [ -z "$geom" ]
+        then
+            geom="POLYGON((-10 32,3 32,3 42,-10 42,-10 32))"
+        fi
         return
     else
         ref_date_sec=$(date +%s)
@@ -109,7 +114,7 @@ function process_mosaic() {
 
     tree --charset ascii $PWD/input_data >> cdab.stderr
 
-    $PWD/env_s3/bin/python s3_slstr_lst.py $PWD/input_data/ $PWD/output_data/ 
+    $PWD/env_s3/bin/python s3_slstr_lst.py $PWD/input_data/ "$geom" $PWD/output_data/
 
     tree --charset ascii $PWD/output_data >> cdab.stderr
     ls -l $PWD/output_data >> cdab.stderr
@@ -144,7 +149,7 @@ function download() {
         # Try staging in with direct method (DIAS-specific)
         echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Processing product ${count}/${size}: ${id}" >> cdab.stderr
         echo "$PWD/env_s3/bin/python stage-in.py \"$item_type\" \"SL_2_LST___\" \"$provider\" \"$id\" $PWD/input_data/" >> cdab.stderr
-        $PWD/env_s3/bin/python stage-in.py "$item_type" "SL_2_LST___" "$provider" "$id" $PWD/input_data/ "$credentials" 2>> cdab.stderr
+        $PWD/env_s3/bin/python stage-in.py "$item_type" "SL_2_LST___" "$provider" "$id" $PWD/input_data/ "$credentials" "$backup_credentials" 2>> cdab.stderr
         res=$?
 
         if [ $res -eq 0 ]
@@ -170,6 +175,7 @@ working_dir="$1"
 test_site="$3" # e.g. CREO
 provider="$4"
 credentials="$5"
+backup_credentials="$6"
 cat_creds=""
 
 stage_in_docker_image=terradue/stars-t2:0.5.38

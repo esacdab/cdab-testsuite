@@ -93,7 +93,7 @@ class OpenStackConnector:
                 if 'name' not in response or 'created' not in response:
                     continue
                 name = response['name']
-                if not name.startswith(self.compute_config['vm_name']):
+                if not name.startswith(self.compute_config['vm_name']) or name.lower().startswith('k-'):
                     continue
                 created_time = datetime.datetime.strptime(response['created'], '%Y-%m-%dT%H:%M:%SZ')
                 time_diff = now - created_time
