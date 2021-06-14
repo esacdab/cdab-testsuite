@@ -70,7 +70,7 @@ class GoogleConnector:
 
         if 'items' in response:
             for item in response['items']:
-                if not item['name'].startswith(self.compute_config['vm_name']):
+                if not item['name'].startswith(self.compute_config['vm_name']) or item['name'].lower().startswith('k-'):
                     continue
                 ct = re.sub('\.\d+([\+-]\d\d):?(\d\d)', '\g<1>\g<2>', item['creationTimestamp'])   # Python 3.6 issue, strip milliseconds and ':' in time zone offset
                 created_time = datetime.datetime.strptime(ct, '%Y-%m-%dT%H:%M:%S%z').astimezone(pytz.utc)
