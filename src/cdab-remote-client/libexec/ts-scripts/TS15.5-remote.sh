@@ -640,6 +640,11 @@ function download() {
         fi
     done
 
+    for f in $(find input_data -name "*.zip")
+    do
+        sudo rm $f
+    done
+
     return $missing
 
 }
