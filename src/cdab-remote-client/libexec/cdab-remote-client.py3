@@ -46,7 +46,7 @@ class TestClient:
     """Main class for remote execution of the test scenarios TS11, TS12, TS13 and TS15.
     """
 
-    VERSION = "1.45"
+    VERSION = "1.46"
 
     errors = {
         ERR_CONFIG: 'Missing or invalid configuration',
@@ -1196,6 +1196,9 @@ class TestClient:
 
             copy_file(self.compute_config, run, "{0}/ts-scripts/{1}".format(os.path.dirname(sys.argv[0]), script_name), script_name)
     
+            if self.backup_download_credentials is None:
+                self.backup_download_credentials = ''
+
             execute_remote_command(
                 self.compute_config,
                 run,
