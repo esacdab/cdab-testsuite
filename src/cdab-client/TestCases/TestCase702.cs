@@ -126,7 +126,11 @@ namespace cdabtesttools.TestCases
                 storageClient.Prepare();
                 foreach (var item in uploadedFiles) {
                     log.DebugFormat("Deleting file {0}...", item);
-                    storageClient.DeleteFile(storageName, item);
+                    try {
+                        storageClient.DeleteFile(storageName, item);
+                    } catch (System.Net.WebException e) {
+                        log.WarnFormat("Problem during file deletion: {0}", e.Message);
+                    }
                 }
                 log.DebugFormat("Deleting storage {0}...", storageName);
                 storageClient.DeleteStorage(storageName, true);

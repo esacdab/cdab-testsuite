@@ -53,6 +53,7 @@ namespace cdabtesttools.TestCases
 
         private string storageName;
         private readonly List<string> uploadedFiles;
+        private readonly List<string> failedUploads;
 
         public TestCase701(ILog log, TargetSiteWrapper target, int load_factor, string storageName, List<string> uploadedFiles) :
             base(log, target, null)
@@ -63,6 +64,7 @@ namespace cdabtesttools.TestCases
             uploadRequests = new ConcurrentQueue<ITransferRequest>();
             this.storageName = storageName;
             this.uploadedFiles = uploadedFiles;
+            this.failedUploads = new List<string>();
         }
 
         public override void PrepareTest()
@@ -163,6 +165,16 @@ namespace cdabtesttools.TestCases
 
         public override TestCaseResult CompleteTest(Task<IEnumerable<TestUnitResult>> tasks)
         {
+
+            // Remove failed uploads from list (to prevent download attempts in the next test case)
+            string[] uploadedFilesCopy = uploadedFiles.ToArray();
+            foreach (string uploadedFile in uploadedFilesCopy) {
+                Console.WriteLine("UF {0}", uploadedFile);
+                foreach (string failedUpload in failedUploads)
+                    if (failedUpload.Contains(uploadedFile))
+                        uploadedFiles.Remove(uploadedFile);
+            }
+
             List<IMetric> _testCaseMetric = new List<IMetric>();
 
             try
@@ -320,6 +332,8 @@ namespace cdabtesttools.TestCases
                     log.Debug(ie.StackTrace);
                     metrics.Add(new ExceptionMetric(ie));
                 }
+
+                failedUploads.Add(transferRequest.RequestUri.AbsoluteUri);
             }
 
             var uploadTask = transferRequest.GetResponseAsync().ContinueWith(resp =>
@@ -371,6 +385,8 @@ namespace cdabtesttools.TestCases
                     log.Debug(ie.StackTrace);
                     metrics.Add(new ExceptionMetric(ie));
                 }
+
+                failedUploads.Add(transferRequest.RequestUri.AbsoluteUri);
             }
 
             DateTimeOffset timeStop = DateTimeOffset.UtcNow;
