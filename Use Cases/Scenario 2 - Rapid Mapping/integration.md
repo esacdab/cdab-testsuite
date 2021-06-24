@@ -198,7 +198,8 @@
 
 7. Download them to your computer and open it with any tool that can visualise TIFF files. Verify that the band/layer `NBR` shows an RGB image of the burn severity of the area of interest. [100%]
 
-   The resulting RGBA image could look like this:
+   The resulting RGBA image for the above area and input products will look like this:
+
    ![Burned area map](burned_area.png "Burned area map")
 
 
