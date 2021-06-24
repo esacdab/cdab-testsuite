@@ -147,7 +147,7 @@
 
     [50%]
 
-5.  At this point the mosaicking algorithm **`s3_slstr_lst.py`** can be launched.
+5.  At this point the trends mapping algorithm **`s3_slstr_lst.py`** can be launched.
     
     It takes two parameters:
   
@@ -177,8 +177,8 @@
 
 7. Download the files `rgba_*.tif` onto your computer and open it with a tool such as QGIS. Verify that it shows the desired information (land surface temperature) of the area of interest. [100%]
 
-   An typical image could look like this:
-   ![Sentinel-3 SLSTR result image QGIS](s3-slstr-lst.png "Sentinel-3 SLSTR result image QGIS")
+   A typical image could look like this:
+   ![Sentinel-3 SLSTR result image in QGIS](s3-slstr-lst.png "Sentinel-3 SLSTR result image in QGIS")
 
 
 ## Application build procedure 

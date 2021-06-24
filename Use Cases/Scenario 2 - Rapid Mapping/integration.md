@@ -54,31 +54,28 @@
    openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout mycert.pem -out mycert.pem
    ```
 
-   Copy the content from the file generated in the password command (usually _~.jupyter/jupyter_notebook_config.json_).
+   Edit the configuration file (usually _~/.jupyter/jupyter_notebook_config.py_).
 
-   Edit the configuration file (usually _.jupyter/jupyter_notebook_config.py_).
-
-   Add these lines to the file (setting the appropriate values for _certfile_, _keyfile_ and _password_):
+   Add these lines to the file (setting the appropriate values for _certfile_ and _keyfile_):
    
    ```
    c.NotebookApp.certfile = u'<path-to-mycert.pem>'
    c.NotebookApp.keyfile = u'<path-to-mycert.pem>'
    c.NotebookApp.ip = '*'
-   c.NotebookApp.password = u'<password hash obtained above>'
    c.NotebookApp.open_browser = False
    c.NotebookApp.port = 9999
    c.NotebookApp.allow_remote_access = False
    ```
 
-   Start Jupyter Lab
+   Start Jupyter Notebook
 
    ```console
-   jupyter lab
+   jupyter notebook
    ```
 
-   There should be log messages displayed confirming that Jupyter Lab is running.
+   There should be log messages displayed confirming that Jupyter Notebook is running.
 
-4. Connect to Jupyter Lab.
+4. Connect to Jupyter Notebook.
 
    Using a new shell, use secure port-forwarding (tunnelling). Replace `user` and `hostname` with the values applying to your virtual machine.
   
@@ -94,7 +91,7 @@
 
 2. Upload the files scenario code files (_burned\_area.ipynb_ and the two helper _*.py_ files) to the workspace folder using the Jupyter upload functionality. [20%]
 
-3. **Using the target site data access and following the documentation available at the target site**, get two relevant Sentinel-2 MSI L2A products. For instance,  the products with the identifier `S2A_MSIL2A_20201026T112151_N0214_R037_T29TPE_20201027T144218` and `S2B_MSIL2A_20201130T112429_N0214_R037_T29TPE_20201130T131854` of November 2020 (Portugal) [30%]
+3. **Using the target site data access and following the documentation available at the target site**, get two relevant Sentinel-2 MSI L2A products. For instance, the products with the identifier `S2B_MSIL2A_20210305T171109_N0214_R112_T14RLP_20210305T212158` and `S2B_MSIL2A_20210424T170839_N0300_R112_T14RLP_20210424T211236` of April 2021 (Northern Mexico) [30%]
 
    * For **Sobloo**, the download can be operformed using the DirectData API. This is done automatically by the Jupyter notebook, so you can skip this manual step.
 
@@ -105,20 +102,20 @@
   
      ```console
      # /local_path is the mountpoint for the data volume
-     mkdir $DATA_PATH/S2A_MSIL2A_20201026T112151_N0214_R037_T29TPE_20201027T144218
-     mkdir $DATA_PATH/S2B_MSIL2A_20201130T112429_N0214_R037_T29TPE_20201130T131854
-     cp /local_path/S2/2A/MSI/LEVEL-2A/S2MSI2A/2020/10/26/S2A_MSIL2A_20201026T112151_N0214_R037_T29TPE_20201027T144218.zip $DATA_PATH/S2A_MSIL2A_20201026T112151_N0214_R037_T29TPE_20201027T144218
-     cp /local_path/S2/2B/MSI/LEVEL-2A/S2MSI2A/2020/11/30/S2B_MSIL2A_20201130T112429_N0214_R037_T29TPE_20201130T131854.zip $DATA_PATH/S2B_MSIL2A_20201130T112429_N0214_R037_T29TPE_20201130T131854
+     mkdir $DATA_PATH/S2B_MSIL2A_20210305T171109_N0214_R112_T14RLP_20210305T212158
+     mkdir $DATA_PATH/S2B_MSIL2A_20210424T170839_N0300_R112_T14RLP_20210424T211236
+     cp /local_path/S2/2A/MSI/LEVEL-2A/S2MSI2A/2021/03/05/S2B_MSIL2A_20210305T171109_N0214_R112_T14RLP_20210305T212158.zip $DATA_PATH/S2B_MSIL2A_20210305T171109_N0214_R112_T14RLP_20210305T212158
+     cp /local_path/S2/2B/MSI/LEVEL-2A/S2MSI2A/2021/04/24/S2B_MSIL2A_20210424T170839_N0300_R112_T14RLP_20210424T211236.zip $DATA_PATH/S2B_MSIL2A_20210424T170839_N0300_R112_T14RLP_20210424T211236
      ```
 
    * For **CREODIAS**, make sure your virtual machine has access to the EO Data volume (mounted under `/eodata/`).
      Set the `$DATA_PATH` variable to the directory for local copies of the products and copy the directories using the following commands:
 
      ```console
-     mkdir $DATA_PATH/S2A_MSIL2A_20201026T112151_N0214_R037_T29TPE_20201027T144218
-     mkdir $DATA_PATH/S2B_MSIL2A_20201130T112429_N0214_R037_T29TPE_20201130T131854
-     cp -r /eodata/Sentinel-2/MSI/L2A/2020/10/26/S2A_MSIL2A_20201026T112151_N0214_R037_T29TPE_20201027T144218.SAFE $DATA_PATH/S2A_MSIL2A_20201026T112151_N0214_R037_T29TPE_20201027T144218/
-     cp -r /eodata/Sentinel-2/MSI/L2A/2020/11/30/S2B_MSIL2A_20201130T112429_N0214_R037_T29TPE_20201130T131854.SAFE $DATA_PATH/S2B_MSIL2A_20201130T112429_N0214_R037_T29TPE_20201130T131854/
+     mkdir $DATA_PATH/S2B_MSIL2A_20210305T171109_N0214_R112_T14RLP_20210305T212158
+     mkdir $DATA_PATH/S2B_MSIL2A_20210424T170839_N0300_R112_T14RLP_20210424T211236
+     cp -r /eodata/Sentinel-2/MSI/L2A/2021/03/05/S2B_MSIL2A_20210305T171109_N0214_R112_T14RLP_20210305T212158.SAFE $DATA_PATH/S2B_MSIL2A_20210305T171109_N0214_R112_T14RLP_20210305T212158/
+     cp -r /eodata/Sentinel-2/MSI/L2A/2021/04/24/S2B_MSIL2A_20210424T170839_N0300_R112_T14RLP_20210424T211236.SAFE $DATA_PATH/S2B_MSIL2A_20210424T170839_N0300_R112_T14RLP_20210424T211236/
      ```
 
    * For **MUNDI**, do the following:
@@ -164,45 +161,48 @@
      Now, set the `$DATA_PATH` variable to the directory for local copies of the products and run the following commands to download the files into the correct location using **s3cmd** (note that not all areas are covered, the file might not be available):
 
      ```console
-     mkdir -p $DATA_PATH/S2A_MSIL2A_20201026T112151_N0214_R037_T29TPE_20201027T144218
-     mkdir -p $DATA_PATH/S2B_MSIL2A_20201130T112429_N0214_R037_T29TPE_20201130T131854
-     s3cmd get -r s3://s2-l2a-2020-q4/29/T/PE/2020/10/26/S2A_MSIL2A_20201026T112151_N0214_R037_T29TPE_20201027T144218 $DATA_PATH/S2A_MSIL2A_20201026T112151_N0214_R037_T29TPE_20201027T144218/
-     s3cmd get -r s3://s2-l2a-2020-q4/29/T/PE/2020/11/30/S2B_MSIL2A_20201130T112429_N0214_R037_T29TPE_20201130T131854 $DATA_PATH/S2B_MSIL2A_20201130T112429_N0214_R037_T29TPE_20201130T131854/
-     mv $DATA_PATH/S2A_MSIL2A_20201026T112151_N0214_R037_T29TPE_20201027T144218/S2A_MSIL2A_20201026T112151_N0214_R037_T29TPE_20201027T144218 $DATA_PATH/S2A_MSIL2A_20201026T112151_N0214_R037_T29TPE_20201027T144218/S2A_MSIL2A_20201026T112151_N0214_R037_T29TPE_20201027T144218.SAFE
-     mv $DATA_PATH/S2B_MSIL2A_20201130T112429_N0214_R037_T29TPE_20201130T131854/S2B_MSIL2A_20201130T112429_N0214_R037_T29TPE_20201130T131854 $DATA_PATH/S2B_MSIL2A_20201130T112429_N0214_R037_T29TPE_20201130T131854/S2B_MSIL2A_20201130T112429_N0214_R037_T29TPE_20201130T131854.SAFE
+     mkdir -p $DATA_PATH/S2B_MSIL2A_20210305T171109_N0214_R112_T14RLP_20210305T212158
+     mkdir -p $DATA_PATH/S2B_MSIL2A_20210424T170839_N0300_R112_T14RLP_20210424T211236
+     s3cmd get -r s3://s2-l2a-2021-q1/29/T/PE/2021/03/05/S2B_MSIL2A_20210305T171109_N0214_R112_T14RLP_20210305T212158 $DATA_PATH/S2B_MSIL2A_20210305T171109_N0214_R112_T14RLP_20210305T212158/
+     s3cmd get -r s3://s2-l2a-2021-q2/29/T/PE/2021/04/24/S2B_MSIL2A_20210424T170839_N0300_R112_T14RLP_20210424T211236 $DATA_PATH/S2B_MSIL2A_20210424T170839_N0300_R112_T14RLP_20210424T211236/
+     mv $DATA_PATH/S2B_MSIL2A_20210305T171109_N0214_R112_T14RLP_20210305T212158/S2B_MSIL2A_20210305T171109_N0214_R112_T14RLP_20210305T212158 $DATA_PATH/S2B_MSIL2A_20210305T171109_N0214_R112_T14RLP_20210305T212158/S2B_MSIL2A_20210305T171109_N0214_R112_T14RLP_20210305T212158.SAFE
+     mv $DATA_PATH/S2B_MSIL2A_20210424T170839_N0300_R112_T14RLP_20210424T211236/S2B_MSIL2A_20210424T170839_N0300_R112_T14RLP_20210424T211236 $DATA_PATH/S2B_MSIL2A_20210424T170839_N0300_R112_T14RLP_20210424T211236/S2B_MSIL2A_20210424T170839_N0300_R112_T14RLP_20210424T211236.SAFE
      ```
 
    Make sure the contents of the product (if necessary, unzip archive from the correct directory) are available and located in a directory accessible by Jupyter Notebook (adjust the notebook cell under *Data location* as required). [40%]
 
    ```console
-   $ unzip S2A_MSIL2A_20201026T112151_N0214_R037_T29TPE_20201027T144218.zip
-   $ unzip S2B_MSIL2A_20201130T112429_N0214_R037_T29TPE_20201130T131854.zip
+   $ unzip S2B_MSIL2A_20210305T171109_N0214_R112_T14RLP_20210305T212158.zip
+   $ unzip S2B_MSIL2A_20210424T170839_N0300_R112_T14RLP_20210424T211236.zip
    ```
 
    Make sure the manifest.safe files are in this location for all products: `<product-id>/<product-id>.SAFE/manifest.safe`
 
-4. Return to Jupyter Notebook, open the notebook with a Python 3.5 kernel. If you created and new conda environment during the installation procedure, make sure the Python kernel is using that environment. [50%]
+4. Return to Jupyter Notebook, open the notebook with a Python 3.6 kernel. If you created and new conda environment during the installation procedure, make sure the Python kernel is using that environment. [50%]
 
-5. Make the appropriate settings in the first cell under *Settings* (self-explaining). **IMPORTANT** Pay particular attention to the value of the PREFIX environment variable (the base path of the conda environment). This variable not being set correctly is a cause of many potential errors.
+5. Make the appropriate settings in the second cell (self-explaining). **IMPORTANT** Pay particular attention to the value of the PREFIX environment variable (the base path of the conda environment). This variable not being set correctly is a cause of many potential errors.
 
    Then execute, one after another, the cells of the notebook, waiting for each cell to complete, ensuring no errors occur.
 
    If the data files were downloaded manually (step 3), you can skip the cells for the data download (under *Data Download*). Otherwise you have to execute the appropriate cell. In this case the download time, which is one of the metrics to record, is measured automatically and reported in the output.
    
-   The total execution time of all cells should be somewhere around 30 minutes. [60%]
+   The total execution time of all cells should be somewhere around 10 minutes. [60%]
 
 6. In the directory of your notebook there should now be two GeoTIFF file whose names start with `burned_area...` [90%]
 
    ```console
    $ ls -l ~
-   -rw-rw-r--. 1 eouser eouser  63983890 Dec 11 18:07 burned_area_20201130_112429_20201130_112429.rgb.tif
-   -rw-rw-r--. 1 eouser eouser 276016007 Dec 11 18:04 burned_area_20201130_112429_20201130_112429.tif
+   -rw-rw-r--. 1 centos centos  16212154 Jun 24 17:37 burned_area_20210305_20210424.rgb.tif
+   -rw-rw-r--. 1 centos centos 130225905 Jun 24 17:38 burned_area_20210305_20210424.tif
    ```
 
 7. Download them to your computer and open it with any tool that can visualise TIFF files. Verify that the band/layer `NBR` shows an RGB image of the burn severity of the area of interest. [100%]
+
+   The resulting RGBA image could look like this:
+   ![Burned area map](burned_area.png "Burned area map")
 
 
 
 ## Application build procedure 
 
-There is no systematically run application for this scenario, so no application and container need to be built.
+There is no systematically run application for this scenario, so no application and image need to be built.
