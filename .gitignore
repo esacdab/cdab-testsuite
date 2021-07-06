@@ -403,3 +403,4 @@ src/cdab-remote-client/pom.xml
 
 # Commits
 commit.txt
+/.project
