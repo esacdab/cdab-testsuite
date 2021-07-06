@@ -2,44 +2,23 @@
 cdab-client is part of the software suite used to run Test Scenarios 
 for bechmarking various Copernicus Data Provider targets.
     
-Copyright (C) 2020 Terradue Ltd, www.terradue.com
-    
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published
-by the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
+    Copyright (C) 2020 Terradue Ltd, www.terradue.com
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published
+    by the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 Exception
 
-If you modify this file, or any covered work, by linking or combining it
-with Terradue.OpenSearch.SciHub (or a modified version of that library),
-containing parts covered by the terms of CC BY-NC-ND 3.0, the licensors
-of this Program grant you additional permission to convey or distribute
-the resulting work.
-*/
-
-/*
-cdab-client is part of the software suite used to run Test Scenarios 
-for bechmarking various Copernicus Data Provider targets.
-    
-Copyright (C) 2020 Terradue Ltd, www.terradue.com
-    
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published
-by the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
+If you modify this file, or any covered work, by linking or combining it with Terradue.OpenSearch.SciHub 
+(or a modified version of that library), containing parts covered by the terms of CC BY-NC-ND 3.0, 
+the licensors of this Program grant you additional permission to convey or distribute the resulting work.
 */
 
 using System;
@@ -52,7 +31,6 @@ using Terradue.OpenSearch.DataHub;
 using Terradue.OpenSearch.DataHub.DHuS;
 using Terradue.OpenSearch.DataHub.Dias;
 using Terradue.OpenSearch.Engine;
-
 
 namespace cdabtesttools.Target
 {
@@ -149,7 +127,6 @@ namespace cdabtesttools.Target
 
         public static IDataHubSourceWrapper CreateDataAccessWrapper(TargetSiteConfiguration targetSiteConfig, FiltersDefinition filters = null)
         {
-
             var target_uri = targetSiteConfig.GetDataAccessUri();
             var target_creds = targetSiteConfig.GetDataAccessNetworkCredentials();
 
@@ -188,7 +165,8 @@ namespace cdabtesttools.Target
 
             if (target_uri.Host.EndsWith("copernicus.eu") || target_uri.AbsolutePath.EndsWith("/dhus"))
             {
-                if (filters != null && filters.GetFilters().Any(f => f.Key == "archiveStatus"))
+                // OData API only for copernicus.eu, not other similar providers
+                if (target_uri.Host.EndsWith("copernicus.eu") && filters != null && filters.GetFilters().Any(f => f.Key == "archiveStatus"))
                 {
                     UriBuilder urib = new UriBuilder(target_uri);
                     urib.Path += target_uri.AbsolutePath.Replace("/search", "").TrimEnd('/').EndsWith("odata/v1") ? "" : "/odata/v1";

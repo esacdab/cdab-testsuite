@@ -2,44 +2,23 @@
 cdab-client is part of the software suite used to run Test Scenarios 
 for bechmarking various Copernicus Data Provider targets.
     
-Copyright (C) 2020 Terradue Ltd, www.terradue.com
-    
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published
-by the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
+    Copyright (C) 2020 Terradue Ltd, www.terradue.com
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published
+    by the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 Exception
 
-If you modify this file, or any covered work, by linking or combining it
-with Terradue.OpenSearch.SciHub (or a modified version of that library),
-containing parts covered by the terms of CC BY-NC-ND 3.0, the licensors
-of this Program grant you additional permission to convey or distribute
-the resulting work.
-*/
-
-/*
-cdab-client is part of the software suite used to run Test Scenarios 
-for bechmarking various Copernicus Data Provider targets.
-    
-Copyright (C) 2020 Terradue Ltd, www.terradue.com
-    
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published
-by the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
+If you modify this file, or any covered work, by linking or combining it with Terradue.OpenSearch.SciHub 
+(or a modified version of that library), containing parts covered by the terms of CC BY-NC-ND 3.0, 
+the licensors of this Program grant you additional permission to convey or distribute the resulting work.
 */
 
 using System;
@@ -74,6 +53,7 @@ namespace cdabtesttools.TestCases
 
         private string storageName;
         private readonly List<string> uploadedFiles;
+        private readonly List<string> failedUploads;
 
         public TestCase701(ILog log, TargetSiteWrapper target, int load_factor, string storageName, List<string> uploadedFiles) :
             base(log, target, null)
@@ -84,6 +64,7 @@ namespace cdabtesttools.TestCases
             uploadRequests = new ConcurrentQueue<ITransferRequest>();
             this.storageName = storageName;
             this.uploadedFiles = uploadedFiles;
+            this.failedUploads = new List<string>();
         }
 
         public override void PrepareTest()
@@ -184,6 +165,16 @@ namespace cdabtesttools.TestCases
 
         public override TestCaseResult CompleteTest(Task<IEnumerable<TestUnitResult>> tasks)
         {
+
+            // Remove failed uploads from list (to prevent download attempts in the next test case)
+            string[] uploadedFilesCopy = uploadedFiles.ToArray();
+            foreach (string uploadedFile in uploadedFilesCopy) {
+                Console.WriteLine("UF {0}", uploadedFile);
+                foreach (string failedUpload in failedUploads)
+                    if (failedUpload.Contains(uploadedFile))
+                        uploadedFiles.Remove(uploadedFile);
+            }
+
             List<IMetric> _testCaseMetric = new List<IMetric>();
 
             try
@@ -341,6 +332,8 @@ namespace cdabtesttools.TestCases
                     log.Debug(ie.StackTrace);
                     metrics.Add(new ExceptionMetric(ie));
                 }
+
+                failedUploads.Add(transferRequest.RequestUri.AbsoluteUri);
             }
 
             var uploadTask = transferRequest.GetResponseAsync().ContinueWith(resp =>
@@ -392,6 +385,8 @@ namespace cdabtesttools.TestCases
                     log.Debug(ie.StackTrace);
                     metrics.Add(new ExceptionMetric(ie));
                 }
+
+                failedUploads.Add(transferRequest.RequestUri.AbsoluteUri);
             }
 
             DateTimeOffset timeStop = DateTimeOffset.UtcNow;

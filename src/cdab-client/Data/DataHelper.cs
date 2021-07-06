@@ -2,36 +2,17 @@
 cdab-client is part of the software suite used to run Test Scenarios 
 for bechmarking various Copernicus Data Provider targets.
     
-Copyright (C) 2020 Terradue Ltd, www.terradue.com
-    
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published
-by the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
-
-/*
-cdab-client is part of the software suite used to run Test Scenarios 
-for bechmarking various Copernicus Data Provider targets.
-    
-Copyright (C) 2020 Terradue Ltd, www.terradue.com
-    
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published
-by the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
+    Copyright (C) 2020 Terradue Ltd, www.terradue.com
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published
+    by the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 using System;
@@ -66,6 +47,16 @@ namespace cdabtesttools.Data
                "Offline", "Offline data", Mission.GetArchivingStatusValidator(Terradue.ServiceModel.Ogc.Eop21.StatusSubTypeValueEnumerationType.OFFLINE), null);
             _filtersDefinition.AddFilter("sensingEnd", "{http://a9.com/-/opensearch/extensions/time/1.0/}end", DateTime.UtcNow.Subtract(TimeSpan.FromDays(700)).ToString("s"), "more than 2 years ago", null, null);
 
+            // Relative orbit cannot be queried via ODATA interface
+            foreach (FilterDefinition f in _filtersDefinition.Filters)
+            {
+                if (f.FullName == "{http://a9.com/-/opensearch/extensions/eo/1.0/}track")
+                {
+                    log.DebugFormat("Filter for track will be removed (not queryable via ODATA interface)");
+                }
+            }
+            _filtersDefinition.RemoveFilter("{http://a9.com/-/opensearch/extensions/eo/1.0/}track");
+
             return _filtersDefinition;
 
         }
@@ -94,28 +85,54 @@ namespace cdabtesttools.Data
 
             FiltersDefinition _filtersDefinition = new FiltersDefinition("Systematic");
 
+            // Get search parameters from configuration
+            string mission = target.TargetSiteConfig.Data.Catalogue.SystematicSearchMission;
+            string missionRegex = target.TargetSiteConfig.Data.Catalogue.SystematicSearchMissionRegex;
+            string productType = target.TargetSiteConfig.Data.Catalogue.SystematicSearchProductType;
+            string productTypeRegex = target.TargetSiteConfig.Data.Catalogue.SystematicSearchProductTypeRegex;
+            string aoiWkt = target.TargetSiteConfig.Data.Catalogue.SystematicSearchAoiWkt;
+            string aoiDescription = target.TargetSiteConfig.Data.Catalogue.SystematicSearchAoiDescription;
+            int days = target.TargetSiteConfig.Data.Catalogue.SystematicSearchDays;
+
+            // Set default values if parameters are not configured
+            if (mission == null) {
+                mission = "Sentinel-1";
+                if (productType == null) productType = "GRD";
+            }
+            if (aoiWkt == null)
+            {
+                aoiWkt = "POLYGON((-5.664 14.532,-5.196 13.991,-4.854 13.969,-4.877 13.637,-4.114 13.938,-3.96 13.378,-3.443 13.158,-3.27 13.698,-2.874 13.654,-2.839 14.054,-2.474 14.299,-2 14.191,-1.98 14.476,-0.745 15.066,-1.686 15.431,-2.532 15.322,-2.816 15.774,-3.262 15.857,-3.8 15.491,-4.135 15.81,-5.23 15.674,-5.1 15.196,-5.546 14.931,-5.664 14.532))";
+                aoiDescription = "over Mopti floodable area in Mali";
+            }
+            if (aoiDescription == null)
+            {
+                int pos = aoiWkt.IndexOf(',');
+                if (pos > 0) aoiDescription = String.Format("AOI: {0}...", aoiWkt.Substring(0, pos));
+                else aoiDescription = "AOI: unknown area";
+            }
+            if (days == 0) days = 7;
+
             _filtersDefinition.AddFilter("missionName", "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform",
-               "Sentinel-1", "Sentinel-1",
-               Mission.GetIdentifierValidator(new Regex(@"^S1.*")), null);
+               mission, mission,
+               missionRegex == null ? null : Mission.GetIdentifierValidator(new Regex(missionRegex)), null);
 
             _filtersDefinition.AddFilter("productType", "{http://a9.com/-/opensearch/extensions/eo/1.0/}productType",
-                "GRD", "Ground Range Detected (GRD)",
-                Mission.GetIdentifierValidator(new Regex(@"^S1.*_GRD._.*")), null);
+                productType, productType,
+                productTypeRegex == null ? null : Mission.GetIdentifierValidator(new Regex(productTypeRegex)), null);
 
-            var geom = wktreader.Read("POLYGON((-5.664 14.532,-5.196 13.991,-4.854 13.969,-4.877 13.637,-4.114 13.938,-3.96 13.378,-3.443 13.158,-3.27 13.698,-2.874 13.654,-2.839 14.054,-2.474 14.299,-2 14.191,-1.98 14.476,-0.745 15.066,-1.686 15.431,-2.532 15.322,-2.816 15.774,-3.262 15.857,-3.8 15.491,-4.135 15.81,-5.23 15.674,-5.1 15.196,-5.546 14.931,-5.664 14.532))");
+            var geom = wktreader.Read(aoiWkt);
 
             _filtersDefinition.AddFilter("geom", "{http://a9.com/-/opensearch/extensions/geo/1.0/}geometry",
-                "POLYGON((-5.664 14.532,-5.196 13.991,-4.854 13.969,-4.877 13.637,-4.114 13.938,-3.96 13.378,-3.443 13.158,-3.27 13.698,-2.874 13.654,-2.839 14.054,-2.474 14.299,-2 14.191,-1.98 14.476,-0.745 15.066,-1.686 15.431,-2.532 15.322,-2.816 15.774,-3.262 15.857,-3.8 15.491,-4.135 15.81,-5.23 15.674,-5.1 15.196,-5.546 14.931,-5.664 14.532))",
-                "over Mopti floodable area in Mali",
+                aoiWkt,
+                aoiDescription,
                 Mission.GetGeometryValidator(geom), null);
 
-            var now = DateTime.UtcNow.Subtract(TimeSpan.FromDays(7)).ToUniversalTime();
+            var since = DateTime.UtcNow.Subtract(TimeSpan.FromDays(days)).ToUniversalTime();
 
-            // _filtersDefinition.AddFilter("{http://purl.org/dc/elements/1.1/}modified",
             _filtersDefinition.AddFilter("modified", "{http://purl.org/dc/terms/}modified",
-                now.ToString("s") + "Z",
-                "ingested since " + now.ToString(),
-                Mission.GetIngestionDateValidator(now), null);
+                since.ToString("s") + "Z",
+                "ingested since " + since.ToString(),
+                Mission.GetIngestionDateValidator(since), null);
 
             // _filtersDefinition.AddFilter("archiveStatus", "{http://a9.com/-/opensearch/extensions/eo/1.0/}statusSubType", "online", "Online", null, null);
 
@@ -185,7 +202,7 @@ namespace cdabtesttools.Data
                     // We check that the baseline exists
                     if (!Configuration.Current.Data.Sets.ContainsKey(referenceSetId))
                     {
-                        log.WarnFormat("Target Site Catalogue Set named '{0}' reference an catalogue reference not found '{1}', skipping!", setName, setConfiguration.ReferenceSetId);
+                        log.WarnFormat("Target Site Catalogue Set named '{0}' reference a catalogue reference not found '{1}', skipping!", setName, setConfiguration.ReferenceSetId);
                         return null;
                     }
                     return Configuration.Current.Data.Sets[referenceSetId];

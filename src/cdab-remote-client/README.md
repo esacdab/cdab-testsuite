@@ -46,7 +46,7 @@ cdab-remote-client -h
 And the output is the following:
 
 ```
-cdab-remote-client version 1.30 (c) 2020 Terradue Srl.
+cdab-remote-client version 1.48 (c) 2020 Terradue Srl.
 
 USAGE: cdab-remote-client [OPTIONS] <test-scenario>
 
@@ -152,6 +152,7 @@ Most of the values for the various keys can be obtained from the OpenStack dashb
 * **remote_user**: User on virtual machine for SSH connections.
 * **use_volume**: Create an external volume for docker image and test execution; this is useful for flavours that have very limited main disk. The size of the additional disk is 100 GB.
 * **use_tmp_volume**: Create an external volume for the /tmp directory; this is useful for flavours that have very limited main disk. The size of the additional disk is 50 GB.
+
 
 
 #### Target site settings

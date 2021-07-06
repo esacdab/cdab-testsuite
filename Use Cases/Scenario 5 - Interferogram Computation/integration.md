@@ -21,7 +21,7 @@
 
     ```console
     sudo sh conda-install.sh
-    source /opt/conda/etc/profile.d/conda.sh
+    source /opt/anaconda/etc/profile.d/conda.sh
     ```
 
 4.  Install the SNAP toolbox in a new conda environment.
@@ -36,6 +36,7 @@
     ```
 
     You may have to log out and log in again for the changes to take effect.
+
 
 ## Integration procedure 
 
@@ -250,7 +251,30 @@
     Download and extract the product as in step 4. [35%]
 
 
-6.  Run the graph processor **gpt** with the arguments explained below.
+6.  Due to the retirement of the legacy server providing Sentinel-1 orbit fiiles (POEORB), the automatic download of those files does not work any more.
+    They have therefore to be searched via the new search API at https://scihub.copernicus.eu/gnss/search and downloaded manually from the provided links.
+    
+    The appropriate files (the orbit files covering both pre- and post-event) have to be added in a structure as shown below under the directory *snap/.snap/auxdata/Orbits/Sentinel-1/POEORB/* under the root directory of the conda environment. Note that the files have to be zipped.
+
+    ```
+    └── S1A
+        └── 2020
+            ├── 06
+            │   └── S1A_OPER_AUX_POEORB_OPOD_20210319T032445_V20200627T225942_20200629T005942.EOF.zip
+            └── 08
+                └── S1A_OPER_AUX_POEORB_OPOD_20210317T062946_V20200814T225942_20200816T005942.EOF.zip
+    ```
+
+    The included script *get-poeorb.py* automates this entire step. It takes the root dir of the conda environment and any number of Sentinel-1 input identifiers (of the pre- and post-event products), as in this example:
+
+    ```bash
+    python get-poeorb.py /opt/anaconda/envs/env_snap/ S1A_IW_SLC__1SSV_20200815T095747_20200815T095815_033916_03EF29_E739 S1A_IW_SLC__1SSV_20200628T095744_20200628T095812_033216_03D91E_A07C
+    ```
+
+    Make sure that the directory structure and contained files correspond to the above example. [40%]
+
+
+7.  Run the graph processor **gpt** with the arguments explained below.
 
     The first argument is the graph definition file as from the use case folder.
     The second argument (**pre_event**) has as value the location of the *.SAFE* folder of the unzipped pre-event product.
@@ -264,9 +288,9 @@
     -Ppost_event=input_data/S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD/S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD.SAFE
     ```
 
-    Make sure the processing starts correctly and does not produce an error within the first minute. [40%]
+    Make sure the processing starts correctly and does not produce an error within the first minute. [45%]
 
-7.  Wait for the processing to complete without error.
+8.  Wait for the processing to complete without error.
     Check the output directory structure and content (under *output_data/target.data*), it should look like this:
 
     ```
@@ -292,10 +316,10 @@
 
   [60%]
 
-8. Download it to your computer and open it with a suitable tool to verify . [80%]
+9. Download it to your computer and open it with a suitable tool to verify that the *.img* files show an interferogram. [80%]
 
 
-9. Do another search similar to the one in step 5, but over a 3-year period before the pre-event product (i.e. the second product we chose), also the relative orbit number in the search.
+10. Do another search similar to the one in step 5, but over a 3-year period before the pre-event product (i.e. the second product we chose), also the relative orbit number in the search.
    Analysing the metadata, make sure the products belong to the correct track and cover the area of interest.
    Download the products as before. For this test. it is not necessary to extract the content. Check the content of the zip files, using this command:
    
@@ -303,6 +327,8 @@
    unzip --list <file>
    ```
    [100%]
+
+
 
 ##  Application build procedure 
 

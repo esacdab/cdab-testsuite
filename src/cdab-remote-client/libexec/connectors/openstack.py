@@ -3,7 +3,6 @@ import datetime
 from enum import Enum
 import io
 import json
-import netifaces as ni
 import os
 from os import path
 import re
@@ -94,7 +93,7 @@ class OpenStackConnector:
                 if 'name' not in response or 'created' not in response:
                     continue
                 name = response['name']
-                if not name.startswith(self.compute_config['vm_name']):
+                if not name.startswith(self.compute_config['vm_name']) or name.lower().startswith('k-'):
                     continue
                 created_time = datetime.datetime.strptime(response['created'], '%Y-%m-%dT%H:%M:%SZ')
                 time_diff = now - created_time
@@ -260,7 +259,7 @@ class OpenStackConnector:
                 options.extend(self.cloud_base_options)
                 options.extend([
                     "--size", "50",
-                    "{0}{1}-volume".format(self.compute_config['vm_name'], run.suffix)
+                    "{0}{1}-tmp-volume".format(self.compute_config['vm_name'], run.suffix)
                 ])
                 response = execute_local_command(run, options, True)
 

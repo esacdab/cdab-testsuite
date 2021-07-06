@@ -2,44 +2,23 @@
 cdab-client is part of the software suite used to run Test Scenarios 
 for bechmarking various Copernicus Data Provider targets.
     
-Copyright (C) 2020 Terradue Ltd, www.terradue.com
-    
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published
-by the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
+    Copyright (C) 2020 Terradue Ltd, www.terradue.com
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published
+    by the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 Exception
 
-If you modify this file, or any covered work, by linking or combining it
-with Terradue.OpenSearch.SciHub (or a modified version of that library),
-containing parts covered by the terms of CC BY-NC-ND 3.0, the licensors
-of this Program grant you additional permission to convey or distribute
-the resulting work.
-*/
-
-/*
-cdab-client is part of the software suite used to run Test Scenarios 
-for bechmarking various Copernicus Data Provider targets.
-    
-Copyright (C) 2020 Terradue Ltd, www.terradue.com
-    
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published
-by the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
+If you modify this file, or any covered work, by linking or combining it with Terradue.OpenSearch.SciHub 
+(or a modified version of that library), containing parts covered by the terms of CC BY-NC-ND 3.0, 
+the licensors of this Program grant you additional permission to convey or distribute the resulting work.
 */
 
 using System;
@@ -382,9 +361,13 @@ namespace cdabtesttools.TestCases
             metrics.Add(new DateTimeMetric(MetricName.endTime, timeStop, "dateTime"));
             metrics.Add(new LongMetric(MetricName.endGetResponseTime, DateTime.UtcNow.Ticks, "ticks"));
             if (respTime.Count() > 0)
-                metrics.Add(new LongMetric(MetricName.responseTime, Convert.ToInt64(respTime.Average()), "ms"));
+            {
+                foreach (var r in respTime) metrics.Add(new LongMetric(MetricName.responseTime, r, "ms"));
+            }
             else
+            {
                 metrics.Add(new LongMetric(MetricName.responseTime, 0, "ms"));
+            }
             metrics.Add(new LongMetric(MetricName.size, totalByteCounter, "bytes"));
             metrics.Add(new LongMetric(MetricName.downloadElapsedTime, stopWatchDownloadElaspedTime.ElapsedMilliseconds, "ms"));
             metrics.Add(new LongMetric(MetricName.maxTotalResults, 1, "#"));

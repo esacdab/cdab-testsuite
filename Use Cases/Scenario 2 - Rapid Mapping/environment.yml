@@ -1,18 +1,17 @@
 name: env_burned_area
 channels:
   - terradue
-  - conda-forge
   - defaults
+  - conda-forge
 dependencies:
-  - python=3.5
-  - requests
-  - cioppy
-  - snap
+  - python=3.6.6
+  - snap=7.0.0
+  - snappy=6.0
+  - poppler=0.65.0
   - ipykernel
-  - otb
-  - gdal>2.2.2
-  - poppler<0.66
-  - imageio
+  - gdal=2.3.2
   - lxml
   - shapely
   - matplotlib
+  - requests
+  - cioppy

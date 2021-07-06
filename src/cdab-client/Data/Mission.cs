@@ -2,36 +2,17 @@
 cdab-client is part of the software suite used to run Test Scenarios 
 for bechmarking various Copernicus Data Provider targets.
     
-Copyright (C) 2020 Terradue Ltd, www.terradue.com
-    
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published
-by the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
-
-/*
-cdab-client is part of the software suite used to run Test Scenarios 
-for bechmarking various Copernicus Data Provider targets.
-    
-Copyright (C) 2020 Terradue Ltd, www.terradue.com
-    
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published
-by the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
+    Copyright (C) 2020 Terradue Ltd, www.terradue.com
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published
+    by the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 using System;
@@ -117,6 +98,7 @@ namespace cdabtesttools.Data
         public static IEnumerable<Mission> GenerateExistingDataDictionary(TargetSiteWrapper target)
         {
             List<Mission> missions = new List<Mission>();
+            IEnumerable<Feature> features = ShapeFileLoader.Load(Configuration.Current.Global.CountryShapefilePath);
 
             // Sentinel1
             Mission s1Mission = new Mission("Sentinel-1", new LabelString("Sentinel-1", "Sentinel-1", GetIdentifierValidator(new Regex(@"^S1.*"))));
@@ -168,13 +150,14 @@ namespace cdabtesttools.Data
             s1Mission.Count = new ItemNumberRange("count", "{http://a9.com/-/spec/opensearch/1.1/}count", 1, 50, 1, "{0}",
                 new Regex(@"([0-9]+(\\.[0-9]+)?)"), "Count", null, GetCountValidator);
 
-            IEnumerable<Feature> features = ShapeFileLoader.Load(Configuration.Current.Global.CountryShapefilePath);
             s1Mission.Geometries = new GeometryFilterCollection("geom", "{http://a9.com/-/opensearch/extensions/geo/1.0/}geometry", features);
 
             missions.Add(s1Mission);
 
             // Sentinel2
-            Mission s2Mission = new Mission("Sentinel-2", new LabelString("Sentinel-2", "Sentinel-2", GetIdentifierValidator(new Regex(@"^S2.*"))));
+            Mission s2Mission;
+
+            s2Mission = new Mission("Sentinel-2", new LabelString("Sentinel-2", "Sentinel-2", GetIdentifierValidator(new Regex(@"^S2.*"))));
             s2Mission.Lifetime = new TimeRange("{http://a9.com/-/opensearch/extensions/time/1.0/}start", "{http://a9.com/-/opensearch/extensions/time/1.0/}end", new DateTime(2015, 07, 01), DateTime.UtcNow);
             s2Mission.PlatformIdentifiers = new StringListChoice("platformSerialIdentifier", "{http://a9.com/-/opensearch/extensions/eo/1.0/}platformSerialIdentifier",
                 new LabelString[] {
@@ -260,6 +243,31 @@ namespace cdabtesttools.Data
 
             missions.Add(s3Mission);
 
+            Mission s5pMission = new Mission("Sentinel-5P", new LabelString("Sentinel-5 Precursor", "Sentinel-5 Precursor", GetIdentifierValidator(new Regex(@"^S5P.*"))));
+            s5pMission.Lifetime = new TimeRange("{http://a9.com/-/opensearch/extensions/time/1.0/}start", "{http://a9.com/-/opensearch/extensions/time/1.0/}end", new DateTime(2015, 07, 01), DateTime.UtcNow);
+            s5pMission.ProductLevels = new StringListChoice("productType", "{http://a9.com/-/opensearch/extensions/eo/1.0/}processingLevel",
+                new LabelString[] {
+                    new LabelString("L1B", "Level-1B", GetIdentifierValidator(new Regex(@"^S5P.*_L1B_.*"))),
+                    new LabelString("L2", "Level-2", GetIdentifierValidator(new Regex(@"^S5P.*_L2__.*"))),
+                });
+            s5pMission.ArchivingStatus = new StringListChoice("archiveStatus", "{http://a9.com/-/opensearch/extensions/eo/1.0/}statusSubType",
+                new LabelString[] {
+                    new LabelString("Online", "Online", GetArchivingStatusValidator(Terradue.ServiceModel.Ogc.Eop21.StatusSubTypeValueEnumerationType.ONLINE), null),
+                    new LabelString("Offline", "Offline", GetArchivingStatusValidator(Terradue.ServiceModel.Ogc.Eop21.StatusSubTypeValueEnumerationType.OFFLINE), null),
+                });
+
+            if (true) {
+                s3Mission.Timeliness = new StringListChoice("timeliness", "{http://a9.com/-/opensearch/extensions/eo/1.0/}timeliness",
+                    new LabelString[] {
+                        new LabelString("Near Real Time", "Near Real Time", GetTimelinessValidator("NRT")),
+                        new LabelString("Offline", "Offline", GetTimelinessValidator("OFFL")),
+                });
+            }
+
+            s5pMission.Geometries = new GeometryFilterCollection("geom", "{http://a9.com/-/opensearch/extensions/geo/1.0/}geometry", features);
+
+            missions.Add(s5pMission);
+
             return missions;
         }
 
@@ -326,9 +334,18 @@ namespace cdabtesttools.Data
                     log.WarnFormat("No geometry found for item {0}", item.Identifier);
                     return false;
                 }
-                return feature.Geometry.Buffer(0.5).Intersects(wktreader.Read(geom.ToWkt()));
+                Geometry geom2 = wktreader.Read(geom.ToWkt());
+
+                // Invert coordinates if necessary
+                if (AdjustGeometry(geom2))
+                {
+                    log.DebugFormat("Coordinates adjusted for item {0}", item.Identifier);
+                }
+                
+                return feature.Geometry.Buffer(0.5).Intersects(geom2);
             };
         }
+
 
         public static Func<IOpenSearchResultItem, bool> GetGeometryValidator(Geometry feature)
         {
@@ -476,7 +493,7 @@ namespace cdabtesttools.Data
                 }
                 catch (Exception e)
                 {
-                    log.ErrorFormat("Error shuffling filters : {0}", e.Message);
+                    log.ErrorFormat("Error shuffling filters: {0}", e.Message);
                     log.Debug(e.StackTrace);
                 }
             }
@@ -593,6 +610,30 @@ namespace cdabtesttools.Data
             }
             return _filtersDefinition;
         }
+
+        private static bool AdjustGeometry(Geometry geometry)
+        {
+            // Invert coordinates if Y values are intended as X values (< -90 or > 90)
+            bool inverted = false;
+            foreach (var c in geometry.Coordinates)
+            {
+                if (c.Y < -90 || c.Y > 90 && !inverted) {
+                    inverted = true;
+                    break;
+                }
+            }
+            if (inverted)
+            {
+                foreach (var c in geometry.Coordinates)
+                {
+                    double x = c.X;
+                    c.X = c.Y;
+                    c.Y = x;
+                }
+            }
+            return inverted;
+        }
+
 
     }
 }

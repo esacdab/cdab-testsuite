@@ -52,9 +52,16 @@ RUN echo 'export PS1="[\u@docker] \W # "' >> /root/.bash_profile
 # enable networking
 RUN echo 'NETWORKING=yes' >> /etc/sysconfig/network
 
-# install supervisord
+# install EPEL release repo
 RUN yum -y install epel-release python-setuptools
-RUN easy_install supervisor
+
+# install Python
+RUN yum install -y python python-all python-pip
+# upgrade breaks pip, deactivated temporarily (produces error: No module named typing)
+# RUN pip install --upgrade pip
+
+# install supervisord
+RUN pip install supervisor
 RUN /usr/bin/echo_supervisord_conf > /etc/supervisord.conf
 RUN mkdir -p /var/log/supervisor
 
@@ -125,11 +132,6 @@ ARG CDAB_REMOTE_CLIENT_RPM
 RUN yum install -y centos-release-scl
 ADD $CDAB_REMOTE_CLIENT_RPM /tmp/$CDAB_REMOTE_CLIENT_RPM
 RUN yum localinstall -y /tmp/$CDAB_REMOTE_CLIENT_RPM
-
-# Install Python
-RUN yum install -y \
-    python \
-    python-all
 
 # Install traceroute
 RUN yum install -y traceroute

@@ -68,6 +68,7 @@ service_providers:
       private_key_file: "cdab-key-mundi.pem"
       remote_user: "linux"
       use_volume: True
+      use_tmp_volume: True
   ONDA:
     data:
       url: https://catalogue.onda-dias.eu/dias-catalogue/

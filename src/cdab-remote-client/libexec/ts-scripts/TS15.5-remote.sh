@@ -6,7 +6,7 @@ function prepare() {
     echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Creating conda environment with snap and cwltool" >> cdab.stderr
     CONDA_DIR="/opt/anaconda"
     CONDA_PREFIX="${PWD}/env_snap"
-    sudo $CONDA_DIR/bin/conda create -p ${CONDA_PREFIX} -y snap cwltool >> cdab.stderr 2>&1
+    sudo $CONDA_DIR/bin/conda create -p ${CONDA_PREFIX} -y snap=7.0.0 cwltool=3.0.20201203173111 >> cdab.stderr 2>&1
     sudo ln -s "${PWD}/env_snap" "${CONDA_DIR}/envs/env_snap"
     export PATH="${CONDA_DIR}/bin:${CONDA_PREFIX}/bin:${CONDA_PREFIX}/snap/bin:${CONDA_PREFIX}/snap/jre/bin:$PATH"
     echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Done (conda environment)" >> cdab.stderr
@@ -63,10 +63,12 @@ function process_interferogram() {
         return
     fi
 
-    end_time=$(($(date +%s) + 1 * 60 * 60))   # Timeout after 1 hour
+    end_time=$(($(date +%s) + 4 * 60 * 60))   # Timeout after 4 hour
 
     echo $pre_id > if-ids.list
     echo $post_id >> if-ids.list
+
+    /opt/anaconda/envs/env_snap/bin/python get-poeorb.py /opt/anaconda/envs/env_snap $pre_id $post_id
 
     while [ $(date +%s) -lt $end_time ]
     do
@@ -483,7 +485,7 @@ EOF
         output_base_dir=$(dirname $dim_file)
 
         echo "Result" >> cdab.stderr
-        tree $output_base_dir >> cdab.stderr
+        tree --charset ascii $output_base_dir >> cdab.stderr
         find $output_base_dir -type f >> cdab.stderr
 
         count=0
@@ -500,6 +502,8 @@ EOF
         then
             ((wrong_processings++))
         fi
+
+        rm -rf $output_base_dir
     fi
 }
 
@@ -548,7 +552,7 @@ function process_stack() {
 
     stack_size=$(cat stack-ids.list | wc -l)
 
-    end_time=$(($(date +%s) + 20 * 60))   # Timeout after 20 minutes
+    end_time=$(($(date +%s) + 30 * 60))   # Timeout after 30 minutes
 
     while [ $(date +%s) -lt $end_time ]
     do
@@ -594,8 +598,24 @@ function download() {
             if [ $res -ne 0 ]
             then
                 echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Error during download" >> cdab.stderr
-                ((missing++))
-                continue
+                present=
+                # MUNDI workaround
+                if [ ${provider} == "MUNDI" ] && [ -s "${PWD}/input_data/${id}/${id}.zip" ]
+                then
+                    echo "Previous error can be ignored, .zip file is present" >> cdab.stderr
+                    sudo chown -R $USER "${PWD}/input_data/${id}"
+                    product_folder=$(find ${PWD}/input_data -type d -name "${id}.SAFE")
+                    if [ -z "$product_folder" ]
+                    then
+                        unzip -d "${PWD}/input_data/${id}" "${PWD}/input_data/${id}/${id}.zip" >> cdab.stderr 2>> cdab.stderr
+                        present=true
+                    fi
+                fi
+                if [ -z "$present" ]
+                then
+                    ((missing++))
+                    continue
+                fi
             fi
 
             product_folder=$(find ${PWD}/input_data -type d -name "${id}.SAFE")
@@ -618,6 +638,11 @@ function download() {
         else
             echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Done (product $count/$size already downloaded)" >> cdab.stderr
         fi
+    done
+
+    for f in $(find input_data -name "*.zip")
+    do
+        sudo rm $f
     done
 
     return $missing
@@ -651,11 +676,11 @@ provider="$4"
 credentials="$5"
 cat_creds=""
 
-stage_in_docker_image=terradue/stars-t2:latest
+stage_in_docker_image=terradue/stars-t2:0.5.38
 
 case "$provider" in
     CREO)
-        catalogue_base_url="https://finder.creodias.eu/resto/api/collections/describe.xml"
+        catalogue_base_url="https://finder.creodias.eu/resto/api/collections/Sentinel1/describe.xml"
         ;;
     MUNDI)
         catalogue_base_url="https://mundiwebservices.com/acdc/catalog/proxy/search"
