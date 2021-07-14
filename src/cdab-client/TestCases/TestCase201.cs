@@ -82,17 +82,6 @@ namespace cdabtesttools.TestCases
             }
             queryFilters = new ConcurrentQueue<FiltersDefinition>(Mission.ShuffleSimpleRandomFiltersCombination(missions, baselines, load_factor, rangeReformatter));
 
-            if (target.Type == TargetType.USGS) {
-                var rand = new Random();
-                int daysBack = rand.Next(100) + 50;
-                DateTime start = DateTime.UtcNow.AddDays(- daysBack);
-                DateTime end = start.AddDays(2);
-                foreach (var qf in queryFilters) {
-                    qf.AddFilter("sensingStart", "{http://a9.com/-/opensearch/extensions/time/1.0/}start", start.ToString("O"), start.ToString("yyyy/MM/dd HH:mm:ss"), null, null);
-                    qf.AddFilter("sensingEnd", "{http://a9.com/-/opensearch/extensions/time/1.0/}end", end.ToString("O"), end.ToString("yyyy/MM/dd HH:mm:ss"), null, null);
-                }
-            }
-
         }
 
         public override TestCaseResult CompleteTest(Task<IEnumerable<TestUnitResult>> tasks)

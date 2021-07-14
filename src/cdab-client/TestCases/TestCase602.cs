@@ -27,6 +27,7 @@ using cdabtesttools.Target;
 using log4net;
 using Terradue.OpenSearch;
 using Terradue.OpenSearch.Result;
+using Terradue.Metadata.EarthObservation.OpenSearch.Extensions;
 
 namespace cdabtesttools.TestCases
 {
@@ -156,10 +157,20 @@ namespace cdabtesttools.TestCases
         private IOpenSearchResultItem FindReferenceItem(IOpenSearchResultItem item, IOpenSearchable os)
         {
             FiltersDefinition filters = new FiltersDefinition(item.Identifier);
-            filters.AddFilter("uid", "{http://a9.com/-/opensearch/extensions/geo/1.0/}uid", item.Identifier, item.Identifier, null, null);
+            if (item.Identifier.Substring(0, 3) == "L1C") {   // for USGS which uses tile identifiers
+                string tileIdentifier = item.Identifier.Substring(4, 6);
+                DateTime startTime = item.FindStartDate();
+                DateTime endTime = item.FindEndDate();
+                if (endTime == startTime) endTime = endTime.AddDays(1);
+                Console.WriteLine("{0} - {1}", startTime, endTime);
+                filters.AddFilter("uid", "{http://a9.com/-/opensearch/extensions/geo/1.0/}uid", String.Format("*{0}*", tileIdentifier), tileIdentifier, null, null);
+                filters.AddFilter("start", "{http://a9.com/-/opensearch/extensions/time/1.0/}start", startTime.ToString("O"), startTime.ToString("O"), null, null);
+                filters.AddFilter("stop", "{http://a9.com/-/opensearch/extensions/time/1.0/}end", endTime.ToString("O"), endTime.ToString("O"), null, null);
+            } else {
+                filters.AddFilter("uid", "{http://a9.com/-/opensearch/extensions/geo/1.0/}uid", item.Identifier, item.Identifier, null, null);
+            }
             var result = ose.Query(os, filters.GetNameValueCollection());
             return result.Items.FirstOrDefault();
-
         }
     }
 }
