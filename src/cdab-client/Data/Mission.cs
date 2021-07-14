@@ -170,11 +170,12 @@ namespace cdabtesttools.Data
 
             if (target.Type == TargetType.USGS) {
                 s2Mission = new Mission("Sentinel-2", new LabelString("Sentinel-2", "Sentinel-2", GetIdentifierValidator(new Regex(@"^L1C_.*"))));
-                s2Mission.Lifetime = new TimeRange("{http://a9.com/-/opensearch/extensions/time/1.0/}start", "{http://a9.com/-/opensearch/extensions/time/1.0/}end", new DateTime(2020, 01, 01), DateTime.UtcNow);
                 s2Mission.ProductTypes = new StringListChoice("productType", "{http://a9.com/-/opensearch/extensions/eo/1.0/}productType",
                     new LabelString[] {
                         new LabelString("sentinel_2a", "Level-1C", GetIdentifierValidator(new Regex(@"^L1C_.*"))),
                     });
+                s2Mission.Lifetime = new TimeRange("{http://a9.com/-/opensearch/extensions/time/1.0/}start", "{http://a9.com/-/opensearch/extensions/time/1.0/}end", new DateTime(2020, 01, 01), DateTime.UtcNow);
+                s2Mission.Geometries = new GeometryFilterCollection("geom", "{http://a9.com/-/opensearch/extensions/geo/1.0/}geometry", features);
                 s2Mission.Count = new ItemNumberRange("count", "{http://a9.com/-/spec/opensearch/1.1/}count", 1, 10, 1, "{0}",
                     new Regex(@"([0-9]+(\\.[0-9]+)?)"), "Count", null, GetCountValidator);
 
