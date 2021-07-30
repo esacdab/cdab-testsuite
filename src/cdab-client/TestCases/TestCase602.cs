@@ -128,13 +128,18 @@ namespace cdabtesttools.TestCases
                     continue;
                 }
                 DateTimeOffset onlineDate = item.PublishDate;
+                log.DebugFormat("Publish date ({0}): {1}", item.Id, onlineDate.ToString("yyyy-MM-ddTHH:mm:ssZ"));
                 var onlineDateStrings = item.ElementExtensions.ReadElementExtensions<string>("onlineDate", "http://www.terradue.com/");
                 if (onlineDateStrings != null && onlineDateStrings.Count() > 0)
                 {
-                    DateTimeOffset.TryParse(onlineDateStrings.FirstOrDefault(), out onlineDate);
+                    DateTimeOffset.TryParse(onlineDateStrings.FirstOrDefault(), System.Globalization.CultureInfo.InstalledUICulture, System.Globalization.DateTimeStyles.AssumeUniversal, out onlineDate);
+                    log.DebugFormat("Online date ({0}): {1}", item.Id, onlineDate.ToString("yyyy-MM-ddTHH:mm:ssZ"));
                 }
 
+                log.DebugFormat("Reference date ({0}): {1}", item.Id, ref_item.PublishDate.ToString("yyyy-MM-ddTHH:mm:ssZ"));
+
                 avaLatencies.Add(onlineDate.Subtract(ref_item.PublishDate).TotalSeconds);
+                log.DebugFormat("Latency (seconds) ({0}): {1}", item.Id, onlineDate.Subtract(ref_item.PublishDate).TotalSeconds);
                 validatedResults++;
             }
 

@@ -221,7 +221,7 @@ product_count=0
 # Process inputs
 
 echo "--------------------------------" >> cdab.stderr
-echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - TC415: Mosaic" >> cdab.stderr
+echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - TC415: Trends mapping" >> cdab.stderr
 
 errors=0
 
