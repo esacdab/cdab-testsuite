@@ -8,7 +8,7 @@ Name:           cdab-remote-client
 Url:            https://github.com/Terradue/cdab-testsuite
 License:        AGPLv3
 Group:          Productivity/Networking/Web/Servers
-Version:        1.48
+Version:        1.50
 Release:        %{_release}
 Summary:        Copernicus Sentinels Data Access Worldwide Benchmark Test Remote Client
 BuildArch:      noarch
@@ -40,6 +40,7 @@ SUCCESS=0
 /opt/rh/rh-python36/root/usr/bin/pip install pyyaml netifaces
 /opt/rh/rh-python36/root/usr/bin/pip install python-openstackclient==5.1.0
 /opt/rh/rh-python36/root/usr/bin/pip install google-api-python-client boto3
+/opt/rh/rh-python36/root/usr/bin/pip install python-cinderclient==2.2.0
 
 # Add symlink to cdab-remote-client
 [ ! -f /usr/lib/cdab-remote-client/etc/config.yaml ] && cp /usr/lib/cdab-remote-client/etc/config.yaml.sample /usr/lib/cdab-remote-client/etc/config.yaml
