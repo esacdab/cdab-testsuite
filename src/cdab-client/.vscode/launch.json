@@ -115,6 +115,20 @@
             ]
         },
         {
+            "name": "HellenicHub TS05",
+            "type": "mono",
+            "request": "launch",
+            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "cwd": "${workspaceRoot}",
+            "args": [
+                "-v",
+                "-tsn=Local",
+                "-lf=1",
+                "-tn=HellenicHub",
+                "TS05"
+            ]
+        },
+        {
             "name": "Cophub TS06",
             "type": "mono",
             "request": "launch",
@@ -690,6 +704,21 @@
                 "-tn=GOOGLE",
                 "TS07"
             ]
-        }
+        },
+        {
+            "name": "TEST TS01",
+            "type": "mono",
+            "request": "launch",
+            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "cwd": "${workspaceRoot}",
+            "args": [
+                "-v",
+                "-conf=/Users/floeschau/Work/repo/tools/cdab-testsuite/src/cdab-client/cdab-client-config-testS5P.yaml",
+                "-tsn=Local",
+                "-lf=1",
+                "-tn=creodias",
+                "TS01"
+            ]
+        },
     ]
 }

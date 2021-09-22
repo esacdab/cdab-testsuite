@@ -46,7 +46,7 @@ class TestClient:
     """Main class for remote execution of the test scenarios TS11, TS12, TS13 and TS15.
     """
 
-    VERSION = "1.50"
+    VERSION = "1.51"
 
     errors = {
         ERR_CONFIG: 'Missing or invalid configuration',
@@ -80,6 +80,7 @@ class TestClient:
             'test_target_url': 'https://catalog.terradue.com/sentinel3/search?uid=S3A_OL_1_EFR____20191110T230850_20191110T231150_20191112T030831_0179_051_215_3600_LN1_O_NT_002',
             'files': [ 's3-olci-composites.py' ],
             'timeout': 2 * 60 * 60,
+            'requires_apihub': True
         },
         'TS15.1': {
             'test_scenario_description': 'Remote execution of a predefined processing scenario test (NDVI)',
@@ -748,6 +749,13 @@ class TestClient:
                 if 'backup_download_source' in self.test_scenario:
                     self.processing_backup_download_source = self.test_scenario['backup_download_source']
                     self.get_target_site_access(self.processing_backup_download_source, True)
+
+            elif 'requires_apihub' in self.test_scenario and self.test_scenario['requires_apihub']:
+                if 'apihub_service_provider' in self.test_scenario:
+                    self.processing_backup_download_source = self.test_scenario['apihub_service_provider']
+                    self.get_target_site_access(self.processing_backup_download_source, True)
+                else:
+                    exit_client(ERR_CONFIG, "Configuration key 'apihub_service_provider' not specified under global.scenario.{0}".format(self.test_scenario_id))                    
 
                         
             if 'cdab_client_test_scenario_id' in self.test_scenario:

@@ -34,7 +34,7 @@
     <PackageReference Include="Terradue.OpenSearch" Version="1.17.5" />
     <PackageReference Include="Terradue.OpenSearch.SciHub" Version="1.14.23"/>
     <PackageReference Include="Terradue.OpenSearch.Usgs" Version="1.5.0"/>
-    <PackageReference Include="Terradue.OpenSearch.Asf" Version="1.2.14" />
+    <PackageReference Include="Terradue.OpenSearch.Asf" Version="1.2.15" />
     <PackageReference Include="Terradue.GeoJson" Version="1.12.0" />
     <PackageReference Include="Terradue.ServiceModel.Syndication" Version="1.1.1" />
     <PackageReference Include="Terradue.Metadata.EarthObservation" Version="1.6.7" />
