@@ -12,11 +12,12 @@
 
    Transfer the included file _conda-install.sh_ on the virtual machine.
 
-   Run the following commands:
+   Run the following commands to prepare conda and allow the creation of an environment:
 
    ```console
    sudo sh conda-install.sh
    source /opt/anaconda/etc/profile.d/conda.sh
+   sudo chown $USER:$USER /opt/anaconda/
    ```
 
    Transfer the the included file _environment.yml_ there and create a new conda environment (name **env_burned_area**) and activate that environment using these commands:

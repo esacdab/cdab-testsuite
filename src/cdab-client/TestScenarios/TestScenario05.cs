@@ -46,7 +46,7 @@ namespace cdabtesttools.TestScenarios
 
         internal static bool CheckCompatibility(TargetSiteWrapper target)
         {
-            return target.Type == TargetType.DATAHUB || target.Type == TargetType.DIAS || target.Type == TargetType.USGS;
+            return target.Type == TargetType.DATAHUB || target.Type == TargetType.DIAS || target.Type == TargetType.ASF || target.Type == TargetType.USGS;
         }
 
         public IEnumerable<TestCase> CreateTestCases()

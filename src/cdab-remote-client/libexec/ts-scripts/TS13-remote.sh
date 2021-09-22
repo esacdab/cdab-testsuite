@@ -9,7 +9,6 @@ function prepare() {
     touch cdab.stderr
 }
 
-
 function select_input() {
     # If no inputs are given, select random files from less than a week ago
     if [ ! -s "input" ]
@@ -39,20 +38,25 @@ function select_input() {
 
 function stage_in() {
     id=$1
-    download_url=$2
-    curl "https://catalog.terradue.com/sentinel3/search/?pt=OL_1_EFR___&start=${start}&stop=${end}&count=1&do=terradue" | \
+    curl "https://catalog.terradue.com/sentinel3/search/?uid=${id}&do=terradue" | \
         xmllint --format - > current.atom.xml
 
-    download_url=$(grep "<link rel=\"enclosure" current.atom.xml | grep "store\.terradue\.com" | sed -E "s#.*href=\"(.*?)\".*#\1#g")
+    download_url=$(grep "<link rel=\"enclosure" current.atom.xml | grep "copernicus.eu" | sed -E "s#.*href=\"(.*?)\".*#\1#g")
+    echo "DOWNLOAD URL = $download_url" >> cdab.stderr >> cdab.stderr
 
     if [ -z "$download_url" ]
     then
         echo "No download URL found" >> cdab.stderr
         return 1
     fi
-
-    curl -L -v -o "${id}.zip" ${download_url}
+    
+    curl -L -v -u "${apihub_credentials}" -o "${id}.zip" ${download_url}
     unzip -o -d input_data "${id}.zip"
+    if [ $? -ne 0 ]
+    then
+	echo "Error while unzipping file" >> cdab.stderr
+        return 1
+    fi
 
     sen_folder=$(find input_data -type d -name "*.SEN3")/
 
@@ -63,10 +67,11 @@ function stage_in() {
 working_dir="$1"
 [ "$working_dir" == "." ] && working_dir=$HOME
 
-docker_image="$2" # docker-co.terradue.com/geohazards-tep/ewf-s3-olci-composites:0.41
-test_site="$3" # e.g. CREO
+docker_image="$2"   # docker-co.terradue.com/geohazards-tep/ewf-s3-olci-composites:0.41
+test_site="$3"   # e.g. CREO
 provider="$4"
-
+target_credentials=$5   # not used
+apihub_credentials="$6"   # API Hub credentials
 
 cd "$working_dir"
 
