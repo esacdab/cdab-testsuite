@@ -170,6 +170,11 @@ RUN curl -O https://letsencrypt.org/certs/isrgrootx1.pem && \
     mv isrgrootx1.pem isrgrootx1.crt && \
     cert-sync isrgrootx1.crt && \
     rm -f isrgrootx1.crt
+RUN curl -O https://curl.se/ca/cacert.pem && \
+    mv cacert.pem cacert.crt && \
+    cert-sync cacert.crt && \
+    rm -f cacert.crt
+
 
 # a complete update
 RUN yum update -y
