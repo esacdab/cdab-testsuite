@@ -53,7 +53,7 @@ def await_vm_availability(compute_config, connect_retries, connect_interval, run
 
         while not available and count < connect_retries:
             try:
-                response = execute_remote_command(compute_config, run, "ls", quiet=True, timeout=10)
+                response = execute_remote_command(compute_config, run, "ls", quiet=True, timeout=60)
                 available = True
             except Exception as e:
                 if datetime.datetime.utcnow() >= retry_until_time:
