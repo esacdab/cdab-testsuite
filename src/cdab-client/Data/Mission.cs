@@ -189,8 +189,8 @@ namespace cdabtesttools.Data
                     });
                 s2Mission.ProductTypes = new StringListChoice("productType", "{http://a9.com/-/opensearch/extensions/eo/1.0/}productType",
                     new LabelString[] {
-                        new LabelString("S2MSI1C", "Level-1C", GetIdentifierValidator(new Regex(@"^S2.*_MSIL1C_.*"))),
-                        new LabelString("S2MSI2A", "Level-2A", GetIdentifierValidator(new Regex(@"^S2.*_MSIL2A_.*"))),
+                        new LabelString("S2MSI1C", "Level-1C", GetIdentifierValidator(new Regex(@"^S2.*_(MSI)?L1C_.*"))),
+                        new LabelString("S2MSI2A", "Level-2A", GetIdentifierValidator(new Regex(@"^S2.*_(MSI)?L2A_.*"))),
                     });
                 s2Mission.RelativeOrbit = new ItemNumberRange("track", "{http://a9.com/-/opensearch/extensions/eo/1.0/}track", 1, 143, 1, "[{0},{1}]",
                     new Regex(@"\[([0-9]+(\\.[0-9]+)?),([0-9]+(\\.[0-9]+)?)\]"), "Track", GetTrackValidator, null);
@@ -477,6 +477,7 @@ namespace cdabtesttools.Data
                             // with the platform parameter equals to the mission name
                             c.Value.Parameters.Any(p => p.FullName == "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
                                 && p.Value == m.MissionName.Value))));
+
                 var _mission = matchingMissions.ToArray()[rnd.Next(0, matchingMissions.Count())];
                 var collections = baselines.SelectMany(b => b.Collections.Where(c =>
                             c.Value.Parameters.Any(p => p.FullName == "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"

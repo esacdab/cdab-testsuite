@@ -469,7 +469,7 @@ namespace cdabtesttools.Measurement
             DoubleArrayMetric _dataCoverage = new DoubleArrayMetric(MetricName.dataOfferConsistency,
                     onlinePct.Values.ToArray(),
                      "%");
-            log.DebugFormat("Data Offer COnsistency : {0}{1}", string.Join(",", _dataCoverage.Value), _dataCoverage.Uom);
+            log.DebugFormat("Data Offer Consistency : {0}{1}", string.Join(",", _dataCoverage.Value), _dataCoverage.Uom);
             metrics.Add(_dataCoverage);
 
             var _tcr = new TestCaseResult(testCase503.Id, metrics, testCase503.StartTime, testCase503.EndTime);

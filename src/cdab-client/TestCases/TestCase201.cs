@@ -110,6 +110,7 @@ namespace cdabtesttools.TestCases
             catch (AggregateException e)
             {
                 log.WarnFormat("Test Case Execution Error : {0}", e.InnerException.Message);
+                log.WarnFormat("STACK TRACE: {0}", e.InnerException.StackTrace);
                 throw e;
             }
 

@@ -169,7 +169,6 @@ namespace cdabtesttools.TestCases
             // Remove failed uploads from list (to prevent download attempts in the next test case)
             string[] uploadedFilesCopy = uploadedFiles.ToArray();
             foreach (string uploadedFile in uploadedFilesCopy) {
-                Console.WriteLine("UF {0}", uploadedFile);
                 foreach (string failedUpload in failedUploads)
                     if (failedUpload.Contains(uploadedFile))
                         uploadedFiles.Remove(uploadedFile);
