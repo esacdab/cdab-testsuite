@@ -6,7 +6,7 @@ Name:           cdab-client
 Url:            https://github.com/Terradue/cdab-testsuite
 License:        AGPLv3
 Group:          Productivity/Networking/Web/Servers
-Version:        1.3.26
+Version:        1.3.27
 Release:        %{_release}
 Summary:        Copernicus Sentinels Data Access Worldwide Benchmark Test Client
 BuildArch:      noarch
