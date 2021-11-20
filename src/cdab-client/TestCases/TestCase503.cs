@@ -56,6 +56,10 @@ namespace cdabtesttools.TestCases
             {
                 foreach (var division in DataHelper.GenerateCrossCatalogueCoverageFiltersDefinition(coverage.Key, coverage.Value, target))
                 {
+                    if (target.TargetSiteConfig.Data.Catalogue.LocalParameters != null && target.TargetSiteConfig.Data.Catalogue.LocalParameters.Count() > 0)
+                        division.Target.FiltersDefinition.AddFilters(target.TargetSiteConfig.Data.Catalogue.LocalParameters);
+                    else
+                        division.Target.FiltersDefinition.AddFilter("archiveStatus", "{http://a9.com/-/opensearch/extensions/eo/1.0/}statusSubType", "online", "Online", null, null);
                     queryFiltersTuple.Enqueue(division);
                 }
             }
@@ -88,7 +92,7 @@ namespace cdabtesttools.TestCases
                     var _testUnitOnline = previousTask[j].ContinueWith<IOpenSearchable>((task) =>
                     {
                         prepTask.Wait();
-                        return filters.Target.Target.CreateOpenSearchableEntity(filters.Target.FiltersDefinition);
+                        return filters.Target.Target.CreateOpenSearchableEntity(filters.Target.FiltersDefinition, 3, true);
                     }).ContinueWith((request) =>
                         {
                             return MakeQuery(request.Result, filters.Target.FiltersDefinition);

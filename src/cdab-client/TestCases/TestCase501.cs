@@ -54,7 +54,7 @@ namespace cdabtesttools.TestCases
             queryFiltersTuple = new ConcurrentQueue<CrossCatalogueCoverageFiltersDefinition>();
             foreach (var coverage in target.TargetSiteConfig.Data.Catalogue.Sets.Where(cs => cs.Value.Type == TargetCatalogueSetType.baseline))
             {
-                 foreach (var analysis in DataHelper.GenerateCrossCatalogueCoverageFiltersDefinition(coverage.Key, coverage.Value, target))
+                foreach (var analysis in DataHelper.GenerateCrossCatalogueCoverageFiltersDefinition(coverage.Key, coverage.Value, target))
                 {
                     queryFiltersTuple.Enqueue(analysis);
                 }
@@ -97,7 +97,7 @@ namespace cdabtesttools.TestCases
                     var _testUnit = previousTask[j].ContinueWith<IOpenSearchable>((task) =>
                     {
                         prepTask.Wait();
-                        return coverageFilter.Target.Target.CreateOpenSearchableEntity(coverageFilter.Target.FiltersDefinition);
+                        return coverageFilter.Target.Target.CreateOpenSearchableEntity(coverageFilter.Target.FiltersDefinition, 3, true);
                     }).ContinueWith((request) =>
                         {
                             return MakeQuery(request.Result, coverageFilter.Target.FiltersDefinition);

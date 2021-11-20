@@ -138,7 +138,7 @@ namespace cdabtesttools.Target
                 return TargetType.DATAHUB;
             }
 
-            if (Wrapper.Settings.ServiceUrl.Host.EndsWith("amazon.com"))
+            if (Wrapper.Settings.ServiceUrl.Host.EndsWith("amazon.com") || Wrapper.Settings.ServiceUrl.Host.EndsWith("sentinel-hub.com"))
             {
                 log.DebugFormat("TARGET TYPE: AMAZON");
                 return TargetType.THIRDPARTY;
@@ -215,8 +215,9 @@ namespace cdabtesttools.Target
 
             if (target_uri.Host.EndsWith("amazon.com"))
             {
-                var searchWrapper = new DHuSWrapper(new Uri("https://scihub.copernicus.eu/apihub"), (NetworkCredential)target_creds);
-                var amazonWrapper = new AmazonWrapper(targetSiteConfig.Data.S3SecretKey, targetSiteConfig.Data.S3KeyId, searchWrapper);
+                //var searchWrapper = new DHuSWrapper(new Uri("https://scihub.copernicus.eu/apihub"), (NetworkCredential)target_creds);
+                //var amazonWrapper = new AmazonOldWrapper(targetSiteConfig.Data.S3SecretKey, targetSiteConfig.Data.S3KeyId, searchWrapper);
+                var amazonWrapper = new AmazonWrapper(targetSiteConfig.Data.S3SecretKey, targetSiteConfig.Data.S3KeyId, (NetworkCredential)target_creds);
                 return amazonWrapper;
             }
 
@@ -230,7 +231,7 @@ namespace cdabtesttools.Target
             return null;
         }
 
-        internal IOpenSearchable CreateOpenSearchableEntity(FiltersDefinition filters = null, int maxRetries = 3)
+        internal IOpenSearchable CreateOpenSearchableEntity(FiltersDefinition filters = null, int maxRetries = 3, bool forceTotalResults = false)
         {
             OpenSearchableFactorySettings ossettings = new OpenSearchableFactorySettings(ose)
             {
@@ -239,6 +240,9 @@ namespace cdabtesttools.Target
             };
             IDataHubSourceWrapper wrapper = CreateDataAccessWrapper(TargetSiteConfig, filters);
             wrapper.Settings.MaxRetries = 3;
+            if (forceTotalResults && wrapper is AmazonWrapper) {
+                (wrapper as AmazonWrapper).ForceTotalResults = true;
+            }
             return wrapper.CreateOpenSearchable(ossettings);
         }
 

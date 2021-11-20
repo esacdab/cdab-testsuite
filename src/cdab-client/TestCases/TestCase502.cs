@@ -93,7 +93,7 @@ namespace cdabtesttools.TestCases
                     var _testUnitOnline = previousTask[j].ContinueWith<IOpenSearchable>((task) =>
                     {
                         prepTask.Wait();
-                        return filters.Target.Target.CreateOpenSearchableEntity(filters.Target.FiltersDefinition);
+                        return filters.Target.Target.CreateOpenSearchableEntity(filters.Target.FiltersDefinition, 3, true);
                     }).ContinueWith((request) =>
                         {
                             return MakeQuery(request.Result, filters.Target.FiltersDefinition);
