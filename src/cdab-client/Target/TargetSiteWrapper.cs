@@ -217,7 +217,7 @@ namespace cdabtesttools.Target
             {
                 //var searchWrapper = new DHuSWrapper(new Uri("https://scihub.copernicus.eu/apihub"), (NetworkCredential)target_creds);
                 //var amazonWrapper = new AmazonOldWrapper(targetSiteConfig.Data.S3SecretKey, targetSiteConfig.Data.S3KeyId, searchWrapper);
-                var amazonWrapper = new AmazonWrapper(targetSiteConfig.Data.S3SecretKey, targetSiteConfig.Data.S3KeyId, (NetworkCredential)target_creds);
+                var amazonWrapper = new AmazonStacWrapper(targetSiteConfig.Data.S3SecretKey, targetSiteConfig.Data.S3KeyId, (NetworkCredential)target_creds);
                 return amazonWrapper;
             }
 
@@ -240,8 +240,9 @@ namespace cdabtesttools.Target
             };
             IDataHubSourceWrapper wrapper = CreateDataAccessWrapper(TargetSiteConfig, filters);
             wrapper.Settings.MaxRetries = 3;
-            if (forceTotalResults && wrapper is AmazonWrapper) {
-                (wrapper as AmazonWrapper).ForceTotalResults = true;
+            
+            if (forceTotalResults && wrapper is AmazonStacWrapper) {
+                (wrapper as AmazonStacWrapper).ForceTotalResults = true;
             }
             return wrapper.CreateOpenSearchable(ossettings);
         }

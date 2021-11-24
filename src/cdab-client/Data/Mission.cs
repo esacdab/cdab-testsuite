@@ -391,7 +391,7 @@ namespace cdabtesttools.Data
             return (IOpenSearchResultItem item)
                     =>
             {
-                return item.PublishDate > date;
+                return item.PublishDate > date;   // ??? publish date corresponds to CreationDate (>= IngestionDate)
             };
         }
 
