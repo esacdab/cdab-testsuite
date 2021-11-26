@@ -5,18 +5,19 @@
 1. Provision a virtual machine on the target site. Preferably with the following specification
     - 2 CPUs, 8GB RAM, 30GB disk
     - CentOS 7
-    - Jupyter Notebook (with Python 3 support), it can also be installed if not present.
+    - Jupyter Lab (with Python 3 support), it can also be installed if not present.
     - With data offer access if required
   
 2. Open a terminal on the provisioned machine and install some prequisites, and install, if necessary, **conda** on the virtual machine and create the conda environment.
 
    Transfer the included file _conda-install.sh_ on the virtual machine.
 
-   Run the following commands:
+   Run the following commands to prepare conda and allow the creation of an environment:
 
    ```console
    sudo sh conda-install.sh
    source /opt/anaconda/etc/profile.d/conda.sh
+   sudo chown $USER:$USER /opt/anaconda/
    ```
 
    Transfer the the included file _environment.yml_ there and create a new conda environment (name **env_burned_area**) and activate that environment using these commands:
@@ -67,15 +68,15 @@
    c.NotebookApp.allow_remote_access = False
    ```
 
-   Start Jupyter Notebook
+   Start Jupyter Lab
 
    ```console
-   jupyter notebook
+   jupyter lab
    ```
 
-   There should be log messages displayed confirming that Jupyter Notebook is running.
+   There should be log messages displayed confirming that Jupyter Lab is running.
 
-4. Connect to Jupyter Notebook.
+4. Connect to Jupyter Lab.
 
    Using a new shell, use secure port-forwarding (tunnelling). Replace `user` and `hostname` with the values applying to your virtual machine.
   
@@ -87,18 +88,27 @@
 
 ## Integration procedure 
 
-1. Open Jupyter Notebook on the virtual machine or within the environment provided through the target site's web interface. [10%]
+1. Open Jupyter Lab on the virtual machine or within the environment provided through the target site's web interface. [10%]
 
 2. Upload the files scenario code files (_burned\_area.ipynb_ and the two helper _*.py_ files) to the workspace folder using the Jupyter upload functionality. [20%]
 
 3. **Using the target site data access and following the documentation available at the target site**, get two relevant Sentinel-2 MSI L2A products. For instance, the products with the identifier `S2B_MSIL2A_20210305T171109_N0214_R112_T14RLP_20210305T212158` and `S2B_MSIL2A_20210424T170839_N0300_R112_T14RLP_20210424T211236` of April 2021 (Northern Mexico) [30%]
 
-   * For **Sobloo**, the download can be operformed using the DirectData API. This is done automatically by the Jupyter notebook, so you can skip this manual step.
+   * For **Sobloo**, do the following:
+
+     The included file _sobloo-download.py_ is intended to make the download from Sobloo easy. Transfer that file on the virtual machine.
+
+     Set the `$DATA_PATH` variable to the directory for local copies of the products and the `$SOBLOO_API_KEY` variable to your Sobloo API key, and download the files using the following commands:
+
+     ```console
+     python3 sobloo-download.py $DATA_PATH S2B_MSIL2A_20210305T171109_N0214_R112_T14RLP_20210305T212158 "$SOBLOO_API_KEY"
+     python3 sobloo-download.py $DATA_PATH S2B_MSIL2A_20210424T170839_N0300_R112_T14RLP_20210424T211236 "$SOBLOO_API_KEY"
+     ```
 
    * For **ONDA**, do the following:
   
      From the shell, mount the data volume as explained in [this page](https://www.onda-dias.eu/cms/knowledge-base/adapi-how-to-mount-unmount/).
-     Set the `$DATA_PATH` variable to the directory  for local copies of the products and copy the .zip files using the following commands:
+     Set the `$DATA_PATH` variable to the directory for local copies of the products and copy the .zip files using the following commands:
   
      ```console
      # /local_path is the mountpoint for the data volume
@@ -169,7 +179,7 @@
      mv $DATA_PATH/S2B_MSIL2A_20210424T170839_N0300_R112_T14RLP_20210424T211236/S2B_MSIL2A_20210424T170839_N0300_R112_T14RLP_20210424T211236 $DATA_PATH/S2B_MSIL2A_20210424T170839_N0300_R112_T14RLP_20210424T211236/S2B_MSIL2A_20210424T170839_N0300_R112_T14RLP_20210424T211236.SAFE
      ```
 
-   Make sure the contents of the product (if necessary, unzip archive from the correct directory) are available and located in a directory accessible by Jupyter Notebook (adjust the notebook cell under *Data location* as required). [40%]
+   Make sure the contents of the product (if necessary, unzip archive from the correct directory) are available and located in a directory accessible by Jupyter Lab (adjust the notebook cell under *Data location* as required). [40%]
 
    ```console
    $ unzip S2B_MSIL2A_20210305T171109_N0214_R112_T14RLP_20210305T212158.zip
@@ -178,7 +188,7 @@
 
    Make sure the manifest.safe files are in this location for all products: `<product-id>/<product-id>.SAFE/manifest.safe`
 
-4. Return to Jupyter Notebook, open the notebook with a Python 3.6 kernel. If you created and new conda environment during the installation procedure, make sure the Python kernel is using that environment. [50%]
+4. Return to Jupyter Lab, open the notebook with a Python 3.6 kernel. If you created and new conda environment during the installation procedure, make sure the Python kernel is using that environment. [50%]
 
 5. Make the appropriate settings in the second cell (self-explaining). **IMPORTANT** Pay particular attention to the value of the PREFIX environment variable (the base path of the conda environment). This variable not being set correctly is a cause of many potential errors.
 
