@@ -89,6 +89,7 @@ fi
 # Process input
 total_processings=0
 wrong_processings=0
+total_process_duration=0
 
 for id in $(cat input)
 do
@@ -105,6 +106,7 @@ do
     else
         ((wrong_processings++))
         echo "Stage in of $id FAILED" >> cdab.stderr
+        continue
     fi
 
     start_time=$(date +%s%N)
@@ -125,6 +127,8 @@ do
         cat cdab.stderr >&2
         ((wrong_processings++))
         echo "Processing of $id FAILED" >> cdab.stderr
+        echo "Files:" >> cdab.stderr
+        for dir in $(find . -type d); do echo "--------" >> cdab.stderr; echo $dir >> cdab.stderr; ls -l $dir >> cdab.stderr; done
     else
         ls -l *.tif >> cdab.stderr
         errors=0
@@ -141,16 +145,13 @@ do
         fi
     fi
     rm -f S3-OLCI-*
-    break
-done
 
-if [ -z "$start_time" ]
-then
     start_time=$(date +%s%N)
     end_time=$(date +%s%N)
-fi
+    process_duration=$(((end_time - start_time) / 1000000))
+    total_process_duration=$((total_process_duration + process_duration))
+done
 
-process_duration=$(((end_time - start_time) / 1000000))
 
 if [ ${total_processings} -eq 0 ]
 then
@@ -164,7 +165,7 @@ else
     then
         avg_process_duration=-1
     else
-        avg_process_duration=$((process_duration / correct_processings))
+        avg_process_duration=$((total_process_duration / correct_processings))
     fi
 fi
 
