@@ -223,8 +223,9 @@ namespace cdabtesttools.Target
 
             if (target_uri.Host.EndsWith("googleapis.com") || target_uri.Host.EndsWith("google.com"))
             {
-                var searchWrapper = new DHuSWrapper(new Uri("https://scihub.copernicus.eu/apihub"), (NetworkCredential)target_creds);
-                var googleWrapper = new GoogleWrapper(targetSiteConfig.AccountFile, targetSiteConfig.ProjectId, searchWrapper);
+                //var searchWrapper = new DHuSWrapper(new Uri("https://scihub.copernicus.eu/apihub"), (NetworkCredential)target_creds);
+                //var googleWrapper = new GoogleWrapper(targetSiteConfig.AccountFile, targetSiteConfig.ProjectId, searchWrapper);
+                var googleWrapper = new GoogleWrapper(targetSiteConfig.AccountFile, targetSiteConfig.ProjectId, (NetworkCredential)target_creds, "https://cloud.google.com");
                 return googleWrapper;
             }
 
@@ -243,6 +244,9 @@ namespace cdabtesttools.Target
             
             if (forceTotalResults && wrapper is AmazonStacWrapper) {
                 (wrapper as AmazonStacWrapper).ForceTotalResults = true;
+            }
+            if (forceTotalResults && wrapper is GoogleWrapper) {
+                (wrapper as GoogleWrapper).ForceTotalResults = true;
             }
             return wrapper.CreateOpenSearchable(ossettings);
         }
