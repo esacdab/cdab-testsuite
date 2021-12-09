@@ -101,8 +101,8 @@
      Set the `$DATA_PATH` variable to the directory for local copies of the products and the `$SOBLOO_API_KEY` variable to your Sobloo API key, and download the files using the following commands:
 
      ```console
-     python3 sobloo-download.py $DATA_PATH S2B_MSIL2A_20210305T171109_N0214_R112_T14RLP_20210305T212158 "$SOBLOO_API_KEY"
-     python3 sobloo-download.py $DATA_PATH S2B_MSIL2A_20210424T170839_N0300_R112_T14RLP_20210424T211236 "$SOBLOO_API_KEY"
+     python3 sobloo-download.py $DATA_PATH/S2B_MSIL2A_20210305T171109_N0214_R112_T14RLP_20210305T212158 S2B_MSIL2A_20210305T171109_N0214_R112_T14RLP_20210305T212158 "$SOBLOO_API_KEY"
+     python3 sobloo-download.py $DATA_PATH/S2B_MSIL2A_20210424T170839_N0300_R112_T14RLP_20210424T211236 S2B_MSIL2A_20210424T170839_N0300_R112_T14RLP_20210424T211236 "$SOBLOO_API_KEY"
      ```
 
    * For **ONDA**, do the following:
