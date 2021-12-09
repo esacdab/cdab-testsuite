@@ -45,11 +45,11 @@ namespace cdabtesttools.TestCases
         protected readonly ILog log;
         private ServicePoint sp;
         protected OpenSearchEngine ose;
-        private readonly MaxParallelismTaskScheduler catalogue_scheduler;
-        private readonly TaskFactory catalogue_task_factory;
+        protected readonly MaxParallelismTaskScheduler catalogue_scheduler;
+        protected readonly TaskFactory catalogue_task_factory;
         protected ConcurrentQueue<FiltersDefinition> queryFilters = null;
-        private List<IOpenSearchResultItem> foundItems = null;
-        private bool ignoreEmptyResult = false;
+        protected List<IOpenSearchResultItem> foundItems = null;
+        protected bool ignoreEmptyResult = false;
 
         public TestCase201(ILog log, TargetSiteWrapper target, int load_factor, IEnumerable<Data.Mission> missions, out List<IOpenSearchResultItem> foundItems, bool ignoreEmptyResult = false) :
             base("TC201", "Basic catalogue query")
@@ -110,7 +110,7 @@ namespace cdabtesttools.TestCases
             catch (AggregateException e)
             {
                 log.WarnFormat("Test Case Execution Error : {0}", e.InnerException.Message);
-                log.WarnFormat("STACK TRACE: {0}", e.InnerException.StackTrace);
+                log.WarnFormat("Stack Trace: {0}", e.InnerException.StackTrace);
                 throw e;
             }
 
@@ -169,7 +169,7 @@ namespace cdabtesttools.TestCases
             return _testUnits.Select(t => t.Result).Where(r => r != null);
         }
 
-        internal TestUnitResult MakeQuery(IOpenSearchable entity, FiltersDefinition fd)
+        public virtual TestUnitResult MakeQuery(IOpenSearchable entity, FiltersDefinition fd)
         {
 
             List<IMetric> metrics = new List<IMetric>();
