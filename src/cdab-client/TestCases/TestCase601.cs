@@ -402,8 +402,10 @@ namespace cdabtesttools.TestCases
             DateTime startTime = fromTime;
             DateTime endTime = fromTime.AddDays(30);
             if (endTime == startTime) endTime = endTime.AddDays(1);
-            filters.AddFilter("start", "{http://a9.com/-/opensearch/extensions/time/1.0/}start", startTime.ToString("yyyy-MM-dd\\THH:mm:ss.fff\\Z"), startTime.ToString("O"), null, null);
-            filters.AddFilter("stop", "{http://a9.com/-/opensearch/extensions/time/1.0/}end", endTime.ToString("yyyy-MM-dd\\THH:mm:ss.fff\\Z"), endTime.ToString("O"), null, null);
+            filters.RemoveFilter("{http://a9.com/-/opensearch/extensions/time/1.0/}start");
+            filters.RemoveFilter("{http://a9.com/-/opensearch/extensions/time/1.0/}end");
+            filters.AddFilter("start", "{http://a9.com/-/opensearch/extensions/time/1.0/}start", startTime.ToString("yyyy-MM-dd\\THH:mm:ss\\Z"), startTime.ToString("yyyy-MM-dd\\THH:mm:ss\\Z"), null, null);
+            filters.AddFilter("stop", "{http://a9.com/-/opensearch/extensions/time/1.0/}end", endTime.ToString("yyyy-MM-dd\\THH:mm:ss\\Z"), endTime.ToString("yyyy-MM-dd\\THH:mm:ss\\Z"), null, null);
 
             result = ose.Query(os, filters.GetNameValueCollection());
             return result.Items.FirstOrDefault();
