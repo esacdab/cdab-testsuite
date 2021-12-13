@@ -1092,7 +1092,7 @@ class TestClient:
             execute_remote_command(
                 self.compute_config,
                 run,
-                "nohup sh {0} {1} {2} {3} {4} {5} {6} {7} {8} > /dev/null 2>&1 &".format(
+                "nohup sh {0} {1} {2} {3} {4} '{5}' {6} {7} {8} > /dev/null 2>&1 &".format(
                     script_name,
                     working_dir,
                     self.docker_image_id if self.docker_image_id else '""',
@@ -1103,7 +1103,7 @@ class TestClient:
                     self.load_factor,
                     self.compute_config['download_origin'],
                 ),
-                display_command="nohup sh {0} {1} {2} {3} {4} {5} {6} {7} {8} > /dev/null 2>&1 &".format(
+                display_command="nohup sh {0} {1} {2} {3} {4} '{5}' {6} {7} {8} > /dev/null 2>&1 &".format(
                     script_name,
                     working_dir,
                     self.docker_image_id if self.docker_image_id else '""',
@@ -1210,7 +1210,7 @@ class TestClient:
             execute_remote_command(
                 self.compute_config,
                 run,
-                "nohup sh {0} {1} {2} {3} {4} {5} {6} > /dev/null 2>&1 &".format(
+                "nohup sh {0} {1} {2} {3} {4} '{5}' '{6}' > /dev/null 2>&1 &".format(
                     script_name,
                     working_dir,
                     self.docker_image_id if self.docker_image_id else '""',
@@ -1219,7 +1219,7 @@ class TestClient:
                     self.target_credentials,
                     self.backup_download_credentials,
                 ),
-                display_command="nohup sh {0} {1} {2} {3} {4} {5} {6} > /dev/null 2>&1 &".format(
+                display_command="nohup sh {0} {1} {2} {3} {4} '{5}' '{6}' > /dev/null 2>&1 &".format(
                     script_name,
                     working_dir,
                     self.docker_image_id if self.docker_image_id else '""',
