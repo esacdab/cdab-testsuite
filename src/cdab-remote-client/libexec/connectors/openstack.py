@@ -32,7 +32,6 @@ class OpenStackConnector:
             'username',
             'password',
             'project_name',
-            'user_domain_name',
             'interface',
             'identity_api_version',
             'vm_name',
@@ -57,10 +56,21 @@ class OpenStackConnector:
         ]
         if self.compute_config['project_id']:
             self.cloud_base_options.extend(['--os-project-id', self.compute_config['project_id']])
-        self.cloud_base_options.extend([
-            '--os-project-name', self.compute_config['project_name'],
-            '--os-user-domain-name', self.compute_config['user_domain_name'],
-        ])
+        self.cloud_base_options.extend(['--os-project-name', self.compute_config['project_name']])
+
+        if self.compute_config['identity_provider']:
+            self.cloud_base_options.extend(['--os-identity-provider', self.compute_config['identity_provider']])
+        if self.compute_config['identity_provider_url']:
+            self.cloud_base_options.extend(['--os-identity-provider-url', self.compute_config['identity_provider_url']])
+        if self.compute_config['protocol']:
+            self.cloud_base_options.extend(['--os-protocol', self.compute_config['protocol']])
+        if self.compute_config['auth_type']:
+            self.cloud_base_options.extend(['--os-auth-type', self.compute_config['auth_type']])
+        if self.compute_config['project_domain_name']:
+            self.cloud_base_options.extend(['--os-project-domain-name', self.compute_config['project_domain_name']])
+        if self.compute_config['user_domain_name']:
+            self.cloud_base_options.extend(['--os-user-domain-name', self.compute_config['user_domain_name']])
+
         if self.compute_config['region_name']:
             self.cloud_base_options.extend(['--os-region-name', self.compute_config['region_name']])
         self.cloud_base_options.extend([
