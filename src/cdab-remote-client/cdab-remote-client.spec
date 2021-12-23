@@ -37,7 +37,7 @@ SUCCESS=0
 
 # Install OpenStack client, Google Cloud Platform Python API and Amazon AWS EC2 Python API
 /opt/rh/rh-python36/root/usr/bin/pip install --upgrade pip
-/opt/rh/rh-python36/root/usr/bin/pip install pyyaml netifaces
+/opt/rh/rh-python36/root/usr/bin/pip install pyyaml lxml netifaces
 /opt/rh/rh-python36/root/usr/bin/pip install python-openstackclient==5.1.0
 /opt/rh/rh-python36/root/usr/bin/pip install google-api-python-client boto3
 /opt/rh/rh-python36/root/usr/bin/pip install python-cinderclient==2.2.0
