@@ -79,68 +79,74 @@ namespace cdabtesttools.TestCases
 
         public override IEnumerable<TestUnitResult> RunTestUnits(TaskFactory taskFactory, Task prepTask)
         {
-            // For providers that do not offer online dates, use special processing
-            if (target.TargetSiteConfig.Data.Catalogue.LatencyPolling) {
-                log.Info("Latencies calculated by polling the target catalogue; process may take some time");
+            if (StartTime.Ticks == 0)
+                StartTime = DateTimeOffset.UtcNow;
 
-                if (StartTime.Ticks == 0)
-                    StartTime = DateTimeOffset.UtcNow;
+            if (prepTask.IsFaulted)
+                throw prepTask.Exception;
 
-                if (prepTask.IsFaulted)
-                    throw prepTask.Exception;
+            List<Task<TestUnitResult>> _testUnits = new List<Task<TestUnitResult>>();
+            Task[] previousTask = Array.ConvertAll(new int[target.TargetSiteConfig.MaxCatalogueThread], mp => prepTask);
 
-                List<Task<TestUnitResult>> _testUnits = new List<Task<TestUnitResult>>();
-                Task[] previousTask = Array.ConvertAll(new int[target.TargetSiteConfig.MaxCatalogueThread], mp => prepTask);
+            int i = queryFilters.Count();
 
-                int i = queryFilters.Count();
-
-                while (i > 0)
+            while (i > 0)
+            {
+                for (int j = 0; j < target.TargetSiteConfig.MaxCatalogueThread; j++)
                 {
-                    for (int j = 0; j < target.TargetSiteConfig.MaxCatalogueThread; j++)
+                    var _testUnit = previousTask[j].ContinueWith<KeyValuePair<IOpenSearchable, FiltersDefinition>>((task) =>
                     {
-                        var _testUnit = previousTask[j].ContinueWith<KeyValuePair<IOpenSearchable, FiltersDefinition>>((task) =>
+                        prepTask.Wait();
+                        FiltersDefinition randomFilter;
+                        queryFilters.TryDequeue(out randomFilter);
+                        return new KeyValuePair<IOpenSearchable, FiltersDefinition>(target.CreateOpenSearchableEntity(randomFilter, Configuration.Current.Global.QueryTryNumber), randomFilter);
+                    }).
+                        ContinueWith((request) =>
                         {
-                            prepTask.Wait();
-                            FiltersDefinition randomFilter;
-                            queryFilters.TryDequeue(out randomFilter);
-                            return new KeyValuePair<IOpenSearchable, FiltersDefinition>(target.CreateOpenSearchableEntity(randomFilter, Configuration.Current.Global.QueryTryNumber), randomFilter);
-                        }).
-                            ContinueWith((request) =>
+                            if (request.Result.Value == null) return null;
+
+                            // Get the original collection from the filter definition and check whether polling is needed
+                            FiltersDefinition parameters = request.Result.Value;
+
+                            bool latencyPolling = target.TargetSiteConfig.Data.Catalogue.LatencyPolling != null && target.TargetSiteConfig.Data.Catalogue.LatencyPolling.Value;
+                            if (parameters.DataCollection != null && parameters.DataCollection.LatencyPolling != null) latencyPolling = parameters.DataCollection.LatencyPolling.Value;
+
+                            if (latencyPolling)
                             {
-                                if (request.Result.Value == null) return null;
-                                FiltersDefinition parameters = request.Result.Value;
+                                // For providers that do not offer online dates, use special processing
+                                log.Info("Latencies calculated by polling the target catalogue; process may take some time");
                                 IOpenSearchable targetEntity = request.Result.Key;
-
                                 return PollUntilAvailable(targetEntity, parameters);
-                            });
-                        _testUnits.Add(_testUnit);
-                        previousTask[j] = _testUnit;
-                        i--;
-                    }
-                }
-                try
-                {
-                    Task.WaitAll(_testUnits.ToArray());
-                }
-                catch (AggregateException ae)
-                {
-                    Exception ex = ae;
-                    while (ex is AggregateException)
-                    {
-                        ex = ex.InnerException;
-                    }
-                    log.Debug(ex.Message);
-                    log.Debug(ex.StackTrace);
-                }
-                EndTime = DateTimeOffset.UtcNow;
+                            }
+                            else
+                            {
+                                return MakeQuery(request.Result.Key, request.Result.Value);
+                            }
 
-                return _testUnits.Select(t => t.Result).Where(r => r != null);
-
+                        });
+                    _testUnits.Add(_testUnit);
+                    previousTask[j] = _testUnit;
+                    i--;
+                }
             }
+            try
+            {
+                Task.WaitAll(_testUnits.ToArray());
+            }
+            catch (AggregateException ae)
+            {
+                Exception ex = ae;
+                while (ex is AggregateException)
+                {
+                    ex = ex.InnerException;
+                }
+                log.Debug(ex.Message);
+                log.Debug(ex.StackTrace);
+            }
+            EndTime = DateTimeOffset.UtcNow;
 
-            // For normal providers, use default (TC201) processing
-            return base.RunTestUnits(taskFactory, prepTask);
-            
+            return _testUnits.Select(t => t.Result).Where(r => r != null);
+
         }
 
 
@@ -152,7 +158,15 @@ namespace cdabtesttools.TestCases
             log.DebugFormat("[{1}] > Query {0} {2}...", fd.Name, Task.CurrentId, fd.Label);
 
             DateTime fromTime = DateTime.UtcNow;
-            
+
+            int latencyCheckOffset = (target.TargetSiteConfig.Data.Catalogue.LatencyCheckOffset != null ? target.TargetSiteConfig.Data.Catalogue.LatencyCheckOffset.Value : 0);
+            if (fd.DataCollection != null && fd.DataCollection.LatencyCheckOffset != null) latencyCheckOffset = fd.DataCollection.LatencyCheckOffset.Value;
+
+            if (latencyCheckOffset != 0)
+            {
+                fromTime = DateTime.UtcNow.AddSeconds(- latencyCheckOffset);
+            }
+        
             var parameters = fd.GetNameValueCollection();
 
             return catalogue_task_factory.StartNew(() =>
@@ -163,10 +177,13 @@ namespace cdabtesttools.TestCases
                     List<double> opsLatencies = new List<double>();
                     long validatedResults = 0;
 
-                    int latencyCheckMaxDuration = target.TargetSiteConfig.Data.Catalogue.LatencyCheckMaxDuration;
-                    if (latencyCheckMaxDuration == 0) latencyCheckMaxDuration = 3600;
-                    int latencyCheckInterval = target.TargetSiteConfig.Data.Catalogue.LatencyCheckInterval;
-                    if (latencyCheckInterval == 0) latencyCheckInterval = 600;
+                    int latencyCheckMaxDuration = (target.TargetSiteConfig.Data.Catalogue.LatencyCheckMaxDuration != null ? target.TargetSiteConfig.Data.Catalogue.LatencyCheckMaxDuration.Value : 3600);
+                    if (fd.DataCollection != null && fd.DataCollection.LatencyCheckMaxDuration != null) latencyCheckMaxDuration = fd.DataCollection.LatencyCheckMaxDuration.Value;
+                    int latencyCheckInterval = (target.TargetSiteConfig.Data.Catalogue.LatencyCheckInterval != null ? target.TargetSiteConfig.Data.Catalogue.LatencyCheckInterval.Value : 600);
+                    if (fd.DataCollection != null && fd.DataCollection.LatencyCheckInterval != null) latencyCheckInterval = fd.DataCollection.LatencyCheckInterval.Value;
+
+                    log.DebugFormat("Latency handling for {0}: max duration: {1} s, check ever {2} s", fd.Label, latencyCheckMaxDuration, latencyCheckInterval);
+
                     DateTime maxEndTime = DateTime.UtcNow.AddSeconds(latencyCheckMaxDuration);
                     log.InfoFormat("Checking for new product in target until {0}", maxEndTime.ToString("yyyy-MM-ddTHH:mm:ssZ"));
 
@@ -193,10 +210,12 @@ namespace cdabtesttools.TestCases
                                     out targetResults
                                 );
                             }
-                            catch (WebException we)
+                            catch (Exception e)
                             {
-                                log.Warn("Error during target request new item");
-                                log.WarnFormat("Error message: {0}", we.Message);
+                                log.Warn("Error during target request for new item");
+                                log.WarnFormat("Error message: {0}", e.Message);
+                                log.WarnFormat("Skipping {0} {1}", fd.Name, fd.Label);
+                                break;
                             }
                             var respTime = sw.ElapsedMilliseconds;
                             sw.Stop();
@@ -270,6 +289,12 @@ namespace cdabtesttools.TestCases
 
                                 DateTimeOffset creationDate = DateTimeOffset.UtcNow;
                                 log.DebugFormat("Target item estimated creation date ({0}): {1}", targetItem.Id, creationDate.ToString("yyyy-MM-ddTHH:mm:ssZ"));
+
+                                foreach (var link in targetItem.Links) {
+                                    if (link != null && link.RelationshipType == "enclosure") {
+                                        log.DebugFormat("  - Enclosure: {0}", link.Uri.AbsoluteUri);
+                                    }
+                                }
 
                                 DateTimeOffset measurementDate = targetItem.FindStartDate();
                                 log.DebugFormat("Item measurement date ({0}): {1}", targetItem.Id, measurementDate.ToString("yyyy-MM-ddTHH:mm:ssZ"));

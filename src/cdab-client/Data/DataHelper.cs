@@ -215,17 +215,17 @@ namespace cdabtesttools.Data
 
         private static IEnumerable<FiltersDefinition> GenerateFilterDefinitionsFromCollectionsDefinition(CatalogueSetConfiguration catDefinition)
         {
-            List<FiltersDefinition> filtersDefinition = new List<FiltersDefinition>();
+            List<FiltersDefinition> filtersDefinitions = new List<FiltersDefinition>();
 
             foreach (var collection in catDefinition.Collections)
             {
-                var fds = new FiltersDefinition(collection.Key);
+                var fds = new FiltersDefinition(collection.Key, collection.Value);
                 fds.AddFilters(collection.Value.Parameters);
                 fds.AddFilters(catDefinition.Parameters);
-                filtersDefinition.Add(fds);
+                filtersDefinitions.Add(fds);
             }
 
-            return filtersDefinition;
+            return filtersDefinitions;
         }
 
         public static IEnumerable<CrossCatalogueCoverageFiltersDefinition> GenerateDataAvailabilityLatencyFiltersDefinition(string setName, CatalogueSetConfiguration setConfiguration, TargetSiteWrapper target)

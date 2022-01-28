@@ -635,7 +635,7 @@ namespace cdabtesttools.Measurement
 
                 if (totalResults.ContainsKey(dataCollectionDivision))
                 {
-                    log.WarnFormat("Data collection with key '{0} is duplicated, please check the config");
+                    log.WarnFormat("Data collection with key '{0} is duplicated, please check the config", dataCollectionDivision);
                     continue;
                 }
                 totalResults.Add(dataCollectionDivision, totalResult);

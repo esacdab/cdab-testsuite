@@ -192,8 +192,10 @@ namespace cdabtesttools.Data
                         new LabelString("S2MSI1C", "Level-1C", GetIdentifierValidator(new Regex(@"^S2.*_(MSI)?L1C_.*"))),
                         new LabelString("S2MSI2A", "Level-2A", GetIdentifierValidator(new Regex(@"^S2.*_(MSI)?L2A_.*"))),
                     });
-                s2Mission.RelativeOrbit = new ItemNumberRange("track", "{http://a9.com/-/opensearch/extensions/eo/1.0/}track", 1, 143, 1, "[{0},{1}]",
-                    new Regex(@"\[([0-9]+(\\.[0-9]+)?),([0-9]+(\\.[0-9]+)?)\]"), "Track", GetTrackValidator, null);
+                if (target.Type != TargetType.THIRDPARTY) {
+                    s2Mission.RelativeOrbit = new ItemNumberRange("track", "{http://a9.com/-/opensearch/extensions/eo/1.0/}track", 1, 143, 1, "[{0},{1}]",
+                        new Regex(@"\[([0-9]+(\\.[0-9]+)?),([0-9]+(\\.[0-9]+)?)\]"), "Track", GetTrackValidator, null);
+                }
 
                 s2Mission.Count = new ItemNumberRange("count", "{http://a9.com/-/spec/opensearch/1.1/}count", 1, 50, 1, "{0}",
                     new Regex(@"([0-9]+(\\.[0-9]+)?)"), "Count", null, GetCountValidator);
@@ -203,11 +205,13 @@ namespace cdabtesttools.Data
                 //         new LabelString("Fast-1.5h", "Fast 1.5h", null, GetMultiFiltersConditioner("productType", new string[]{"S2MSI1C"})),
                 //     });
 
-                s2Mission.ArchivingStatus = new StringListChoice("archiveStatus", "{http://a9.com/-/opensearch/extensions/eo/1.0/}statusSubType",
-                    new LabelString[] {
-                        new LabelString("Online", "Online", GetArchivingStatusValidator(Terradue.ServiceModel.Ogc.Eop21.StatusSubTypeValueEnumerationType.ONLINE), null),
-                        new LabelString("Offline", "Offline", GetArchivingStatusValidator(Terradue.ServiceModel.Ogc.Eop21.StatusSubTypeValueEnumerationType.OFFLINE), null),
-                    });
+                if (target.Type != TargetType.THIRDPARTY) {
+                    s2Mission.ArchivingStatus = new StringListChoice("archiveStatus", "{http://a9.com/-/opensearch/extensions/eo/1.0/}statusSubType",
+                        new LabelString[] {
+                            new LabelString("Online", "Online", GetArchivingStatusValidator(Terradue.ServiceModel.Ogc.Eop21.StatusSubTypeValueEnumerationType.ONLINE), null),
+                            new LabelString("Offline", "Offline", GetArchivingStatusValidator(Terradue.ServiceModel.Ogc.Eop21.StatusSubTypeValueEnumerationType.OFFLINE), null),
+                        });
+                }
 
                 s2Mission.Geometries = new GeometryFilterCollection("geom", "{http://a9.com/-/opensearch/extensions/geo/1.0/}geometry", features);
             }
