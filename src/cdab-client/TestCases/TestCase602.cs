@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Net;
@@ -37,6 +38,10 @@ namespace cdabtesttools.TestCases
 {
     internal class TestCase602 : TestCase201
     {
+        // S2B_MSIL1C_20220124T051219_N0301_R033_T41FQE_20220124T063342
+        // S2B_OPER_MSI_L1C_TL_VGS2_20220124T063342_A025513_T41FQE_N03.01
+        private static Regex sentinel2UidRegex = new Regex(@"S2[AB]_MSI..._.{15}_N.{4}_R.{3}_(?'tile'T.{5})_.{15}");
+        private static Regex sentinel2TileRegex = new Regex(@"S2[AB]_OPER_MSI_..._.._...._.{15}_A.{6}_(?'tile'T.{5})_N.{2}\...");
         private Dictionary<int, CrossCatalogueCoverageFiltersDefinition> queryFiltersTuple;
 
         public TestCase602(ILog log, TargetSiteWrapper target, int load_factor, out List<IOpenSearchResultItem> foundItems) :
@@ -84,70 +89,75 @@ namespace cdabtesttools.TestCases
 
         public override IEnumerable<TestUnitResult> RunTestUnits(TaskFactory taskFactory, Task prepTask)
         {
-            // For providers that do not offer online dates, use special processing
-            if (target.TargetSiteConfig.Data.Catalogue.LatencyPolling) {
-                log.Info("Latencies calculated by polling the target catalogue; process may take some time");
+            if (StartTime.Ticks == 0)
+                StartTime = DateTimeOffset.UtcNow;
 
-                if (StartTime.Ticks == 0)
-                    StartTime = DateTimeOffset.UtcNow;
+            if (prepTask.IsFaulted)
+                throw prepTask.Exception;
 
-                if (prepTask.IsFaulted)
-                    throw prepTask.Exception;
+            List<Task<TestUnitResult>> _testUnits = new List<Task<TestUnitResult>>();
+            Task[] previousTask = Array.ConvertAll(new int[target.TargetSiteConfig.MaxCatalogueThread], mp => prepTask);
 
-                List<Task<TestUnitResult>> _testUnits = new List<Task<TestUnitResult>>();
-                Task[] previousTask = Array.ConvertAll(new int[target.TargetSiteConfig.MaxCatalogueThread], mp => prepTask);
+            int i = queryFilters.Count();
 
-                int i = queryFilters.Count();
-
-                while (i > 0)
+            while (i > 0)
+            {
+                for (int j = 0; j < target.TargetSiteConfig.MaxCatalogueThread; j++)
                 {
-                    for (int j = 0; j < target.TargetSiteConfig.MaxCatalogueThread; j++)
+                    var _testUnit = previousTask[j].ContinueWith<KeyValuePair<IOpenSearchable, FiltersDefinition>>((task) =>
                     {
-                        var _testUnit = previousTask[j].ContinueWith<KeyValuePair<IOpenSearchable, FiltersDefinition>>((task) =>
+                        prepTask.Wait();
+                        FiltersDefinition randomFilter;
+                        queryFilters.TryDequeue(out randomFilter);
+                        return new KeyValuePair<IOpenSearchable, FiltersDefinition>(target.CreateOpenSearchableEntity(randomFilter, Configuration.Current.Global.QueryTryNumber), randomFilter);
+                    }).
+                        ContinueWith((request) =>
                         {
-                            prepTask.Wait();
-                            FiltersDefinition randomFilter;
-                            queryFilters.TryDequeue(out randomFilter);
-                            return new KeyValuePair<IOpenSearchable, FiltersDefinition>(target.CreateOpenSearchableEntity(randomFilter, Configuration.Current.Global.QueryTryNumber), randomFilter);
-                        }).
-                            ContinueWith((request) =>
+                            if (request.Result.Value == null) return null;
+
+                            // Get the original collection from the filter definition and check whether polling is needed
+                            FiltersDefinition parameters = request.Result.Value;
+                            bool latencyPolling = target.TargetSiteConfig.Data.Catalogue.LatencyPolling != null && target.TargetSiteConfig.Data.Catalogue.LatencyPolling.Value;
+                            if (parameters.DataCollection != null && parameters.DataCollection.LatencyPolling != null) latencyPolling = parameters.DataCollection.LatencyPolling.Value;
+
+                            if (latencyPolling)
                             {
-                                if (request.Result.Value == null) return null;
-                                FiltersDefinition parameters = request.Result.Value;
+                                // For providers that do not offer online dates, use special processing
+                                log.Info("Latencies calculated by polling the target catalogue; process may take some time");
+
                                 int queryId = int.Parse(parameters.Filters.FirstOrDefault(f => f.Key == "queryId").Value);
                                 IOpenSearchable targetEntity = request.Result.Key;
                                 IOpenSearchable referenceEntity = queryFiltersTuple[queryId].Reference.Target.CreateOpenSearchableEntity();
 
                                 return PollUntilAvailable(targetEntity, referenceEntity, parameters);
-                            });
-                        _testUnits.Add(_testUnit);
-                        previousTask[j] = _testUnit;
-                        i--;
-                    }
+                            }
+                            else
+                            {
+                                return MakeQuery(request.Result.Key, request.Result.Value);
+                            }
+                        });
+                    _testUnits.Add(_testUnit);
+                    previousTask[j] = _testUnit;
+                    i--;
                 }
-                try
-                {
-                    Task.WaitAll(_testUnits.ToArray());
-                }
-                catch (AggregateException ae)
-                {
-                    Exception ex = ae;
-                    while (ex is AggregateException)
-                    {
-                        ex = ex.InnerException;
-                    }
-                    log.Debug(ex.Message);
-                    log.Debug(ex.StackTrace);
-                }
-                EndTime = DateTimeOffset.UtcNow;
-
-                return _testUnits.Select(t => t.Result).Where(r => r != null);
-
             }
+            try
+            {
+                Task.WaitAll(_testUnits.ToArray());
+            }
+            catch (AggregateException ae)
+            {
+                Exception ex = ae;
+                while (ex is AggregateException)
+                {
+                    ex = ex.InnerException;
+                }
+                log.Debug(ex.Message);
+                log.Debug(ex.StackTrace);
+            }
+            EndTime = DateTimeOffset.UtcNow;
 
-            // For normal providers, use default (TC201) processing
-            return base.RunTestUnits(taskFactory, prepTask);
-            
+            return _testUnits.Select(t => t.Result).Where(r => r != null);
         }
 
 
@@ -157,12 +167,22 @@ namespace cdabtesttools.TestCases
             List<IMetric> metrics = new List<IMetric>();
 
             log.DebugFormat("[{1}] > Query {0} {2}...", fd.Name, Task.CurrentId, fd.Label);
-
+ 
             var parameters = fd.GetNameValueCollection();
 
             return catalogue_task_factory.StartNew(() =>
             {
-                foreach (var param in parameters.AllKeys) {
+                int latencyCheckOffset = (target.TargetSiteConfig.Data.Catalogue.LatencyCheckOffset != null ? target.TargetSiteConfig.Data.Catalogue.LatencyCheckOffset.Value : 0);
+                if (fd.DataCollection != null && fd.DataCollection.LatencyCheckOffset != null) latencyCheckOffset = fd.DataCollection.LatencyCheckOffset.Value;
+
+                if (latencyCheckOffset != 0)
+                {
+                    DateTime modifiedEnd = DateTime.UtcNow.AddSeconds(- latencyCheckOffset);
+                    parameters["{http://purl.org/dc/terms/}modified"] = String.Format("2000-01-01T00:00:00Z/{0:yyyy-MM-ddTHH:mm:ssZ}", modifiedEnd);
+                }
+            
+                foreach (var param in parameters.AllKeys)
+                {
                     log.DebugFormat("- Parameter {0} = {1}", param, parameters[param]);
                 }
                 parameters["{http://a9.com/-/spec/opensearch/1.1/}count"] = "1";
@@ -198,10 +218,13 @@ namespace cdabtesttools.TestCases
                     List<double> avaLatencies = new List<double>();
                     long validatedResults = 0;
 
-                    int latencyCheckMaxDuration = target.TargetSiteConfig.Data.Catalogue.LatencyCheckMaxDuration;
-                    if (latencyCheckMaxDuration == 0) latencyCheckMaxDuration = 3600;
-                    int latencyCheckInterval = target.TargetSiteConfig.Data.Catalogue.LatencyCheckInterval;
-                    if (latencyCheckInterval == 0) latencyCheckInterval = 600;
+                    int latencyCheckMaxDuration = (target.TargetSiteConfig.Data.Catalogue.LatencyCheckMaxDuration != null ? target.TargetSiteConfig.Data.Catalogue.LatencyCheckMaxDuration.Value : 3600);
+                    if (fd.DataCollection != null && fd.DataCollection.LatencyCheckMaxDuration != null) latencyCheckMaxDuration = fd.DataCollection.LatencyCheckMaxDuration.Value;
+                    int latencyCheckInterval = (target.TargetSiteConfig.Data.Catalogue.LatencyCheckInterval != null ? target.TargetSiteConfig.Data.Catalogue.LatencyCheckInterval.Value : 600);
+                    if (fd.DataCollection != null && fd.DataCollection.LatencyCheckInterval != null) latencyCheckInterval = fd.DataCollection.LatencyCheckInterval.Value;
+
+                    log.DebugFormat("Latency handling for {0}: max duration: {1} s, check ever {2} s", fd.Label, latencyCheckMaxDuration, latencyCheckInterval);
+
                     DateTime maxEndTime = DateTime.UtcNow.AddSeconds(latencyCheckMaxDuration);
                     log.InfoFormat("Checking for product availability in target until {0}", maxEndTime.ToString("yyyy-MM-ddTHH:mm:ssZ"));
                     
@@ -231,7 +254,6 @@ namespace cdabtesttools.TestCases
                                         fd,   // add original filters (product type may be needed in target)
                                         out targetResults
                                     );
-                                    online[referenceItem] = true;
                                 }
                                 catch (WebException we)
                                 {
@@ -244,10 +266,11 @@ namespace cdabtesttools.TestCases
 
                                 if (targetItem == null)
                                 {
-                                    log.InfoFormat("Item {0} not (yet) available in target", referenceItem.Id);
+                                    log.InfoFormat("Item {0} not (yet) available in target", referenceItem.Identifier);
                                     oneMissing = true;
                                     continue;
                                 }
+                                online[referenceItem] = true;
 
                                 long serializedSize = 0;
                                 try
@@ -489,7 +512,28 @@ namespace cdabtesttools.TestCases
                 filters.AddFilter("uid", "{http://a9.com/-/opensearch/extensions/geo/1.0/}uid", item.Identifier, item.Identifier, null, null);
             }
             result = ose.Query(os, filters.GetNameValueCollection());
-            return result.Items.FirstOrDefault();
+
+            IOpenSearchResultItem correspondingItem = result.Items.FirstOrDefault();
+
+            if (correspondingItem != null && correspondingItem.Identifier == item.Identifier)
+            {
+                return correspondingItem;
+            }
+            else
+            {
+                foreach (var it in result.Items) {
+                    log.DebugFormat("- ID: {0}", it.Identifier);
+                }
+                Match uidMatch = sentinel2UidRegex.Match(item.Identifier);
+                if (!uidMatch.Success)
+                {
+                    uidMatch = sentinel2TileRegex.Match(item.Identifier);
+                    if (!uidMatch.Success) return null;
+                }
+
+                string tile = uidMatch.Groups["tile"].Value;
+                return result.Items.Where(i => i.Identifier.Contains(tile)).FirstOrDefault();
+            }
         }
     }
 }

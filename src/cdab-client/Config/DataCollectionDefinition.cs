@@ -28,6 +28,13 @@ namespace cdabtesttools.Config
 
         public List<OpenSearchParameter> Parameters { get; set; }
 
-        
+        public bool? LatencyPolling { get; set; }
+
+        public int? LatencyCheckInterval { get; set; }
+
+        public int? LatencyCheckMaxDuration { get; set; }
+
+        public int? LatencyCheckOffset { get; set; }
+
     }
 }
