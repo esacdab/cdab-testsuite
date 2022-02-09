@@ -200,7 +200,9 @@ namespace cdabtesttools.TestCases
                     log.DebugFormat("[{0}] < No results for {2}. Exception: {1}", Task.CurrentId, e.InnerException.Message, fd.Label);
                     log.Debug(e.InnerException.StackTrace);
                     metrics.Add(new ExceptionMetric(e.InnerException));
-                    //metrics.Add(new LongMetric(MetricName.maxTotalResults, -1, "#"));
+                    LongMetric totalResultsMetric = metrics.FirstOrDefault(m => m.Name == MetricName.maxTotalResults) as LongMetric;
+                    if (totalResultsMetric != null) metrics.Remove(totalResultsMetric);
+                    metrics.Add(new LongMetric(MetricName.maxTotalResults, -1, "#"));
                     metrics.Add(new LongMetric(MetricName.totalReadResults, -1, "#"));
                 }
 
@@ -361,6 +363,9 @@ namespace cdabtesttools.TestCases
                             log.WarnFormat("Target item not online within time limit");
                         }
 
+                        LongMetric totalResultsMetric = metrics.FirstOrDefault(m => m.Name == MetricName.maxTotalResults) as LongMetric;
+                        if (totalResultsMetric != null) metrics.Remove(totalResultsMetric);
+                        metrics.Add(new LongMetric(MetricName.maxTotalResults, 1, "#"));
                         metrics.Add(new LongMetric(MetricName.wrongResultsCount, results.Items.Count() - validatedResults, "#"));
                         metrics.Add(new LongMetric(MetricName.totalValidatedResults, validatedResults, "#"));
                         metrics.Add(new LongMetric(MetricName.totalReadResults, results.Items.Count(), "#"));

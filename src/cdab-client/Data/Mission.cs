@@ -113,11 +113,14 @@ namespace cdabtesttools.Data
             }
             else
             {
-                s1Mission.PlatformIdentifiers = new StringListChoice("platformSerialIdentifier", "{http://a9.com/-/opensearch/extensions/eo/1.0/}platformSerialIdentifier",
-                    new LabelString[] {
-                        new LabelString("2014-016A", "A", GetIdentifierValidator(new Regex(@"^S1A.*"))),
-                        new LabelString("2016-025A", "B", GetIdentifierValidator(new Regex(@"^S1B.*")))
-                    });
+                if (target.Type != TargetType.THIRDPARTY)
+                {
+                    s1Mission.PlatformIdentifiers = new StringListChoice("platformSerialIdentifier", "{http://a9.com/-/opensearch/extensions/eo/1.0/}platformSerialIdentifier",
+                        new LabelString[] {
+                            new LabelString("2014-016A", "A", GetIdentifierValidator(new Regex(@"^S1A.*"))),
+                            new LabelString("2016-025A", "B", GetIdentifierValidator(new Regex(@"^S1B.*")))
+                        });
+                }
             }
             s1Mission.ProductTypes = new StringListChoice("productType", "{http://a9.com/-/opensearch/extensions/eo/1.0/}productType",
                 new LabelString[] {
@@ -182,11 +185,13 @@ namespace cdabtesttools.Data
             } else {
                 s2Mission = new Mission("Sentinel-2", new LabelString("Sentinel-2", "Sentinel-2", GetIdentifierValidator(new Regex(@"^S2.*"))));
                 s2Mission.Lifetime = new TimeRange("{http://a9.com/-/opensearch/extensions/time/1.0/}start", "{http://a9.com/-/opensearch/extensions/time/1.0/}end", new DateTime(2015, 07, 01), DateTime.UtcNow);
-                s2Mission.PlatformIdentifiers = new StringListChoice("platformSerialIdentifier", "{http://a9.com/-/opensearch/extensions/eo/1.0/}platformSerialIdentifier",
-                    new LabelString[] {
-                        new LabelString("2015-028A", "A", GetIdentifierValidator(new Regex(@"^S2A.*"))),
-                        new LabelString("2017-013A", "B", GetIdentifierValidator(new Regex(@"^S2B.*")))
-                    });
+                if (target.Type != TargetType.THIRDPARTY) {
+                    s2Mission.PlatformIdentifiers = new StringListChoice("platformSerialIdentifier", "{http://a9.com/-/opensearch/extensions/eo/1.0/}platformSerialIdentifier",
+                        new LabelString[] {
+                            new LabelString("2015-028A", "A", GetIdentifierValidator(new Regex(@"^S2A.*"))),
+                            new LabelString("2017-013A", "B", GetIdentifierValidator(new Regex(@"^S2B.*")))
+                        });
+                }
                 s2Mission.ProductTypes = new StringListChoice("productType", "{http://a9.com/-/opensearch/extensions/eo/1.0/}productType",
                     new LabelString[] {
                         new LabelString("S2MSI1C", "Level-1C", GetIdentifierValidator(new Regex(@"^S2.*_(MSI)?L1C_.*"))),
@@ -221,11 +226,14 @@ namespace cdabtesttools.Data
             // Sentinel3
             Mission s3Mission = new Mission("Sentinel-3", new LabelString("Sentinel-3", "Sentinel-3", GetIdentifierValidator(new Regex(@"^S3.*"))));
             s3Mission.Lifetime = new TimeRange("{http://a9.com/-/opensearch/extensions/time/1.0/}start", "{http://a9.com/-/opensearch/extensions/time/1.0/}end", new DateTime(2016, 03, 01), DateTime.UtcNow);
-            s3Mission.PlatformIdentifiers = new StringListChoice("platformSerialIdentifier", "{http://a9.com/-/opensearch/extensions/eo/1.0/}platformSerialIdentifier",
-                new LabelString[] {
-                    new LabelString("2016-011A", "A", GetIdentifierValidator(new Regex(@"^S3A.*"))),
-                    new LabelString("2018-039A", "B", GetIdentifierValidator(new Regex(@"^S3B.*")))
-                });
+            if (target.Type != TargetType.THIRDPARTY)
+            {
+                s3Mission.PlatformIdentifiers = new StringListChoice("platformSerialIdentifier", "{http://a9.com/-/opensearch/extensions/eo/1.0/}platformSerialIdentifier",
+                    new LabelString[] {
+                        new LabelString("2016-011A", "A", GetIdentifierValidator(new Regex(@"^S3A.*"))),
+                        new LabelString("2018-039A", "B", GetIdentifierValidator(new Regex(@"^S3B.*")))
+                    });
+            }
             s3Mission.ProductTypes = new StringListChoice("productType", "{http://a9.com/-/opensearch/extensions/eo/1.0/}productType",
                 new LabelString[] {
                     new LabelString("OL_1_EFR___", "OLCI Level-1B EO FR", GetIdentifierValidator(new Regex(@"^S3.*_OL_1_EFR___.*"))),

@@ -156,6 +156,7 @@ namespace cdabtesttools.TestCases
             List<IMetric> metrics = new List<IMetric>();
 
             log.DebugFormat("[{1}] > Query {0} {2}...", fd.Name, Task.CurrentId, fd.Label);
+            bool error = false;
 
             DateTime fromTime = DateTime.UtcNow;
 
@@ -215,6 +216,7 @@ namespace cdabtesttools.TestCases
                                 log.Warn("Error during target request for new item");
                                 log.WarnFormat("Error message: {0}", e.Message);
                                 log.WarnFormat("Skipping {0} {1}", fd.Name, fd.Label);
+                                error = true;
                                 break;
                             }
                             var respTime = sw.ElapsedMilliseconds;
@@ -317,9 +319,22 @@ namespace cdabtesttools.TestCases
                             log.WarnFormat("Target item not online within time limit");
                         }
 
-                        metrics.Add(new LongMetric(MetricName.wrongResultsCount, 1 - validatedResults, "#"));
-                        metrics.Add(new LongMetric(MetricName.totalValidatedResults, validatedResults, "#"));
-                        metrics.Add(new LongMetric(MetricName.totalReadResults, 1, "#"));
+                        LongMetric totalResultsMetric = metrics.FirstOrDefault(m => m.Name == MetricName.maxTotalResults) as LongMetric;
+                        if (totalResultsMetric != null) metrics.Remove(totalResultsMetric);
+                        if (error) 
+                        {
+                            metrics.Add(new LongMetric(MetricName.maxTotalResults, -1, "#"));
+                            metrics.Add(new LongMetric(MetricName.wrongResultsCount, 0, "#"));
+                            metrics.Add(new LongMetric(MetricName.totalValidatedResults, 0, "#"));
+                            metrics.Add(new LongMetric(MetricName.totalReadResults, -1, "#"));
+                        }
+                        else
+                        {
+                            metrics.Add(new LongMetric(MetricName.maxTotalResults, 1, "#"));
+                            metrics.Add(new LongMetric(MetricName.wrongResultsCount, 1 - validatedResults, "#"));
+                            metrics.Add(new LongMetric(MetricName.totalValidatedResults, validatedResults, "#"));
+                            metrics.Add(new LongMetric(MetricName.totalReadResults, 1, "#"));
+                        }
                         
                         if (opsLatencies.Count() > 0)
                         {
