@@ -34,6 +34,7 @@ using log4net;
 using Terradue.OpenSearch;
 using Terradue.OpenSearch.Engine;
 using Terradue.OpenSearch.Result;
+using Terradue.OpenSearch.DataHub;
 
 namespace cdabtesttools.TestCases
 {
@@ -80,7 +81,11 @@ namespace cdabtesttools.TestCases
                     return (r.Formatter.Replace(",", " TO "));
                 };
             }
-            queryFilters = new ConcurrentQueue<FiltersDefinition>(Mission.ShuffleSimpleRandomFiltersCombination(missions, baselines, load_factor, rangeReformatter));
+            try {
+                queryFilters = new ConcurrentQueue<FiltersDefinition>(Mission.ShuffleSimpleRandomFiltersCombination(missions, baselines, load_factor, rangeReformatter));
+            } catch (Exception e) {
+                throw;
+            }
 
         }
 
@@ -136,6 +141,7 @@ namespace cdabtesttools.TestCases
                     var _testUnit = previousTask[j].ContinueWith<KeyValuePair<IOpenSearchable, FiltersDefinition>>((task) =>
                     {
                         prepTask.Wait();
+
                         FiltersDefinition randomFilter;
                         queryFilters.TryDequeue(out randomFilter);
                         return new KeyValuePair<IOpenSearchable, FiltersDefinition>(target.CreateOpenSearchableEntity(randomFilter, Configuration.Current.Global.QueryTryNumber), randomFilter);
@@ -150,6 +156,7 @@ namespace cdabtesttools.TestCases
                     i--;
                 }
             }
+
             try
             {
                 Task.WaitAll(_testUnits.ToArray());
@@ -196,7 +203,14 @@ namespace cdabtesttools.TestCases
                 catch (AggregateException e)
                 {
                     log.DebugFormat("[{0}] < No results for {2}. Exception: {1}", Task.CurrentId, e.InnerException.Message, fd.Label);
-                    log.Debug(e.InnerException.StackTrace);
+                    if (e.InnerException is UnsupportedDataException)
+                    {
+                        log.Debug("Data collection not supported by target");
+                    }
+                    else
+                    {
+                        log.Debug(e.InnerException.StackTrace);
+                    }
                     metrics.Add(new ExceptionMetric(e.InnerException));
                     metrics.Add(new LongMetric(MetricName.maxTotalResults, -1, "#"));
                     metrics.Add(new LongMetric(MetricName.totalReadResults, -1, "#"));
