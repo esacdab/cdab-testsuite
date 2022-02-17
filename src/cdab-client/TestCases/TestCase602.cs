@@ -44,6 +44,8 @@ namespace cdabtesttools.TestCases
         private static Regex sentinel2TileRegex = new Regex(@"S2[AB]_OPER_MSI_..._.._...._.{15}_A.{6}_(?'tile'T.{5})_N.{2}\...");
         private Dictionary<int, CrossCatalogueCoverageFiltersDefinition> queryFiltersTuple;
 
+        public override bool MarkUnsupportedData => true;
+
         public TestCase602(ILog log, TargetSiteWrapper target, int load_factor, out List<IOpenSearchResultItem> foundItems) :
             base(log, target, load_factor, null, out foundItems)
         {

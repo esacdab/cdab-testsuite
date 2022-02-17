@@ -146,8 +146,6 @@ do
     fi
     rm -f S3-OLCI-*
 
-    start_time=$(date +%s%N)
-    end_time=$(date +%s%N)
     process_duration=$(((end_time - start_time) / 1000000))
     total_process_duration=$((total_process_duration + process_duration))
 done
