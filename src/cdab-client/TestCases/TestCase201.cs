@@ -52,6 +52,10 @@ namespace cdabtesttools.TestCases
         protected List<IOpenSearchResultItem> foundItems = null;
         protected bool ignoreEmptyResult = false;
 
+        // Whether or not data collections not supported on the target are specially marked and filtered
+        public virtual bool MarkUnsupportedData => false;
+
+
         public TestCase201(ILog log, TargetSiteWrapper target, int load_factor, IEnumerable<Data.Mission> missions, out List<IOpenSearchResultItem> foundItems, bool ignoreEmptyResult = false) :
             base("TC201", "Basic catalogue query")
         {
@@ -203,17 +207,19 @@ namespace cdabtesttools.TestCases
                 catch (AggregateException e)
                 {
                     log.DebugFormat("[{0}] < No results for {2}. Exception: {1}", Task.CurrentId, e.InnerException.Message, fd.Label);
-                    if (e.InnerException is UnsupportedDataException)
+                    if (e.InnerException is UnsupportedDataException && MarkUnsupportedData)
                     {
                         log.Debug("Data collection not supported by target");
+                        metrics.Add(new LongMetric(MetricName.maxTotalResults, -2, "#"));
+                        metrics.Add(new LongMetric(MetricName.totalReadResults, -2, "#"));
                     }
                     else
                     {
                         log.Debug(e.InnerException.StackTrace);
+                        metrics.Add(new LongMetric(MetricName.maxTotalResults, -1, "#"));
+                        metrics.Add(new LongMetric(MetricName.totalReadResults, -1, "#"));
                     }
                     metrics.Add(new ExceptionMetric(e.InnerException));
-                    metrics.Add(new LongMetric(MetricName.maxTotalResults, -1, "#"));
-                    metrics.Add(new LongMetric(MetricName.totalReadResults, -1, "#"));
                 }
                 finally
                 {

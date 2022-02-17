@@ -247,7 +247,20 @@ namespace cdabtesttools
 
         private static TargetSiteWrapper ConfigureTarget(TargetSiteConfiguration targetSiteConfig)
         {
-            return new TargetSiteWrapper(target_name, targetSiteConfig);
+            bool enableDirectDataAccess = false;
+            foreach (string scenario in scenarios) {
+                if (scenario.StartsWith("TS1")) enableDirectDataAccess = true;
+            }
+            TargetSiteWrapper targetSiteWrapper = new TargetSiteWrapper(target_name, targetSiteConfig, enableDirectDataAccess);
+            if (enableDirectDataAccess)
+            {
+                log.Info("Scenario is executed on target instance, internal target-specific data access will be used if possible");
+            }
+            else
+            {
+                log.Info("Scenario is executed on an instance outside the target, external target-specific data access will be used if possible");
+            }
+            return targetSiteWrapper;
         }
 
 

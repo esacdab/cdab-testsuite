@@ -84,13 +84,13 @@ namespace cdabtesttools.Target
         /// </summary>
         /// <param name="name">A name for the target site.</param>
         /// <param name="targetSiteConfig">The object representing the target site node from the configuration YAML file.</param>
-        public TargetSiteWrapper(string name, TargetSiteConfiguration targetSiteConfig)
+        public TargetSiteWrapper(string name, TargetSiteConfiguration targetSiteConfig, bool enableDirectDataAccess = false)
         {
             Name = name;
             this.targetSiteConfig = targetSiteConfig;
             ose = new Terradue.OpenSearch.Engine.OpenSearchEngine();
             ose.LoadPlugins();
-            wrapper = CreateDataAccessWrapper(targetSiteConfig);
+            wrapper = CreateDataAccessWrapper(targetSiteConfig, null, enableDirectDataAccess);
             target_type = InitType();
         }
 
@@ -153,7 +153,7 @@ namespace cdabtesttools.Target
             return TargetType.UNKNOWN;
         }
 
-        public static IDataHubSourceWrapper CreateDataAccessWrapper(TargetSiteConfiguration targetSiteConfig, FiltersDefinition filters = null)
+        public static IDataHubSourceWrapper CreateDataAccessWrapper(TargetSiteConfiguration targetSiteConfig, FiltersDefinition filters = null, bool enableDirectDataAccess = false)
         {
             var target_uri = targetSiteConfig.GetDataAccessUri();
             var target_creds = targetSiteConfig.GetDataAccessNetworkCredentials();
@@ -164,16 +164,25 @@ namespace cdabtesttools.Target
 
             if (target_uri.Host == "catalogue.onda-dias.eu")
             {
-                return new OndaDiasWrapper(new Uri(string.Format("https://catalogue.onda-dias.eu/dias-catalogue")), (NetworkCredential)target_creds, targetSiteConfig.Storage.ToOpenStackStorageSettings());
+                OndaDiasWrapper ondaDiasWrapper = new OndaDiasWrapper(new Uri(string.Format("https://catalogue.onda-dias.eu/dias-catalogue")), (NetworkCredential)target_creds, targetSiteConfig.Storage.ToOpenStackStorageSettings());
+                ondaDiasWrapper.EnableDirectDataAccess = enableDirectDataAccess;
+                return ondaDiasWrapper;
+
             }
 
             if (target_uri.Host == "finder.creodias.eu" || target_uri.Host == "finder.code-de.org")
             {
+                CreoDiasWrapper creoDiasWrapper;
                 if (targetSiteConfig.Data.Url != null)
                 {
-                    return new CreoDiasWrapper(target_creds, osUrl: targetSiteConfig.Data.Url, openStackStorageSettings: targetSiteConfig.Storage.ToOpenStackStorageSettings() );
+                    creoDiasWrapper = new CreoDiasWrapper(target_creds, osUrl: targetSiteConfig.Data.Url, openStackStorageSettings: targetSiteConfig.Storage.ToOpenStackStorageSettings() );
                 }
-                return new CreoDiasWrapper(target_creds, openStackStorageSettings: targetSiteConfig.Storage.ToOpenStackStorageSettings() );
+                else
+                {
+                    creoDiasWrapper = new CreoDiasWrapper(target_creds, openStackStorageSettings: targetSiteConfig.Storage.ToOpenStackStorageSettings() );
+                }
+                creoDiasWrapper.EnableDirectDataAccess = enableDirectDataAccess;
+                return creoDiasWrapper;
             }
 
             if (target_uri.Host.Contains("mundiwebservices.com"))
@@ -239,7 +248,7 @@ namespace cdabtesttools.Target
                 Credentials = Wrapper.Settings.Credentials,
                 MaxRetries = maxRetries
             };
-            IDataHubSourceWrapper wrapper = CreateDataAccessWrapper(TargetSiteConfig, filters);
+            IDataHubSourceWrapper wrapper = CreateDataAccessWrapper(TargetSiteConfig, filters, false);
             wrapper.Settings.MaxRetries = 3;
             
             if (forceTotalResults && wrapper is AmazonStacWrapper) {

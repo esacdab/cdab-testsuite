@@ -1087,7 +1087,18 @@ class TestClient:
         except Exception as e:
             Logger.log(LogLevel.WARN, str(e), run=run)
 
+        tools = []
+        if 'tools' in self.test_scenario:
+            tools.extend(self.test_scenario['tools'])
+        if 'tools' in self.target_site_class:
+            tools.extend(self.target_site_class['tools'])
+
+
         if self.docker_run_command == 'CDAB_CLIENT_DEFAULT':
+
+            if 'onda-eodata' in tools:
+                copy_file(self.compute_config, run, "{0}/ts-scripts/link-onda-eodata.sh".format(os.path.dirname(sys.argv[0])), "link-onda-eodata.sh")
+                execute_remote_command(self.compute_config, run, "sudo sh link-onda-eodata.sh")
 
             script_name = "{0}-remote.sh".format(self.test_scenario_id)
             copy_file(self.compute_config, run, "{0}/ts-scripts/{1}".format(os.path.dirname(sys.argv[0]), script_name), script_name)
@@ -1132,12 +1143,6 @@ class TestClient:
                 script_name = "{0}-remote.sh".format(self.test_scenario_id)
 
             # Install tools specific for test scenarios and provider
-            tools = []
-            if 'tools' in self.test_scenario:
-                tools.extend(self.test_scenario['tools'])
-            if 'tools' in self.target_site_class:
-                tools.extend(self.target_site_class['tools'])
-
             if 'conda' in tools:
                 if self.compute_config['use_volume']:
                     conda_dir = "/mnt/cdab-volume/opt/anaconda"

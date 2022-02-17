@@ -30,6 +30,7 @@ using cdabtesttools.Measurement;
 using cdabtesttools.Target;
 using log4net;
 using Terradue.OpenSearch;
+using Terradue.OpenSearch.DataHub;
 using Terradue.OpenSearch.Result;
 using Terradue.Metadata.EarthObservation.OpenSearch.Extensions;
 
@@ -37,6 +38,9 @@ namespace cdabtesttools.TestCases
 {
     internal class TestCase601 : TestCase201
     {
+
+        public override bool MarkUnsupportedData => true;
+
         public TestCase601(ILog log, TargetSiteWrapper target, int load_factor, out List<IOpenSearchResultItem> foundItems) :
             base(log, target, load_factor, null, out foundItems)
         {
@@ -157,6 +161,7 @@ namespace cdabtesttools.TestCases
 
             log.DebugFormat("[{1}] > Query {0} {2}...", fd.Name, Task.CurrentId, fd.Label);
             bool error = false;
+            bool unsupportedError = false;
 
             DateTime fromTime = DateTime.UtcNow;
 
@@ -217,6 +222,10 @@ namespace cdabtesttools.TestCases
                                 log.WarnFormat("Error message: {0}", e.Message);
                                 log.WarnFormat("Skipping {0} {1}", fd.Name, fd.Label);
                                 error = true;
+                                if (e is UnsupportedDataException)
+                                {
+                                    unsupportedError = true;
+                                }
                                 break;
                             }
                             var respTime = sw.ElapsedMilliseconds;
@@ -323,10 +332,10 @@ namespace cdabtesttools.TestCases
                         if (totalResultsMetric != null) metrics.Remove(totalResultsMetric);
                         if (error) 
                         {
-                            metrics.Add(new LongMetric(MetricName.maxTotalResults, -1, "#"));
+                            metrics.Add(new LongMetric(MetricName.maxTotalResults, unsupportedError ? -2 : -1, "#"));
                             metrics.Add(new LongMetric(MetricName.wrongResultsCount, 0, "#"));
                             metrics.Add(new LongMetric(MetricName.totalValidatedResults, 0, "#"));
-                            metrics.Add(new LongMetric(MetricName.totalReadResults, -1, "#"));
+                            metrics.Add(new LongMetric(MetricName.totalReadResults, unsupportedError ? -2 : -1, "#"));
                         }
                         else
                         {
