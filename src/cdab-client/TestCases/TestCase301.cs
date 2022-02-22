@@ -406,7 +406,7 @@ namespace cdabtesttools.TestCases
                     dataAccessStr = "http";
                     break;
                 case ItemAccessMethod.LocalFileSystem:
-                    if (target is OndaDiasWrapper)
+                    if (target.Wrapper is OndaDiasWrapper)
                     {
                         dataAccessStr = "ens";
                     }
@@ -416,7 +416,7 @@ namespace cdabtesttools.TestCases
                     }
                     break;
                 case ItemAccessMethod.NetworkFileSystem:
-                    if (target is OndaDiasWrapper)
+                    if (target.Wrapper is OndaDiasWrapper)
                     {
                         dataAccessStr = "ens";
                     }
