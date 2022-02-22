@@ -37,11 +37,10 @@ using cdabtesttools.Data;
 using cdabtesttools.Measurement;
 using cdabtesttools.Target;
 using log4net;
-using Terradue.Metadata.EarthObservation.OpenSearch.Extensions;
-using Terradue.OpenSearch;
 using Terradue.OpenSearch.DataHub;
 using Terradue.OpenSearch.Engine;
 using Terradue.OpenSearch.Result;
+using Terradue.OpenSearch.DataHub.Dias;
 using Terradue.ServiceModel.Ogc.Eop21;
 using Terradue.ServiceModel.Syndication;
 
@@ -162,6 +161,7 @@ namespace cdabtesttools.TestCases
                     MetricName.totalSize,
                     MetricName.resultsErrorRate,
                     MetricName.throughput,
+                    MetricName.dataAccess,
                     MetricName.dataCollectionDivision
                 }, tasks.Result.Count());
                 testCaseResults.SearchFiltersDefinition = results.Where(tcr => tcr != null).Select(tcr => tcr.FiltersDefinition).ToList();
@@ -379,6 +379,8 @@ namespace cdabtesttools.TestCases
                 FiltersDefinition fd = DataHelper.GenerateFiltersDefinitionFromItem("Download", enclosureAccess.SourceItem);
                 metrics.Add(new StringMetric(MetricName.dataCollectionDivision, fd.Label, "string"));
                 tcr.FiltersDefinition = fd;
+                
+                metrics.Add(new StringMetric(MetricName.dataAccess, GetDataAccessStr(enclosureAccess.AccessMethod, target), "string"));
             }
             tcr.State = enclosureAccess;
             return tcr;
@@ -393,6 +395,47 @@ namespace cdabtesttools.TestCases
             int place = Convert.ToInt32(Math.Floor(Math.Log(bytes, 1024)));
             double num = Math.Round(bytes / Math.Pow(1024, place), 1);
             return (Math.Sign(byteCount) * num).ToString() + suf[place];
+        }
+
+        protected static string GetDataAccessStr(ItemAccessMethod accessMethod, TargetSiteWrapper target)
+        {
+            string dataAccessStr = null;
+            switch (accessMethod)
+            {
+                case ItemAccessMethod.HttpDownload:
+                    dataAccessStr = "http";
+                    break;
+                case ItemAccessMethod.LocalFileSystem:
+                    if (target is OndaDiasWrapper)
+                    {
+                        dataAccessStr = "ens";
+                    }
+                    else
+                    {
+                        dataAccessStr = "nfs";
+                    }
+                    break;
+                case ItemAccessMethod.NetworkFileSystem:
+                    if (target is OndaDiasWrapper)
+                    {
+                        dataAccessStr = "ens";
+                    }
+                    else
+                    {
+                        dataAccessStr = "nfs";
+                    }
+                    break;
+                case ItemAccessMethod.S3Download:
+                    dataAccessStr = "s3";
+                    break;
+                case ItemAccessMethod.GoogleDownload:
+                    dataAccessStr = "gcp";
+                    break;
+                case ItemAccessMethod.Order:
+                    dataAccessStr = "order";
+                    break;
+            }
+            return dataAccessStr;
         }
     }
 }
