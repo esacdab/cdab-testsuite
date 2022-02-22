@@ -122,7 +122,6 @@ namespace cdabtesttools.Measurement
                     {
                         _totalErrors += ((LongMetric)tryNumber).Value / ((LongMetric)maxTryNumber).Value;
                     }
-
                 }
                 DoubleMetric _errorRate = new DoubleMetric(MetricName.errorRate,
                         (_totalErrors / tasksCount) * 100,
@@ -231,6 +230,20 @@ namespace cdabtesttools.Measurement
                 metrics.Add(_dataCollectionDivisions);
             }
 
+            if (metricsToAnalyze.Contains(MetricName.dataAccess) && results.SelectMany(r => r.Metrics).Where(m => m.Name == MetricName.dataAccess).Count() > 0)
+            {
+                List<string> dataAccessValues = new List<string>();
+                foreach (var result in results)
+                {
+                    StringMetric resultDataAccess = result.Metrics.FirstOrDefault(m => m.Name == MetricName.dataAccess) as StringMetric;
+                    dataAccessValues.Add(resultDataAccess == null ? null : resultDataAccess.Value);
+                }
+                StringArrayMetric _dataAccesses = new StringArrayMetric(MetricName.dataAccess, dataAccessValues.ToArray(), "string");
+                metrics.Add(_dataAccesses);
+                log.DebugFormat("Data Access Methods : {0}", string.Join(",", _dataAccesses.Value));
+            }
+
+
             if (metricsToAnalyze.Contains(MetricName.offlineDataAvailabilityLatency) && testCase is TestCase304)
             {
                 TestCase304 testCase304 = testCase as TestCase304;
@@ -239,6 +252,7 @@ namespace cdabtesttools.Measurement
                 {
                     if (result.Status != TestUnitResultStatus.Complete)
                         continue;
+                    
                     var _httpStatus = result.Metrics.Where(m => m.Name == MetricName.httpStatusCode).Cast<StringMetric>().Select(m => m.Value);
                     int statusCode = int.Parse(_httpStatus.First().Split(':').First());
                     if (statusCode == 200)
