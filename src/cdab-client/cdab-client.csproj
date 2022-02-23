@@ -10,7 +10,7 @@
     <RuntimeIdentifiers>win;linux</RuntimeIdentifiers>
     <Title>CDAB Test Tools</Title>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <Version>1.8.1</Version>
+    <Version>1.8.2</Version>
     <Authors>Emmanuel Mathot</Authors>
     <Company>Terradue</Company>
     <RepositoryUrl>https://git.terradue.com/systems/cdab-cli</RepositoryUrl>
@@ -32,7 +32,7 @@
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
     <PackageReference Include="Mono.Options" Version="5.3.0.1" />
     <PackageReference Include="Terradue.OpenSearch" Version="1.17.5" />
-    <PackageReference Include="Terradue.OpenSearch.SciHub" Version="1.19.0"/>
+    <PackageReference Include="Terradue.OpenSearch.SciHub" Version="1.19.1"/>
     <PackageReference Include="Terradue.OpenSearch.Usgs" Version="1.5.0"/>
     <PackageReference Include="Terradue.OpenSearch.Asf" Version="1.2.15" />
     <PackageReference Include="Terradue.GeoJson" Version="1.12.0" />

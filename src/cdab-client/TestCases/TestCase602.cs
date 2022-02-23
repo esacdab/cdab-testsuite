@@ -494,12 +494,16 @@ namespace cdabtesttools.TestCases
                 DateTime startTime = item.FindStartDate();
                 DateTime endTime = item.FindEndDate();
                 if (endTime == startTime) endTime = endTime.AddDays(1);
-                filters.AddFilter("uid", "{http://a9.com/-/opensearch/extensions/geo/1.0/}uid", String.Format("*{0}*", tileIdentifier), tileIdentifier, null, null);
-                filters.AddFilter("start", "{http://a9.com/-/opensearch/extensions/time/1.0/}start", startTime.ToString("O"), startTime.ToString("O"), null, null);
-                filters.AddFilter("stop", "{http://a9.com/-/opensearch/extensions/time/1.0/}end", endTime.ToString("O"), endTime.ToString("O"), null, null);
+                filters.RemoveFilter("{http://a9.com/-/opensearch/extensions/geo/1.0/}uid");
+                filters.RemoveFilter("{http://a9.com/-/opensearch/extensions/time/1.0/}start");
+                filters.RemoveFilter("{http://a9.com/-/opensearch/extensions/time/1.0/}end");
+                filters.AddFilter("uid", "{http://a9.com/-/opensearch/extensions/geo/1.0/}uid", String.Format("*{0}*", tileIdentifier), String.Empty, null, null);
+                filters.AddFilter("start", "{http://a9.com/-/opensearch/extensions/time/1.0/}start", startTime.ToString("O"), String.Empty, null, null);
+                filters.AddFilter("stop", "{http://a9.com/-/opensearch/extensions/time/1.0/}end", endTime.ToString("O"), String.Empty, null, null);
             
             } else if (item.Identifier.Substring(0, 2) == "S2" && item.Identifier.Contains(".")) {   // Tile identifier
                 // e.g. S2A_OPER_MSI_L1C_TL_VGS1_20211112T190720_A033386_T13VCK_N03.01 -> S2A_MSIL1C_*_T13VCK_20211112T190720
+                filters.RemoveFilter("{http://a9.com/-/opensearch/extensions/geo/1.0/}uid");
                 filters.AddFilter(
                     "uid",
                     "{http://a9.com/-/opensearch/extensions/geo/1.0/}uid",
@@ -510,7 +514,7 @@ namespace cdabtesttools.TestCases
                         item.Identifier.Substring(49, 6),
                         item.Identifier.Substring(25, 15)
                     ),
-                    item.Identifier,
+                    String.Empty,
                     null,
                     null
                 );

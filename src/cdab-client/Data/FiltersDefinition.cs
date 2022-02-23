@@ -22,6 +22,8 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using cdabtesttools.Config;
 using Terradue.OpenSearch.Result;
+using Newtonsoft.Json;
+
 
 namespace cdabtesttools.Data
 {
@@ -32,6 +34,8 @@ namespace cdabtesttools.Data
         private List<FilterDefinition> filters;
 
         public string Name { get => name; set => name = value; }
+
+        [JsonIgnore]
         public DataCollectionDefinition DataCollection { get => dataCollection; set => dataCollection = value; }
         
         public string Label

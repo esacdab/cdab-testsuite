@@ -170,7 +170,7 @@ namespace cdabtesttools.Target
 
             }
 
-            if (target_uri.Host == "finder.creodias.eu" || target_uri.Host == "finder.code-de.org")
+            if (target_uri.Host == "finder.creodias.eu")
             {
                 CreoDiasWrapper creoDiasWrapper;
                 if (targetSiteConfig.Data.Url != null)
@@ -183,6 +183,21 @@ namespace cdabtesttools.Target
                 }
                 creoDiasWrapper.EnableDirectDataAccess = enableDirectDataAccess;
                 return creoDiasWrapper;
+            }
+
+            if (target_uri.Host == "finder.code-de.org")
+            {
+                CodeDeDiasWrapper codeDeDiasWrapper;
+                if (targetSiteConfig.Data.Url != null)
+                {
+                    codeDeDiasWrapper = new CodeDeDiasWrapper(target_creds, osUrl: targetSiteConfig.Data.Url, openStackStorageSettings: targetSiteConfig.Storage.ToOpenStackStorageSettings() );
+                }
+                else
+                {
+                    codeDeDiasWrapper = new CodeDeDiasWrapper(target_creds, openStackStorageSettings: targetSiteConfig.Storage.ToOpenStackStorageSettings() );
+                }
+                codeDeDiasWrapper.EnableDirectDataAccess = enableDirectDataAccess;
+                return codeDeDiasWrapper;
             }
 
             if (target_uri.Host.Contains("mundiwebservices.com"))
