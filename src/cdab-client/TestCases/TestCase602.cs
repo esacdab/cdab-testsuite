@@ -489,6 +489,7 @@ namespace cdabtesttools.TestCases
         private IOpenSearchResultItem FindCorrespondingItem(IOpenSearchResultItem item, IOpenSearchable os, FiltersDefinition filters, out IOpenSearchResultCollection result)
         {
             if (filters == null) filters = new FiltersDefinition(item.Identifier);
+
             if (item.Identifier.Substring(0, 3) == "L1C") {   // for providers which use tile identifiers
                 string tileIdentifier = item.Identifier.Substring(4, 6);
                 DateTime startTime = item.FindStartDate();
@@ -520,13 +521,14 @@ namespace cdabtesttools.TestCases
                 );
 
             } else {
-                filters.AddFilter("uid", "{http://a9.com/-/opensearch/extensions/geo/1.0/}uid", item.Identifier, item.Identifier, null, null);
+                filters.RemoveFilter("{http://a9.com/-/opensearch/extensions/geo/1.0/}uid");
+                filters.AddFilter("uid", "{http://a9.com/-/opensearch/extensions/geo/1.0/}uid", item.Identifier, String.Empty, null, null);
             }
             result = ose.Query(os, filters.GetNameValueCollection());
 
             IOpenSearchResultItem correspondingItem = result.Items.FirstOrDefault();
 
-            if (correspondingItem != null && correspondingItem.Identifier == item.Identifier)
+            if (correspondingItem != null && (correspondingItem.Identifier == item.Identifier || item.Identifier.Substring(0, 3) == "L1C"))
             {
                 return correspondingItem;
             }
