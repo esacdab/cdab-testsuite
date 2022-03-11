@@ -47,13 +47,14 @@ function stage_in() {
     then
         download_url=$(curl $ref | xmllint --format - | grep "<link rel=\"enclosure" | grep -E "scihub|apihub|copernicus\.eu" | sed -E "s#.*href=\"(.*?)\".*#\1#g")
         mkdir -p input_data/$id
+        echo "curl -u $credentials -o \"${id}.zip\" $download_url" >> cdab.stderr
         curl -u $credentials -o "${id}.zip" $download_url
         unzip -d input_data/$id "${id}.zip"
         res=$?
         [ $res -ne 0 ] && return $res
     else
-        echo "docker run -u root --workdir /res -v ${PWD}:/res -v ${HOME}/config/etc/Stars:/etc/Stars/conf.d -v ${HOME}/config/Stars:/root/.config/Stars \"${stage_in_docker_image}\" Stars copy -v \"${ref}\" -r 4 -si ${provider} -o /res/input_data/ --allow-ordering --harvest" >> cdab.stderr
-        docker run -u root --workdir /res -v ${PWD}:/res -v ${HOME}/config/etc/Stars:/etc/Stars/conf.d -v ${HOME}/config/Stars:/root/.config/Stars "${stage_in_docker_image}" Stars copy -v "${ref}" -r 4 -si ${provider} -o /res/input_data/ --allow-ordering --harvest >> cdab.stdout 2>> cdab.stderr
+        echo "docker run -u root --workdir /res -v ${PWD}:/res -v ${HOME}/config/etc/Stars:/etc/Stars/conf.d -v ${HOME}/config/Stars:/root/.config/Stars \"${stage_in_docker_image}\" Stars copy -v \"${ref}\" -r 4 -si ${provider} -o /res/input_data/ --allow-ordering" >> cdab.stderr
+        docker run -u root --workdir /res -v ${PWD}:/res -v ${HOME}/config/etc/Stars:/etc/Stars/conf.d -v ${HOME}/config/Stars:/root/.config/Stars "${stage_in_docker_image}" Stars copy -v "${ref}" -r 4 -si ${provider} -o /res/input_data/ --allow-ordering >> cdab.stdout 2>> cdab.stderr
         res=$?
         [ $res -ne 0 ] && return $res
     fi
@@ -72,7 +73,7 @@ index="sentinel2"
 product_type="S2MSI1C"
 product_count=2
 
-stage_in_docker_image=terradue/stars-t2:0.5.38
+stage_in_docker_image=terradue/stars:1.3.5
 [ -z "$application_docker_image" ] && application_docker_image=docker.terradue.com/cdab-ndvi:latest
 
 cd "$1"

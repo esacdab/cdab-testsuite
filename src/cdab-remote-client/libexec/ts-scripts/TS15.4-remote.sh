@@ -178,7 +178,7 @@ credentials="$5"
 backup_credentials="$6"
 cat_creds=""
 
-stage_in_docker_image=terradue/stars-t2:0.5.38
+stage_in_docker_image=terradue/stars:1.3.5
 
 case "$provider" in
     CREO)

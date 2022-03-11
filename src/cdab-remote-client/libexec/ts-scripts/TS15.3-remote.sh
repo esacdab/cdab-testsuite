@@ -141,7 +141,7 @@ function download() {
 
         # Try staging in with direct method (DIAS-specific)
         echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Processing product ${count}/${size}: ${id}" >> cdab.stderr
-        echo "$PWD/env_s3/bin/python stage-in.py \"$item_type\" \"OL_2_LFR___\" \"$provider\" \"$id\" $PWD/input_data/" >> cdab.stderr
+        echo "Stage-in command: $PWD/env_s3/bin/python stage-in.py \"$item_type\" \"OL_2_LFR___\" \"$provider\" \"$id\" $PWD/input_data/" >> cdab.stderr
         $PWD/env_s3/bin/python stage-in.py "$item_type" "OL_2_LFR___" "$provider" "$id" $PWD/input_data/ "$credentials" "$backup_credentials" 2>> cdab.stderr
         res=$?
 
@@ -171,7 +171,7 @@ credentials="$5"
 backup_credentials="$6"
 cat_creds=""
 
-stage_in_docker_image=terradue/stars-t2:0.5.38
+stage_in_docker_image=terradue/stars:1.3.5
 
 case "$provider" in
     CREO)
