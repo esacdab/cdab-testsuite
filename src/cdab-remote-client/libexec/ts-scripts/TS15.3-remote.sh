@@ -141,7 +141,7 @@ function download() {
 
         # Try staging in with direct method (DIAS-specific)
         echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Processing product ${count}/${size}: ${id}" >> cdab.stderr
-        echo "Stage-in command: $PWD/env_s3/bin/python stage-in.py \"$item_type\" \"OL_2_LFR___\" \"$provider\" \"$id\" $PWD/input_data/" >> cdab.stderr
+        echo "Stage-in command: $PWD/env_s3/bin/python stage-in.py \"$item_type\" \"OL_2_LFR___\" \"$provider\" \"$id\" $PWD/input_data/ \"...\" \"...\"" >> cdab.stderr
         $PWD/env_s3/bin/python stage-in.py "$item_type" "OL_2_LFR___" "$provider" "$id" $PWD/input_data/ "$credentials" "$backup_credentials" 2>> cdab.stderr
         res=$?
 

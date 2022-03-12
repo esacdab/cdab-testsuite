@@ -280,7 +280,7 @@ input_id = sys.argv[4]
 input_dir = sys.argv[5]
 credentials = sys.argv[6]
 if len(sys.argv) >= 8:
-    creo_credentials = credentials = sys.argv[7]
+    creo_credentials = sys.argv[7]
 else:
     creo_credentials = None
 # Find matching product type from product identifier
