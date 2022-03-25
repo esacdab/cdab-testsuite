@@ -592,7 +592,7 @@ function download() {
         then
             atom_file="file:///res/${id}.atom.xml"
             echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Downloading product ${count}/${size}" >> cdab.stderr
-            echo "docker run -u root --workdir /res -v ${PWD}:/res -v ${HOME}/config/etc/Stars:/etc/Stars/conf.d -v ${HOME}/config/Stars:/root/.config/Stars \"${stage_in_docker_image}\" Stars copy -v \"${atom_file}\" -r 4 -si ${provider} -o /res/input_data/ --allow-orderingt" >> cdab.stderr
+            echo "docker run -u root --workdir /res -v ${PWD}:/res -v ${HOME}/config/etc/Stars:/etc/Stars/conf.d -v ${HOME}/config/Stars:/root/.config/Stars \"${stage_in_docker_image}\" Stars copy -v \"${atom_file}\" -r 4 -si ${provider} -o /res/input_data/ --allow-ordering" >> cdab.stderr
             docker run -u root --workdir /res -v ${PWD}:/res -v ${HOME}/config/etc/Stars:/etc/Stars/conf.d -v ${HOME}/config/Stars:/root/.config/Stars "${stage_in_docker_image}" Stars copy -v "${atom_file}" -r 4 -si ${provider} -o /res/input_data/ --allow-ordering >> cdab.stdout 2>> cdab.stderr
             res=$?
             if [ $res -ne 0 ]

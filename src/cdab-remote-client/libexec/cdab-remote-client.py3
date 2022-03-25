@@ -1255,9 +1255,13 @@ class TestClient:
                 time.sleep(30)
             else:
                 running = False
+                run.test_end_time = datetime.datetime.utcnow()
+                Logger.log(LogLevel.INFO, "Test completed", run=run)
 
-        run.test_end_time = datetime.datetime.utcnow()
-        Logger.log(LogLevel.INFO, "Test completed", run=run)
+        if running:
+            print("********************************************************************", file=run.stderr)
+            Logger.log(LogLevel.WARN, "Test not completed (timeout)", run=run)
+            print("********************************************************************", file=run.stderr)
 
         stdout_file = "cdab{0}.stdout".format(run.suffix)
         stderr_file = "cdab{0}.stderr".format(run.suffix)
@@ -1273,12 +1277,22 @@ class TestClient:
 
         Logger.log(LogLevel.INFO, "--------------------------------", run=run)
         Logger.log(LogLevel.INFO, "remote execution stdout (START)", run=run)
-        with open(stdout_file, 'r') as cdab_stdout:
-            print(cdab_stdout.read(), end="", file=run.stderr)
+        try:
+            with open(stdout_file, 'r') as cdab_stdout:
+                print(cdab_stdout.read(), end="", file=run.stderr)
+        except Exception as e:
+            print("Error opening file: {0}".format(str(e)), file=run.stderr)
+            with open(stdout_file, 'rb') as cdab_stdout:
+                print(str(cdab_stdout.read()).replace('\\n', '\n'), file=run.stderr)
         Logger.log(LogLevel.INFO, "remote execution stdout (END)", run=run)
         Logger.log(LogLevel.INFO, "remote execution stderr (START)", run=run)
-        with open(stderr_file, 'r') as cdab_stderr:
-            print(cdab_stderr.read(), end="", file=run.stderr)
+        try:
+            with open(stderr_file, 'r') as cdab_stderr:
+                print(cdab_stderr.read(), end="", file=run.stderr)
+        except Exception as e:
+            print("Error opening file: {0}".format(str(e)), file=run.stderr)
+            with open(stderr_file, 'rb') as cdab_stderr:
+                print(str(cdab_stderr.read()).replace('\\n', '\n'), file=run.stderr)
         Logger.log(LogLevel.INFO, "remote execution stderr (END)", run=run)
         Logger.log(LogLevel.INFO, "--------------------------------", run=run)
 

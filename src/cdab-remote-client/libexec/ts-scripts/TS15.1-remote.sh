@@ -93,20 +93,38 @@ start_time=$(date +%s%N)
 
 for id in $(cat input)
 do
-    ((total_processings++))
-
     echo "Stage in $id" >> cdab.stderr
     # Stage in input product
-    stage_in $id >> cdab.stdout 2>> cdab.stderr
-    res=$?
-    echo "EXIT CODE = $res" >> cdab.stderr
+    retry=0
+    while [ $retry -lt 3 ]
+    do
+        if [ $retry -ne 0 ]
+        then
+            echo "Wait $((retry * 10)) seconds" >> cdab.stderr
+            sleep $((retry * 10))
+            echo "Retrying" >> cdab.stderr
+        fi
+        stage_in $id >> cdab.stdout 2>> cdab.stderr
+        res=$?
+        echo "EXIT CODE = $res" >> cdab.stderr
+        [ $res -eq 0 ] && break
+        ((retry++))
+    done
 
     if [ $res -ne 0 ]
     then
-        ((wrong_processings++))
-        echo "Stage in of $id FAILED" >> cdab.stderr
+        if [ "$provider" == "AMAZON" ] || [ "$provider" == "GOOGLE" ]
+        then
+            echo "Stage in of $id FAILED (not counted)" >> cdab.stderr
+        else
+            ((wrong_processings++))
+            echo "Stage in of $id FAILED" >> cdab.stderr
+        fi
         continue
     fi
+
+    ((total_processings++))
+
     # Run tool
 
     path=$(find ./input_data -type d -name IMG_DATA | grep $id)/
@@ -136,6 +154,8 @@ do
         fi
     fi
     rm -f output_data/*.tif
+    echo "TIFF files: ${count}, errors: ${errors}" >> cdab.stderr
+    echo "Processings: total: ${total_processings}, wrong: ${wrong_processings}" >> cdab.stderr
 done
 
 end_time=$(date +%s%N)
