@@ -592,29 +592,42 @@ function download() {
         then
             atom_file="file:///res/${id}.atom.xml"
             echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Downloading product ${count}/${size}" >> cdab.stderr
-            echo "docker run -u root --workdir /res -v ${PWD}:/res -v ${HOME}/config/etc/Stars:/etc/Stars/conf.d -v ${HOME}/config/Stars:/root/.config/Stars \"${stage_in_docker_image}\" Stars copy -v \"${atom_file}\" -r 4 -si ${provider} -o /res/input_data/ --allow-ordering" >> cdab.stderr
-            docker run -u root --workdir /res -v ${PWD}:/res -v ${HOME}/config/etc/Stars:/etc/Stars/conf.d -v ${HOME}/config/Stars:/root/.config/Stars "${stage_in_docker_image}" Stars copy -v "${atom_file}" -r 4 -si ${provider} -o /res/input_data/ --allow-ordering >> cdab.stdout 2>> cdab.stderr
-            res=$?
-            if [ $res -ne 0 ]
+            if [ "$provider" == "SOBLOO" ]
             then
-                echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Error during download" >> cdab.stderr
-                present=
-                # MUNDI workaround
-                if [ ${provider} == "MUNDI" ] && [ -s "${PWD}/input_data/${id}/${id}.zip" ]
+                sobloo_uid=$(curl "https://sobloo.eu/api/v1/services/search?f=identification.externalId:eq:$id" | sed -E 's/.*"uid":"([^"]*)".*/\1/')
+                download_url="https://sobloo.eu/api/v1/services/download/${sobloo_uid}"
+                mkdir -p input_data/$id
+                apikey=$(echo $credentials | sed -E 's/.*:(.*)/\1/')
+                echo "curl -H \"Authorization: Apikey ...\" -o \"${id}.zip\" $download_url" >> cdab.stderr
+                curl -H "Authorization: Apikey ${apikey}" -o "${id}.zip" $download_url
+                # Set env variable, otherwise failure
+                export UNZIP_DISABLE_ZIPBOMB_DETECTION=TRUE
+                unzip -d input_data/$id "${id}.zip"
+            else
+                echo "docker run -u root --workdir /res -v ${PWD}:/res -v ${HOME}/config/etc/Stars:/etc/Stars/conf.d -v ${HOME}/config/Stars:/root/.config/Stars \"${stage_in_docker_image}\" Stars copy -v \"${atom_file}\" -r 4 -si ${provider} -o /res/input_data/ --allow-ordering" >> cdab.stderr
+                docker run -u root --workdir /res -v ${PWD}:/res -v ${HOME}/config/etc/Stars:/etc/Stars/conf.d -v ${HOME}/config/Stars:/root/.config/Stars "${stage_in_docker_image}" Stars copy -v "${atom_file}" -r 4 -si ${provider} -o /res/input_data/ --allow-ordering >> cdab.stdout 2>> cdab.stderr
+                res=$?
+                if [ $res -ne 0 ]
                 then
-                    echo "Previous error can be ignored, .zip file is present" >> cdab.stderr
-                    sudo chown -R $USER "${PWD}/input_data/${id}"
-                    product_folder=$(find ${PWD}/input_data -type d -name "${id}.SAFE")
-                    if [ -z "$product_folder" ]
+                    echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Error during download" >> cdab.stderr
+                    # MUNDI workaround
+                    if [ ${provider} == "MUNDI" ] && [ -s "${PWD}/input_data/${id}/${id}.zip" ]
                     then
-                        unzip -d "${PWD}/input_data/${id}" "${PWD}/input_data/${id}/${id}.zip" >> cdab.stderr 2>> cdab.stderr
-                        present=true
+                        present=
+                        echo "Previous error can be ignored, .zip file is present" >> cdab.stderr
+                        sudo chown -R $USER "${PWD}/input_data/${id}"
+                        product_folder=$(find ${PWD}/input_data -type d -name "${id}.SAFE")
+                        if [ -z "$product_folder" ]
+                        then
+                            unzip -d "${PWD}/input_data/${id}" "${PWD}/input_data/${id}/${id}.zip" >> cdab.stderr 2>> cdab.stderr
+                            present=true
+                        fi
+                        if [ -z "$present" ]
+                        then
+                            ((missing++))
+                            continue
+                        fi
                     fi
-                fi
-                if [ -z "$present" ]
-                then
-                    ((missing++))
-                    continue
                 fi
             fi
 
@@ -676,7 +689,7 @@ provider="$4"
 credentials="$5"
 cat_creds=""
 
-stage_in_docker_image=terradue/stars:1.3.5
+stage_in_docker_image=terradue/stars:1.3.6
 
 case "$provider" in
     CREO)

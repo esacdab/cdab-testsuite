@@ -52,6 +52,24 @@ function stage_in() {
         unzip -d input_data/$id "${id}.zip"
         res=$?
         [ $res -ne 0 ] && return $res
+    elif [ "$provider" == "SOBLOO" ]
+    then
+        sobloo_uid=$(curl "https://sobloo.eu/api/v1/services/search?f=identification.externalId:eq:$id" | sed -E 's/.*"uid":"([^"]*)".*/\1/')
+        download_url="https://sobloo.eu/api/v1/services/download/${sobloo_uid}"
+        mkdir -p input_data/$id
+        apikey=$(echo $credentials | sed -E 's/.*:(.*)/\1/')
+        echo "curl -H \"Authorization: Apikey ...\" -o \"${id}.zip\" $download_url" >> cdab.stderr
+        curl -H "Authorization: Apikey ${apikey}" -o "${id}.zip" $download_url
+        # Set env variable, otherwise failure
+        export UNZIP_DISABLE_ZIPBOMB_DETECTION=TRUE
+        unzip -d input_data/$id "${id}.zip"
+        path=$(find ./input_data -type d -name IMG_DATA | grep $id)
+        if [ -z "$path" ]
+        then
+            res=1
+        else
+            res=0
+        fi
     else
         echo "docker run -u root --workdir /res -v ${PWD}:/res -v ${HOME}/config/etc/Stars:/etc/Stars/conf.d -v ${HOME}/config/Stars:/root/.config/Stars \"${stage_in_docker_image}\" Stars copy -v \"${ref}\" -r 4 -si ${provider} -o /res/input_data/ --allow-ordering" >> cdab.stderr
         docker run -u root --workdir /res -v ${PWD}:/res -v ${HOME}/config/etc/Stars:/etc/Stars/conf.d -v ${HOME}/config/Stars:/root/.config/Stars "${stage_in_docker_image}" Stars copy -v "${ref}" -r 4 -si ${provider} -o /res/input_data/ --allow-ordering >> cdab.stdout 2>> cdab.stderr
@@ -73,7 +91,7 @@ index="sentinel2"
 product_type="S2MSI1C"
 product_count=2
 
-stage_in_docker_image=terradue/stars:1.3.5
+stage_in_docker_image=terradue/stars:1.3.6
 [ -z "$application_docker_image" ] && application_docker_image=docker.terradue.com/cdab-ndvi:latest
 
 cd "$1"
