@@ -171,6 +171,7 @@ do
             ((wrong_processings++))
         fi
     fi
+    rm -rf input_data/${id}* ${id}*
     rm -f output_data/*.tif
     echo "TIFF files: ${count}, errors: ${errors}" >> cdab.stderr
     echo "Processings: total: ${total_processings}, wrong: ${wrong_processings}" >> cdab.stderr
