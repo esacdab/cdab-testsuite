@@ -46,7 +46,7 @@ class TestClient:
     """Main class for remote execution of the test scenarios TS11, TS12, TS13 and TS15.
     """
 
-    VERSION = "1.61"
+    VERSION = "1.62"
 
     errors = {
         ERR_CONFIG: 'Missing or invalid configuration',
@@ -134,6 +134,10 @@ class TestClient:
     target_site_classes = {
         'CREO': {
             'uri_prefix': 'https://auth.creodias.eu/'
+        },
+        'CODEDE': {
+            'uri_prefix': 'https://finder.code-de.org',
+            'tools': [ 'codede-eodata' ]
         },
         'MUNDI': {
             'uri_prefix': 'https://mundiwebservices.com',
@@ -1099,6 +1103,9 @@ class TestClient:
             if 'onda-eodata' in tools:
                 copy_file(self.compute_config, run, "{0}/ts-scripts/link-onda-eodata.sh".format(os.path.dirname(sys.argv[0])), "link-onda-eodata.sh")
                 execute_remote_command(self.compute_config, run, "sudo sh link-onda-eodata.sh")
+            if 'codede-eodata' in tools:
+                copy_file(self.compute_config, run, "{0}/ts-scripts/link-codede-eodata.sh".format(os.path.dirname(sys.argv[0])), "link-codede-eodata.sh")
+                execute_remote_command(self.compute_config, run, "sudo sh link-codede-eodata.sh")
 
             script_name = "{0}-remote.sh".format(self.test_scenario_id)
             copy_file(self.compute_config, run, "{0}/ts-scripts/{1}".format(os.path.dirname(sys.argv[0]), script_name), script_name)
@@ -1204,6 +1211,9 @@ class TestClient:
             if 'onda-eodata' in tools:
                 copy_file(self.compute_config, run, "{0}/ts-scripts/link-onda-eodata.sh".format(os.path.dirname(sys.argv[0])), "link-onda-eodata.sh")
                 execute_remote_command(self.compute_config, run, "sudo sh link-onda-eodata.sh")
+            if 'codede-eodata' in tools:
+                copy_file(self.compute_config, run, "{0}/ts-scripts/link-codede-eodata.sh".format(os.path.dirname(sys.argv[0])), "link-codede-eodata.sh")
+                execute_remote_command(self.compute_config, run, "sudo sh link-codede-eodata.sh")
 
             if 'files' in self.test_scenario:
                 for f in self.test_scenario['files']:
