@@ -405,6 +405,9 @@ namespace cdabtesttools.TestCases
                 case ItemAccessMethod.HttpDownload:
                     dataAccessStr = "http";
                     break;
+                case ItemAccessMethod.FtpDownload:
+                    dataAccessStr = "ftp";
+                    break;
                 case ItemAccessMethod.LocalFileSystem:
                     if (target.Wrapper is OndaDiasWrapper)
                     {
