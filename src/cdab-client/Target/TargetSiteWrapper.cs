@@ -22,6 +22,7 @@ the licensors of this Program grant you additional permission to convey or distr
 */
 
 using System;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using cdabtesttools.Config;
@@ -120,6 +121,12 @@ namespace cdabtesttools.Target
                 return TargetType.DIAS;
             }
 
+            if (Wrapper.Settings.ServiceUrl.Host.Contains("wekeo.eu"))
+            {
+                log.DebugFormat("TARGET TYPE: DIAS");
+                return TargetType.DIAS;
+            }
+
             if (Wrapper.Settings.ServiceUrl.Host == "api.daac.asf.alaska.edu")
             {
                 log.DebugFormat("TARGET TYPE: ASF");
@@ -213,6 +220,55 @@ namespace cdabtesttools.Target
                 var soblooDiasWrapper = new SoblooDiasWrapper(target_creds);
                 soblooDiasWrapper.S3StorageSettings = targetSiteConfig.Storage.ToS3StorageSettings();
                 return soblooDiasWrapper;
+            }
+
+            if (target_uri.Host.Contains("wekeo.eu"))
+            {
+                var wekeoDiasWrapper = new WekeoDiasWrapper(target_creds, targetSiteConfig.Data.Url);
+                if (targetSiteConfig.Data.Catalogue.LimitQuery != null && targetSiteConfig.Data.Catalogue.LimitQuery.Value)
+                {
+                    wekeoDiasWrapper.LimitQuery = true;
+
+                    if (targetSiteConfig.Data.Catalogue.DefaultBoundingBox != null)
+                    {
+                        string[] boundingBoxStrParts = targetSiteConfig.Data.Catalogue.DefaultBoundingBox.Split(',');
+                        if (boundingBoxStrParts.Length != 4) throw new Exception("Bounding box must contain 4 coordinates");
+                        double[] boundingBox = new double[4];
+                        for (int i = 0; i < 4; i++)
+                        {
+                            if (!System.Double.TryParse(boundingBoxStrParts[i], out boundingBox[i]))
+                            {
+                                throw new Exception("Bounding box must contain numeric values");
+                            }
+                        }
+                        wekeoDiasWrapper.DefaultBoundingBox = boundingBox;
+                    }
+
+                    if (targetSiteConfig.Data.Catalogue.DefaultStartTime != null)
+                    {
+                        if (DateTime.TryParse(targetSiteConfig.Data.Catalogue.DefaultStartTime, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out DateTime dt))
+                        {
+                            wekeoDiasWrapper.DefaultStartTime = dt;
+                        }
+                        else
+                        {
+                            throw new Exception("The default start time for limited queries must be ISO-formatted");
+                        }
+                    }
+                    if (targetSiteConfig.Data.Catalogue.DefaultEndTime != null)
+                    {
+                        if (DateTime.TryParse(targetSiteConfig.Data.Catalogue.DefaultEndTime, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out DateTime dt))
+                        {
+                            wekeoDiasWrapper.DefaultEndTime = dt;
+                        }
+                        else
+                        {
+                            throw new Exception("The default end time for limited queries must be ISO-formatted");
+                        }
+                    }
+                }
+
+                return wekeoDiasWrapper;
             }
 
             if (target_uri.Host == "api.daac.asf.alaska.edu")
