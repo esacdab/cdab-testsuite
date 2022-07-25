@@ -298,6 +298,7 @@ namespace cdabtesttools.Target
                 //var searchWrapper = new DHuSWrapper(new Uri("https://scihub.copernicus.eu/apihub"), (NetworkCredential)target_creds);
                 //var amazonWrapper = new AmazonOldWrapper(targetSiteConfig.Data.S3SecretKey, targetSiteConfig.Data.S3KeyId, searchWrapper);
                 var amazonWrapper = new AmazonStacWrapper(targetSiteConfig.Data.S3SecretKey, targetSiteConfig.Data.S3KeyId, (NetworkCredential)target_creds);
+                amazonWrapper.AllowOpenSearch = targetSiteConfig.Data.Catalogue.AllowOpenSearch;
                 return amazonWrapper;
             }
 
