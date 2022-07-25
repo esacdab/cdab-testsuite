@@ -63,8 +63,11 @@ namespace cdabtesttools
 
         static FileInfo configFile = new FileInfo("config.yaml");
 
+
         public static void Main(string[] args)
         {
+            // Fix for Newtonsoft.Json vulnerability issue: https://github.com/advisories/GHSA-5crp-9r3c-p9vr
+            JsonConvert.DefaultSettings = () => new JsonSerializerSettings { MaxDepth = 128 };
 
             bool show_help = false;
 
