@@ -43,6 +43,8 @@ namespace cdabtesttools.Config
 
         public int SystematicSearchDays { get; set; }
 
+        public bool AllowOpenSearch { get; set; }
+
         public bool? LatencyPolling { get; set; }
 
         public int? LatencyCheckInterval { get; set; }
