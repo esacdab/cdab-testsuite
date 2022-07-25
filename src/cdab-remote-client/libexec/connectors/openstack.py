@@ -68,6 +68,8 @@ class OpenStackConnector:
             self.cloud_base_options.extend(['--os-auth-type', self.compute_config['auth_type']])
         if self.compute_config['project_domain_name']:
             self.cloud_base_options.extend(['--os-project-domain-name', self.compute_config['project_domain_name']])
+        if self.compute_config['project_domain_id']:
+            self.cloud_base_options.extend(['--os-project-domain-id', self.compute_config['project_domain_id']])
         if self.compute_config['user_domain_name']:
             self.cloud_base_options.extend(['--os-user-domain-name', self.compute_config['user_domain_name']])
 
@@ -82,6 +84,12 @@ class OpenStackConnector:
                 '--os-volume-api-version', self.compute_config['volume_api_version'],
             ])
 
+        if self.compute_config['discovery_endpoint']:
+            self.cloud_base_options.extend(['--os-discovery-endpoint', self.compute_config['discovery_endpoint']])
+        if self.compute_config['client_id']:
+            self.cloud_base_options.extend(['--os-client-id', self.compute_config['client_id']])
+        if self.compute_config['client_secret']:
+            self.cloud_base_options.extend(['--os-client-secret', self.compute_config['client_secret']])
         
 
     def delete_old_resources(self, max_retention_hours):
