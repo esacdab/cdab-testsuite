@@ -46,7 +46,7 @@ class TestClient:
     """Main class for remote execution of the test scenarios TS11, TS12, TS13 and TS15.
     """
 
-    VERSION = "1.63"
+    VERSION = "1.64"
 
     errors = {
         ERR_CONFIG: 'Missing or invalid configuration',
@@ -1098,7 +1098,7 @@ class TestClient:
         tools = []
         if 'tools' in self.test_scenario:
             tools.extend(self.test_scenario['tools'])
-        if 'tools' in self.target_site_class:
+        if self.target_site_class and 'tools' in self.target_site_class:
             tools.extend(self.target_site_class['tools'])
 
 
