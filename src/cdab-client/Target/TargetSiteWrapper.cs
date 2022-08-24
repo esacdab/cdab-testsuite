@@ -35,6 +35,7 @@ using Terradue.OpenSearch.DataHub.Dias;
 using Terradue.OpenSearch.Engine;
 using Terradue.OpenSearch.DataHub.Aws;
 using Terradue.OpenSearch.DataHub.GoogleCloud;
+using Terradue.OpenSearch.DataHub.MicrosoftPlanetaryComputer;
 using Terradue.OpenSearch.Usgs;
 
 namespace cdabtesttools.Target
@@ -156,6 +157,13 @@ namespace cdabtesttools.Target
                 log.DebugFormat("TARGET TYPE: GOOGLE");
                 return TargetType.THIRDPARTY;
             }
+
+            if (Wrapper.Settings.ServiceUrl.Host.EndsWith("microsoft.com"))
+            {
+                log.DebugFormat("TARGET TYPE: MICROSOFT");
+                return TargetType.THIRDPARTY;
+            }
+            
 
             return TargetType.UNKNOWN;
         }
@@ -310,6 +318,12 @@ namespace cdabtesttools.Target
                 return googleWrapper;
             }
 
+            if (target_uri.Host.EndsWith("microsoft.com"))
+            {
+                var googleWrapper = new MicrosoftWrapper((NetworkCredential)target_creds, "https://planetarycomputer.microsoft.com");
+                return googleWrapper;
+            }
+
             return null;
         }
 
@@ -329,6 +343,10 @@ namespace cdabtesttools.Target
             if (forceTotalResults && wrapper is GoogleWrapper) {
                 (wrapper as GoogleWrapper).ForceTotalResults = true;
             }
+            if (forceTotalResults && wrapper is MicrosoftWrapper) {
+                (wrapper as MicrosoftWrapper).ForceTotalResults = true;
+            }
+
             return wrapper.CreateOpenSearchable(ossettings);
         }
 

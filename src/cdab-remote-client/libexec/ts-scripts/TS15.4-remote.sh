@@ -35,6 +35,7 @@ function select_input() {
         start_date=$(date -d@$((ref_date_sec - 14 * 24 * 60 * 60)) +%Y-"%m-%dT00:00:00Z")
         end_date=$(date -d@$((ref_date_sec + 0)) +%Y-"%m-%dT00:00:00Z")
         geom="POLYGON((-10 32,3 32,3 42,-10 42,-10 32))"
+        bbox="-10,32,3,42"
         count=20
 
         [ -s "$PWD/input" ] && . $PWD/input
@@ -61,27 +62,33 @@ function select_input() {
     esac
 
 
-    echo "opensearch-client -m Scihub -p start=${start_date} -p stop=${end_date} -p \"geom=${geom}\" $search_params -p count=$count \"${catalogue_base_url}\" {}" >> cdab.stderr
-    opensearch-client $cat_creds -m Scihub -p start=${start_date} -p stop=${end_date} -p "geom=${geom}" $search_params -p count=$count "${catalogue_base_url}" {} | xmllint --format - > result.atom.xml
-    if [ $? -ne 0 ]
+    if [ "$provider" == "WEKEO" ]
     then
-        echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Invalid or empty result from ${catalogue_base_url}" >> cdab.stderr
-        return 1
+        $PWD/env_s3/bin/python wekeo-tool.py query --credentials="$credentials" --pn=Sentinel-3 --pt=SL_2_LST___ --bbox="$bbox" --dates="${start_date}/${end_date}" > urls.list 2>> cdab.stderr
+        echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Done ($(cat urls.list | wc -l) items)" >> cdab.stderr
+    else
+        echo "opensearch-client -m Scihub -p start=${start_date} -p stop=${end_date} -p \"geom=${geom}\" $search_params -p count=$count \"${catalogue_base_url}\" {}" >> cdab.stderr
+        opensearch-client $cat_creds -m Scihub -p start=${start_date} -p stop=${end_date} -p "geom=${geom}" $search_params -p count=$count "${catalogue_base_url}" {} | xmllint --format - > result.atom.xml
+        if [ $? -ne 0 ]
+        then
+            echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Invalid or empty result from ${catalogue_base_url}" >> cdab.stderr
+            return 1
+        fi
+
+        grep "<dc:identifier>" result.atom.xml | sed -E "s#.*<.*?>(.*)<.*>.*#\1#g" > ids.list
+
+        # if [ ${provider} == "ONDA" ] && [ $(grep -E "^S3[AB]_SL_2_LST____" ids.list | wc -l) -eq 0 ]
+        if [ ${provider} == "ONDA" ]   # workaround until ENS is working again
+        then
+            grep "<link rel=\"enclosure\" " result.atom.xml | sed -E "s#.*href=\"(.+?)\".*#\1#g" > urls.list
+        fi
+        echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Done ($(cat ids.list | wc -l) items)" >> cdab.stderr
     fi
 
-    grep "<dc:identifier>" result.atom.xml | sed -E "s#.*<.*?>(.*)<.*>.*#\1#g" > ids.list
-
-    # if [ ${provider} == "ONDA" ] && [ $(grep -E "^S3[AB]_SL_2_LST____" ids.list | wc -l) -eq 0 ]
-    if [ ${provider} == "ONDA" ]   # workaround until ENS is working again
-    then
-        grep "<link rel=\"enclosure\" " result.atom.xml | sed -E "s#.*href=\"(.+?)\".*#\1#g" > urls.list
-    fi
-
-    echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Done ($(cat ids.list | wc -l) items)" >> cdab.stderr
 }
 
 
-function process_mosaic() {
+function process_trends() {
     max_attempts=1
     attempt=0
 
@@ -146,11 +153,39 @@ function download() {
         ((count++))
         error=
 
-        # Try staging in with direct method (DIAS-specific)
         echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Processing product ${count}/${size}: ${id}" >> cdab.stderr
-        echo "$PWD/env_s3/bin/python stage-in.py \"$item_type\" \"SL_2_LST___\" \"$provider\" \"$id\" $PWD/input_data/" >> cdab.stderr
-        $PWD/env_s3/bin/python stage-in.py "$item_type" "SL_2_LST___" "$provider" "$id" $PWD/input_data/ "$credentials" "$backup_credentials" 2>> cdab.stderr
-        res=$?
+        if [ "$provider" == "WEKEO" ]
+        then
+            res=0
+            if [ "$item_type" == 'id' ]
+            then
+                python3 wekeo-tool.py query --credentials="$credentials" --pn=Sentinel-3 --pt=SL_2_LST___ --uid=$id > download.url 2>> cdab.stderr
+                if [ -s download.url ]
+                then
+                    url=$(head -1 download.url)
+                    product_id=$id
+                else
+                    echo "Not found on WEkEO: ${id}" >> cdab.stderr
+                    res=1
+                fi
+            else
+                url=$id
+                product_id=$(echo $url | sed -E "s/.*(S3[AB][A-Z0-9_]+)\.SEN3.*/\1/")
+            fi
+            if [ $res -eq 0 ]
+            then
+                echo "Download from WEkEO: ${count}/${size}: ${id}" >> cdab.stderr
+                $PWD/env_s3/bin/python wekeo-tool.py download --credentials="$credentials" --url="$url" --dest="${product_id}.zip" 2>> cdab.stderr
+                unzip -d $PWD/input_data/ "${product_id}.zip"
+                res=$?
+                rm -f "${product_id}.zip"
+            fi
+        else
+            # Try staging in with direct method (DIAS-specific)
+            echo "$PWD/env_s3/bin/python stage-in.py \"$item_type\" \"SL_2_LST___\" \"$provider\" \"$id\" $PWD/input_data/" >> cdab.stderr
+            $PWD/env_s3/bin/python stage-in.py "$item_type" "SL_2_LST___" "$provider" "$id" $PWD/input_data/ "$credentials" "$backup_credentials" 2>> cdab.stderr
+            res=$?
+        fi
 
         if [ $res -eq 0 ]
         then
@@ -225,31 +260,36 @@ echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - TC415: Trends mapping" >> cdab.stderr
 
 errors=0
 
-start_time_mosaic=$(date +%s%N)
+start_time_trends=$(date +%s%N)
 
 if [ $res -eq 0 ]
 then
-    product_count=$(cat ids.list | wc -l)
-    process_mosaic
+    if [ -s urls.list ]
+    then
+        product_count=$(cat urls.list | wc -l)
+    else
+        product_count=$(cat ids.list | wc -l)
+    fi
+    process_trends
 fi
 
-end_time_mosaic=$(date +%s%N)
+end_time_trends=$(date +%s%N)
 
-process_duration_mosaic=$(((end_time_mosaic - start_time_mosaic) / 1000000))
+process_duration_trends=$(((end_time_trends - start_time_trends) / 1000000))
 
-total_processings_mosaic=1
+total_processings_trends=1
 
 if [ ${product_count} -eq 0 ]
 then
-    error_rate_mosaic=100.0
+    error_rate_trends=100.0
 elif [ ${errors} -eq 0 ]
 then
-    error_rate_mosaic=0.0
+    error_rate_trends=0.0
 else
     r=$(echo "scale=4; (${errors}*100)/${product_count}+0.04999" | bc)
-    error_rate_mosaic=$(printf "%.1f" $r)
+    error_rate_trends=$(printf "%.1f" $r)
 fi  
-avg_process_duration_mosaic=$process_duration_mosaic
+avg_process_duration_trends=$process_duration_trends
 
 
 
@@ -276,28 +316,28 @@ cat > TS15Results.json << EOF
     {
       "testName": "TC415",
       "className": "cdabtesttools.TestCases.TestCase415",
-      "startedAt": "$(date -d @${start_time_mosaic::-9} +%Y-"%m-%dT%H:%M:%SZ")",
-      "endedAt": "$(date -d @${end_time_mosaic::-9} +%Y-"%m-%dT%H:%M:%SZ")",
-      "duration": ${process_duration_mosaic},
+      "startedAt": "$(date -d @${start_time_trends::-9} +%Y-"%m-%dT%H:%M:%SZ")",
+      "endedAt": "$(date -d @${end_time_trends::-9} +%Y-"%m-%dT%H:%M:%SZ")",
+      "duration": ${process_duration_trends},
       "metrics": [
         { 
           "name": "errorRate",
-          "value": ${error_rate_mosaic},
+          "value": ${error_rate_trends},
           "uom": "%"
         },
         { 
           "name": "processDuration",
-          "value": ${process_duration_mosaic},
+          "value": ${process_duration_trends},
           "uom": "ms"
         },
         { 
           "name": "avgProcessDuration",
-          "value": ${avg_process_duration_mosaic},
+          "value": ${avg_process_duration_trends},
           "uom": "ms"
         },
         { 
           "name": "processCount",
-          "value": ${total_processings_mosaic},
+          "value": ${total_processings_trends},
           "uom": "#"
         }
       ]
