@@ -1,6 +1,7 @@
 function prepare() {
     echo "Installing tools" >> cdab.stderr
     sudo yum install -y bc unzip gcc python3-devel
+    sudo pip3 install requests
     echo "Done" >> cdab.stderr
 
     echo "Installing Stars docker image" >> cdab.stderr
@@ -70,6 +71,27 @@ function stage_in() {
         else
             res=0
         fi
+    elif [ "$provider" == "WEKEO" ]
+    then
+        mkdir -p input_data/$id
+        echo "Obtaining download URL from WEkEO for $id" >> cdab.stderr
+        python3 wekeo-tool.py query --credentials="$credentials" --pn=Sentinel-2 --pt=S2MSI1C --uid=$id > download.url 2>> cdab.stderr
+        if [ ! -s download.url ]
+        then
+            return 1
+        fi
+        download_url=$(head -1 download.url)
+        echo "Downloading from WEkEO: $download_url" >> cdab.stderr
+        python3 wekeo-tool.py download --credentials="$credentials" --url="$download_url" --dest="${id}.zip" 2>> cdab.stderr
+        unzip -d input_data/$id "${id}.zip"
+        path=$(find ./input_data -type d -name IMG_DATA | grep $id)
+        if [ -z "$path" ]
+        then
+            res=1
+        else
+            res=0
+        fi
+
     else
         echo "docker run -u root --workdir /res -v ${PWD}:/res -v ${HOME}/config/etc/Stars:/etc/Stars/conf.d -v ${HOME}/config/Stars:/root/.config/Stars \"${stage_in_docker_image}\" Stars copy -v \"${ref}\" -r 4 -si ${provider} -o /res/input_data/ --allow-ordering" >> cdab.stderr
         docker run -u root --workdir /res -v ${PWD}:/res -v ${HOME}/config/etc/Stars:/etc/Stars/conf.d -v ${HOME}/config/Stars:/root/.config/Stars "${stage_in_docker_image}" Stars copy -v "${ref}" -r 4 -si ${provider} -o /res/input_data/ --allow-ordering >> cdab.stdout 2>> cdab.stderr

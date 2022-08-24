@@ -21,14 +21,20 @@ function prepare() {
 
 function select_input() {
     # If no inputs are given, select random files from a week to two weeks ago
-    if [ -s "$PWD/input" ] && ! grep -q = "$PWD/input"   # input exists and contains only identifiers (no '=' signs)
+    if [ -s "$PWD/input" ]
     then
-        cp "$PWD/input" ids.list
-        return
+        if grep -q = "$PWD/input"   # input exists and contains query parameters ('=' signs)
+        then
+            . $PWD/input
+        else   # input exists and contains identifiers (no '=' signs)
+            cp "$PWD/input" ids.list
+            return
+        fi
     else
         ref_date_sec=$(date +%s)
         start_date=$(date -d@$((ref_date_sec - 14 * 24 * 60 * 60)) +%Y-"%m-%dT00:00:00Z")
         end_date=$(date -d@$((ref_date_sec + 0)) +%Y-"%m-%dT00:00:00Z")
+        bbox="-20,5,10,35"
         geom="POLYGON((-20 5,10 5,10 35,-20 35,-20 5))"
         count=20
 
@@ -55,24 +61,28 @@ function select_input() {
             ;;
     esac
 
-
-    echo "opensearch-client -m Scihub -p start=${start_date} -p stop=${end_date} -p \"geom=${geom}\" $search_params -p count=$count \"${catalogue_base_url}\" {}" >> cdab.stderr
-    opensearch-client $cat_creds -m Scihub -p start=${start_date} -p stop=${end_date} -p "geom=${geom}" $search_params -p count=$count "${catalogue_base_url}" {} | xmllint --format - > result.atom.xml
-    if [ $? -ne 0 ]
+    if [ "$provider" == "WEKEO" ]
     then
-        echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Invalid or empty result from ${catalogue_base_url}" >> cdab.stderr
-        return 1
+        $PWD/env_s3/bin/python wekeo-tool.py query --credentials="$credentials" --pn=Sentinel-3 --pt=OL_2_LFR___ --bbox="$bbox" --dates="${start_date}/${end_date}" > urls.list 2>> cdab.stderr
+        echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Done ($(cat urls.list | wc -l) items)" >> cdab.stderr
+    else
+        echo "opensearch-client -m Scihub -p start=${start_date} -p stop=${end_date} -p \"geom=${geom}\" $search_params -p count=$count \"${catalogue_base_url}\" {}" >> cdab.stderr
+        opensearch-client $cat_creds -m Scihub -p start=${start_date} -p stop=${end_date} -p "geom=${geom}" $search_params -p count=$count "${catalogue_base_url}" {} | xmllint --format - > result.atom.xml
+        if [ $? -ne 0 ]
+        then
+            echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Invalid or empty result from ${catalogue_base_url}" >> cdab.stderr
+            return 1
+        fi
+
+        grep "<dc:identifier>" result.atom.xml | sed -E "s#.*<.*?>(.*)<.*>.*#\1#g" > ids.list
+
+        # if [ ${provider} == "ONDA" ] && [ $(grep -E "^S3[AB]_OL_2_LFR____" ids.list | wc -l) -eq 0 ]
+        if [ ${provider} == "ONDA" ]   # workaround until ENS is working again
+        then
+            grep "<link rel=\"enclosure\" " result.atom.xml | sed -E "s#.*href=\"(.+?)\".*#\1#g" > urls.list
+        fi
+        echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Done ($(cat ids.list | wc -l) items)" >> cdab.stderr
     fi
-
-    grep "<dc:identifier>" result.atom.xml | sed -E "s#.*<.*?>(.*)<.*>.*#\1#g" > ids.list
-
-    # if [ ${provider} == "ONDA" ] && [ $(grep -E "^S3[AB]_OL_2_LFR____" ids.list | wc -l) -eq 0 ]
-    if [ ${provider} == "ONDA" ]   # workaround until ENS is working again
-    then
-        grep "<link rel=\"enclosure\" " result.atom.xml | sed -E "s#.*href=\"(.+?)\".*#\1#g" > urls.list
-    fi
-
-    echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Done ($(cat ids.list | wc -l) items)" >> cdab.stderr
 }
 
 
@@ -139,11 +149,39 @@ function download() {
         ((count++))
         error=
 
-        # Try staging in with direct method (DIAS-specific)
         echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Processing product ${count}/${size}: ${id}" >> cdab.stderr
-        echo "Stage-in command: $PWD/env_s3/bin/python stage-in.py \"$item_type\" \"OL_2_LFR___\" \"$provider\" \"$id\" $PWD/input_data/ \"...\" \"...\"" >> cdab.stderr
-        $PWD/env_s3/bin/python stage-in.py "$item_type" "OL_2_LFR___" "$provider" "$id" $PWD/input_data/ "$credentials" "$backup_credentials" 2>> cdab.stderr
-        res=$?
+        if [ "$provider" == "WEKEO" ]
+        then
+            res=0
+            if [ "$item_type" == 'id' ]
+            then
+                python3 wekeo-tool.py query --credentials="$credentials" --pn=Sentinel-3 --pt=OL_2_LFR___ --uid=$id > download.url 2>> cdab.stderr
+                if [ -s download.url ]
+                then
+                    url=$(head -1 download.url)
+                    product_id=$id
+                else
+                    echo "Not found on WEkEO: ${id}" >> cdab.stderr
+                    res=1
+                fi
+            else
+                url=$id
+                product_id=$(echo $url | sed -E "s/.*(S3[AB][A-Z0-9_]+)\.SEN3.*/\1/")
+            fi
+            if [ $res -eq 0 ]
+            then
+                echo "Download from WEkEO: ${count}/${size}: ${id}" >> cdab.stderr
+                $PWD/env_s3/bin/python wekeo-tool.py download --credentials="$credentials" --url="$url" --dest="${product_id}.zip" 2>> cdab.stderr
+                unzip -d $PWD/input_data/ "${product_id}.zip"
+                res=$?
+                rm -f "${product_id}.zip"
+            fi
+        else
+            # Try staging in with direct method (DIAS-specific)
+            echo "Stage-in command: $PWD/env_s3/bin/python stage-in.py \"$item_type\" \"OL_2_LFR___\" \"$provider\" \"$id\" $PWD/input_data/ \"...\" \"...\"" >> cdab.stderr
+            $PWD/env_s3/bin/python stage-in.py "$item_type" "OL_2_LFR___" "$provider" "$id" $PWD/input_data/ "$credentials" "$backup_credentials" 2>> cdab.stderr
+            res=$?
+        fi
 
         if [ $res -eq 0 ]
         then
@@ -222,7 +260,12 @@ start_time_mosaic=$(date +%s%N)
 
 if [ $res -eq 0 ]
 then
-    product_count=$(cat ids.list | wc -l)
+    if [ -s urls.list ]
+    then
+        product_count=$(cat urls.list | wc -l)
+    else
+        product_count=$(cat ids.list | wc -l)
+    fi
     process_mosaic
 fi
 

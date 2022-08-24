@@ -159,6 +159,9 @@ class TestClient:
         'GOOGLE': {
             'uri_prefix': 'https://scihub.copernicus.eu/'
         },
+        'WEKEO': {
+            'tools': [ 'wekeo-tool' ]
+        },
     }
 
     command_line = [
@@ -1171,7 +1174,7 @@ class TestClient:
                 execute_remote_command(self.compute_config, run, "sudo unzip -d /usr/lib/ opensearch-client.zip")
                 execute_remote_command(self.compute_config, run, "sudo mv /usr/lib/opensearch-client/bin/opensearch-client /usr/bin/")
 
-            if 'Stars' in tools:
+            if 'Stars' in tools and 'uri_prefix' in self.target_site_class:
                 execute_remote_command(self.compute_config, run, "docker pull terradue/stars:1.3.5")
                 execute_remote_command(self.compute_config, run, "mkdir -p config/Stars")
                 execute_remote_command(self.compute_config, run, "mkdir -p config/etc/Stars")
@@ -1218,6 +1221,8 @@ class TestClient:
             if 'codede-eodata' in tools:
                 copy_file(self.compute_config, run, "{0}/ts-scripts/link-codede-eodata.sh".format(os.path.dirname(sys.argv[0])), "link-codede-eodata.sh")
                 execute_remote_command(self.compute_config, run, "sudo sh link-codede-eodata.sh")
+            if 'wekeo-tool' in tools:
+                copy_file(self.compute_config, run, "{0}/ts-scripts/wekeo-tool.py".format(os.path.dirname(sys.argv[0])), "{0}/wekeo-tool.py".format(working_dir))
 
             if 'files' in self.test_scenario:
                 for f in self.test_scenario['files']:
