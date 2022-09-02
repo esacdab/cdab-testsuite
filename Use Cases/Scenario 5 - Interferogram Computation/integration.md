@@ -173,7 +173,34 @@
       mkdir -p input_data/S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD
       s3cmd get s3://s1-l1-slc-2020-q3/2020/08/21/IW/DV/S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD.zip input_data/S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD/
       ```
+
       
+    * For **WEkEO**, do the following:
+
+      The included file _wekeo-tool.py_ is intended to make the download from WEkEO easy. Transfer that file on the virtual machine.
+
+      Set the environment variable `WEKEO_CREDS` with your WEkEO username and password:
+
+      ```console
+      WEKEO_CREDS='<username>:<password>'
+      ```
+
+      Run the following command:
+        
+      ```console
+      python3 wekeo-tool.py query --credentials="$WEKEO_CREDS" --pn=Sentinel-1 --pt=SLC --uid=S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD > S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD.url
+      ```
+        
+      If the *\*.url* files is empty, the product is not available from WEkEO.
+      Download it from another source (see below) or do a different query with a different region and/or period, and retry.
+
+      If the file is available and contains a URL you can download the product with this command:
+
+      ```console
+      python3 wekeo-tool.py download --credentials="$WEKEO_CREDS" --url="$(cat S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD.url)" --dest="S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD.zip"
+      ```
+
+    
 
     The Terradue storage can be used as an alternative download source in case of unavailability elsewhere. The download command for above product would be the following:
 
