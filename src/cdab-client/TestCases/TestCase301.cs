@@ -340,7 +340,7 @@ namespace cdabtesttools.TestCases
                     if (ie is WebException)
                     {
                         WebException we = ie as WebException;
-                        log.DebugFormat("[{0}] Error downloading {2}. {4} Error: {1}[{3}]", Task.CurrentId, we.Message, enclosureAccess.Uri, we.Status.ToString(), enclosureAccess.AccessMethod);
+                        log.DebugFormat("[{0}] Error downloading {2}. {4} Error: {1}[{3}]", Task.CurrentId, we.Message, request.RequestUri, we.Status.ToString(), enclosureAccess.AccessMethod);
                         if (we.Response is HttpWebResponse)
                             metrics.Add(new StringMetric(MetricName.httpStatusCode, string.Format("{0}:{1}", (int)((HttpWebResponse)we.Response).StatusCode, ((HttpWebResponse)we.Response).StatusDescription), ""));
 
