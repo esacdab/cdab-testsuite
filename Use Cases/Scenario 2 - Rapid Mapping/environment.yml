@@ -15,3 +15,4 @@ dependencies:
   - matplotlib
   - requests
   - cioppy
+  - jupyterlab

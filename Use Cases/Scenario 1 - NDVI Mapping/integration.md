@@ -53,7 +53,7 @@
 
 2. Upload the current use case folder to the user folder using either SCP or the provider upload tool. [20%]
 
-3. **Using the target site data access and following the documentation available at the target site**, get a relevant Sentinel2 Level1C product tile. Typically, Tile `T31TFK` of the `07 May 2020 10:40:31 GMT`. [40%]
+3. **Using the target site data access and following the documentation available at the target site**, get a relevant Sentinel2 Level1C product tile. Typically, Tile `T31TFK` of the `07 May 2020 10:40:31 GMT` (this is an example only and products of other areas and periods will work equally well). [40%]
 
    ```console
    $ curl -L -o S2A_MSIL1C_20200507T104031_N0209_R008_T31TFK_20200507T124549.zip https://store.terradue.com/download/sentinel2/files/v1/S2A_MSIL1C_20200507T104031_N0209_R008_T31TFK_20200507T124549

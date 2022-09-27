@@ -135,9 +135,9 @@
         WEKEO_CREDS='<username>:<password>'
 
         # Replace <identifier> with a product identifier
-        python3 wekeo-tool.py query --credentials="$WEKEO_CREDS" --pn=Sentinel-3 --pt=SL_2_LST___ --uid=<identifier> > <identifier>.url
+        /opt/anaconda/envs/env_s3/bin/python3 wekeo-tool.py query --credentials="$WEKEO_CREDS" --pn=Sentinel-3 --pt=SL_2_LST___ --uid=<identifier> > <identifier>.url
 
-        python3 wekeo-tool.py download --credentials="$WEKEO_CREDS" --url="$(cat <identifier>.url)" --dest="<identifier>.zip"
+        /opt/anaconda/envs/env_s3/bin/python3 wekeo-tool.py download --credentials="$WEKEO_CREDS" --url="$(cat <identifier>.url)" --dest="<identifier>.zip"
 
         unzip -d input_data/ <identifier>.zip
         ```
