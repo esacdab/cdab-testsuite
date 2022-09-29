@@ -223,40 +223,40 @@
     Verify that the directory structure and content of the extracted product is as follows:
 
     ```
-S1A_IW_SLC__1SSV_20200827T095748_20200827T095816_034091_03F552_00E7
-└── S1A_IW_SLC__1SSV_20200827T095748_20200827T095816_034091_03F552_00E7.SAFE
-    ├── annotation
-    │   ├── calibration
-    │   │   ├── calibration-s1a-iw1-slc-vv-20200827t095748-20200827t095816-034091-03f552-001.xml
-    │   │   ├── calibration-s1a-iw2-slc-vv-20200827t095749-20200827t095814-034091-03f552-002.xml
-    │   │   ├── calibration-s1a-iw3-slc-vv-20200827t095750-20200827t095815-034091-03f552-003.xml
-    │   │   ├── noise-s1a-iw1-slc-vv-20200827t095748-20200827t095816-034091-03f552-001.xml
-    │   │   ├── noise-s1a-iw2-slc-vv-20200827t095749-20200827t095814-034091-03f552-002.xml
-    │   │   └── noise-s1a-iw3-slc-vv-20200827t095750-20200827t095815-034091-03f552-003.xml
-    │   ├── s1a-iw1-slc-vv-20200827t095748-20200827t095816-034091-03f552-001.xml
-    │   ├── s1a-iw2-slc-vv-20200827t095749-20200827t095814-034091-03f552-002.xml
-    │   └── s1a-iw3-slc-vv-20200827t095750-20200827t095815-034091-03f552-003.xml
-    ├── manifest.safe
-    ├── measurement
-    │   ├── s1a-iw1-slc-vv-20200827t095748-20200827t095816-034091-03f552-001.tiff
-    │   ├── s1a-iw2-slc-vv-20200827t095749-20200827t095814-034091-03f552-002.tiff
-    │   └── s1a-iw3-slc-vv-20200827t095750-20200827t095815-034091-03f552-003.tiff
-    ├── preview
-    │   ├── icons
-    │   │   └── logo.png
-    │   ├── map-overlay.kml
-    │   ├── product-preview.html
-    │   └── quick-look.png
-    ├── S1A_IW_SLC__1SSV_20200827T095748_20200827T095816_034091_03F552_00E7.SAFE-report-20200827T124738.pdf
-    └── support
-        ├── s1-level-1-calibration.xsd
-        ├── s1-level-1-measurement.xsd
-        ├── s1-level-1-noise.xsd
-        ├── s1-level-1-product.xsd
-        ├── s1-level-1-quicklook.xsd
-        ├── s1-map-overlay.xsd
-        ├── s1-object-types.xsd
-        └── s1-product-preview.xsd
+    S1A_IW_SLC__1SSV_20200827T095748_20200827T095816_034091_03F552_00E7
+    └── S1A_IW_SLC__1SSV_20200827T095748_20200827T095816_034091_03F552_00E7.SAFE
+        ├── annotation
+        │   ├── calibration
+        │   │   ├── calibration-s1a-iw1-slc-vv-20200827t095748-20200827t095816-034091-03f552-001.xml
+        │   │   ├── calibration-s1a-iw2-slc-vv-20200827t095749-20200827t095814-034091-03f552-002.xml
+        │   │   ├── calibration-s1a-iw3-slc-vv-20200827t095750-20200827t095815-034091-03f552-003.xml
+        │   │   ├── noise-s1a-iw1-slc-vv-20200827t095748-20200827t095816-034091-03f552-001.xml
+        │   │   ├── noise-s1a-iw2-slc-vv-20200827t095749-20200827t095814-034091-03f552-002.xml
+        │   │   └── noise-s1a-iw3-slc-vv-20200827t095750-20200827t095815-034091-03f552-003.xml
+        │   ├── s1a-iw1-slc-vv-20200827t095748-20200827t095816-034091-03f552-001.xml
+        │   ├── s1a-iw2-slc-vv-20200827t095749-20200827t095814-034091-03f552-002.xml
+        │   └── s1a-iw3-slc-vv-20200827t095750-20200827t095815-034091-03f552-003.xml
+        ├── manifest.safe
+        ├── measurement
+        │   ├── s1a-iw1-slc-vv-20200827t095748-20200827t095816-034091-03f552-001.tiff
+        │   ├── s1a-iw2-slc-vv-20200827t095749-20200827t095814-034091-03f552-002.tiff
+        │   └── s1a-iw3-slc-vv-20200827t095750-20200827t095815-034091-03f552-003.tiff
+        ├── preview
+        │   ├── icons
+        │   │   └── logo.png
+        │   ├── map-overlay.kml
+        │   ├── product-preview.html
+        │   └── quick-look.png
+        ├── S1A_IW_SLC__1SSV_20200827T095748_20200827T095816_034091_03F552_00E7.SAFE-report-20200827T124738.pdf
+        └── support
+            ├── s1-level-1-calibration.xsd
+            ├── s1-level-1-measurement.xsd
+            ├── s1-level-1-noise.xsd
+            ├── s1-level-1-product.xsd
+            ├── s1-level-1-quicklook.xsd
+            ├── s1-map-overlay.xsd
+            ├── s1-object-types.xsd
+            └── s1-product-preview.xsd
     ```
     [30%]
 
@@ -313,12 +313,13 @@ S1A_IW_SLC__1SSV_20200827T095748_20200827T095816_034091_03F552_00E7
     Check the output directory structure and content (under *output_data/target.data*), it should look like this:
 
     ```
-    ├── coh_VV_15Aug2020_21Aug2020.hdr
-    ├── coh_VV_15Aug2020_21Aug2020.img
-    ├── i_ifg_VV_15Aug2020_21Aug2020.hdr
-    ├── i_ifg_VV_15Aug2020_21Aug2020.img
-    ├── q_ifg_VV_15Aug2020_21Aug2020.hdr
-    ├── q_ifg_VV_15Aug2020_21Aug2020.img
+    target.data/
+    ├── coh_VV_15Aug2020_27Aug2020.hdr
+    ├── coh_VV_15Aug2020_27Aug2020.img
+    ├── i_ifg_VV_15Aug2020_27Aug2020.hdr
+    ├── i_ifg_VV_15Aug2020_27Aug2020.img
+    ├── q_ifg_VV_15Aug2020_27Aug2020.hdr
+    ├── q_ifg_VV_15Aug2020_27Aug2020.img
     ├── tie_point_grids
     │   ├── incident_angle.hdr
     │   ├── incident_angle.img
