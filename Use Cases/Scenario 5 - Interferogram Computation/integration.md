@@ -29,7 +29,7 @@
     Transfer the the included file _environment.yml_ there and create a new conda environment (name **env_snap**) and activate that environment using these commands:
   
     ```console
-    sudo chown -R eouser:eouser /opt/anaconda/
+    sudo chown -R $USER:$USER /opt/anaconda/
     # This avoids permission errors during the conda environment installation
 
     conda env create --file environment.yml
