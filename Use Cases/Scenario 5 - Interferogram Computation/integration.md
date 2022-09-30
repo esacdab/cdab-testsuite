@@ -29,6 +29,9 @@
     Transfer the the included file _environment.yml_ there and create a new conda environment (name **env_snap**) and activate that environment using these commands:
   
     ```console
+    sudo chown -R $USER:$USER /opt/anaconda/
+    # This avoids permission errors during the conda environment installation
+
     conda env create --file environment.yml
     # This takes a while. Follow the instructions and confirm.
 
@@ -51,7 +54,7 @@
 
     Search for a product, possibly the first, from the 10-day perriod starting at the moment of the event (earthquake in this example).
 
-    The resulting product will be the **post-event** product. Ideally it should be the one with the identifier **S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD**.
+    The resulting product will be the **post-event** product. It should be the one with the identifier **S1A_IW_SLC__1SSV_20200827T095748_20200827T095816_034091_03F552_00E7**.
   
     Obtain that product's metadata and extract its download location. [20%]
 
@@ -72,7 +75,7 @@
       url_regex = re.compile('.*\.SAFE(/(?P<dir>[^\?]*))?(/(?P<file>[^/\?]+))(\?.*)?')
 
       time_start = datetime.utcnow()
-      id = 'S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD'
+      id = 'S1A_IW_SLC__1SSV_20200827T095748_20200827T095816_034091_03F552_00E7'
       response = requests.post("https://sobloo.eu/api/v1-beta/direct-data/product-links",
           headers = {'Authorization': 'Apikey {0}'.format(sobloo_api_key)},
           json={'product': id, "regexp": "(.*)"}
@@ -111,20 +114,20 @@
   
       ```console
       # /local_path is the mountpoint for the data volume
-      mkdir input_data/S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD
+      mkdir input_data/S1A_IW_SLC__1SSV_20200827T095748_20200827T095816_034091_03F552_00E7
       
-      # Locate the file S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD.zip
+      # Locate the file S1A_IW_SLC__1SSV_20200827T095748_20200827T095816_034091_03F552_00E7.zip
       # in one of the many subdirectories of /local_path/S1
       # and set file=<location>
-      cp $file input_data/S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD
+      cp $file input_data/S1A_IW_SLC__1SSV_20200827T095748_20200827T095816_034091_03F552_00E7
       ```
 
     * For **CREODIAS**, make sure your virtual machine has access to the EO Data volume (mounted under `/eodata/`).
       Copy the directories using the following commands:
 
       ```console
-      mkdir input_data/S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD
-      cp -r /eodata/Sentinel-1/SAR/SLC/2020/08/21/S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD.SAFE input_data/S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD/
+      mkdir input_data/S1A_IW_SLC__1SSV_20200827T095748_20200827T095816_034091_03F552_00E7
+      cp -r /eodata/Sentinel-1/SAR/SLC/2020/08/27/S1A_IW_SLC__1SSV_20200827T095748_20200827T095816_034091_03F552_00E7.SAFE input_data/S1A_IW_SLC__1SSV_20200827T095748_20200827T095816_034091_03F552_00E7/
       ```
 
     * For **MUNDI**, do the following:
@@ -170,64 +173,81 @@
       Now, run the following commands to download the files into the correct location using **s3cmd** (note that not all areas are covered, the file might not be available):
 
       ```console
-      mkdir -p input_data/S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD
-      s3cmd get s3://s1-l1-slc-2020-q3/2020/08/21/IW/DV/S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD.zip input_data/S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD/
+      mkdir -p input_data/S1A_IW_SLC__1SSV_20200827T095748_20200827T095816_034091_03F552_00E7
+      s3cmd get s3://s1-l1-slc-2020-q3/2020/08/27/IW/SV/S1A_IW_SLC__1SSV_20200827T095748_20200827T095816_034091_03F552_00E7.zip input_data/S1A_IW_SLC__1SSV_20200827T095748_20200827T095816_034091_03F552_00E7/
       ```
+
       
+    * For **WEkEO**, do the following:
+
+      The included file _wekeo-tool.py_ is intended to make the download from WEkEO easy. Transfer that file on the virtual machine.
+
+      Set the environment variable `WEKEO_CREDS` with your WEkEO username and password:
+
+      ```console
+      WEKEO_CREDS='<username>:<password>'
+      ```
+
+      Run the following command:
+        
+      ```console
+      python3 wekeo-tool.py query --credentials="$WEKEO_CREDS" --pn=Sentinel-1 --pt=SLC --uid=S1A_IW_SLC__1SSV_20200827T095748_20200827T095816_034091_03F552_00E7 > S1A_IW_SLC__1SSV_20200827T095748_20200827T095816_034091_03F552_00E7.url
+      ```
+        
+      If the *\*.url* files is empty, the product is not available from WEkEO.
+      Download it from another source (see below) or do a different query with a different region and/or period, and retry.
+
+      If the file is available and contains a URL you can download the product with this command:
+
+      ```console
+      mkdir input_data/S1A_IW_SLC__1SSV_20200827T095748_20200827T095816_034091_03F552_00E7
+      python3 wekeo-tool.py download --credentials="$WEKEO_CREDS" --url="$(cat S1A_IW_SLC__1SSV_20200827T095748_20200827T095816_034091_03F552_00E7.url)" --dest="S1A_IW_SLC__1SSV_20200827T095748_20200827T095816_034091_03F552_00E7.zip"
+      unzip -d input_data/S1A_IW_SLC__1SSV_20200827T095748_20200827T095816_034091_03F552_00E7 S1A_IW_SLC__1SSV_20200827T095748_20200827T095816_034091_03F552_00E7.zip
+      rm S1A_IW_SLC__1SSV_20200827T095748_20200827T095816_034091_03F552_00E7.zip
+      ```
+
+    
 
     The Terradue storage can be used as an alternative download source in case of unavailability elsewhere. The download command for above product would be the following:
 
     ```console
-    $ curl -L -o input_data/S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD.zip https://store.terradue.com/download/sentinel1/files/v1/S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD
+    $ curl -L -o input_data/S1A_IW_SLC__1SSV_20200827T095748_20200827T095816_034091_03F552_00E7.zip https://store.terradue.com/download/sentinel1/files/v1/S1A_IW_SLC__1SSV_20200827T095748_20200827T095816_034091_03F552_00E7
     ```
 
     Make the necessary commands to extract the product as a folder. The product directory should be in the same place as the *.zip* file, which can be deleted after extraction.
 
     ```console
-    $ unzip S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD.zip
+    $ unzip S1A_IW_SLC__1SSV_20200827T095748_20200827T095816_034091_03F552_00E7.zip
     ```
 
     Verify that the directory structure and content of the extracted product is as follows:
 
     ```
-    S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD
-    └── S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD.SAFE
+    S1A_IW_SLC__1SSV_20200827T095748_20200827T095816_034091_03F552_00E7
+    └── S1A_IW_SLC__1SSV_20200827T095748_20200827T095816_034091_03F552_00E7.SAFE
         ├── annotation
         │   ├── calibration
-        │   │   ├── calibration-s1b-iw1-slc-vh-20200821t095716-20200821t095741-023020-02bb48-001.xml
-        │   │   ├── calibration-s1b-iw1-slc-vv-20200821t095716-20200821t095741-023020-02bb48-004.xml
-        │   │   ├── calibration-s1b-iw2-slc-vh-20200821t095714-20200821t095740-023020-02bb48-002.xml
-        │   │   ├── calibration-s1b-iw2-slc-vv-20200821t095714-20200821t095740-023020-02bb48-005.xml
-        │   │   ├── calibration-s1b-iw3-slc-vh-20200821t095715-20200821t095741-023020-02bb48-003.xml
-        │   │   ├── calibration-s1b-iw3-slc-vv-20200821t095715-20200821t095741-023020-02bb48-006.xml
-        │   │   ├── noise-s1b-iw1-slc-vh-20200821t095716-20200821t095741-023020-02bb48-001.xml
-        │   │   ├── noise-s1b-iw1-slc-vv-20200821t095716-20200821t095741-023020-02bb48-004.xml
-        │   │   ├── noise-s1b-iw2-slc-vh-20200821t095714-20200821t095740-023020-02bb48-002.xml
-        │   │   ├── noise-s1b-iw2-slc-vv-20200821t095714-20200821t095740-023020-02bb48-005.xml
-        │   │   ├── noise-s1b-iw3-slc-vh-20200821t095715-20200821t095741-023020-02bb48-003.xml
-        │   │   └── noise-s1b-iw3-slc-vv-20200821t095715-20200821t095741-023020-02bb48-006.xml
-        │   ├── s1b-iw1-slc-vh-20200821t095716-20200821t095741-023020-02bb48-001.xml
-        │   ├── s1b-iw1-slc-vv-20200821t095716-20200821t095741-023020-02bb48-004.xml
-        │   ├── s1b-iw2-slc-vh-20200821t095714-20200821t095740-023020-02bb48-002.xml
-        │   ├── s1b-iw2-slc-vv-20200821t095714-20200821t095740-023020-02bb48-005.xml
-        │   ├── s1b-iw3-slc-vh-20200821t095715-20200821t095741-023020-02bb48-003.xml
-        │   └── s1b-iw3-slc-vv-20200821t095715-20200821t095741-023020-02bb48-006.xml
+        │   │   ├── calibration-s1a-iw1-slc-vv-20200827t095748-20200827t095816-034091-03f552-001.xml
+        │   │   ├── calibration-s1a-iw2-slc-vv-20200827t095749-20200827t095814-034091-03f552-002.xml
+        │   │   ├── calibration-s1a-iw3-slc-vv-20200827t095750-20200827t095815-034091-03f552-003.xml
+        │   │   ├── noise-s1a-iw1-slc-vv-20200827t095748-20200827t095816-034091-03f552-001.xml
+        │   │   ├── noise-s1a-iw2-slc-vv-20200827t095749-20200827t095814-034091-03f552-002.xml
+        │   │   └── noise-s1a-iw3-slc-vv-20200827t095750-20200827t095815-034091-03f552-003.xml
+        │   ├── s1a-iw1-slc-vv-20200827t095748-20200827t095816-034091-03f552-001.xml
+        │   ├── s1a-iw2-slc-vv-20200827t095749-20200827t095814-034091-03f552-002.xml
+        │   └── s1a-iw3-slc-vv-20200827t095750-20200827t095815-034091-03f552-003.xml
         ├── manifest.safe
         ├── measurement
-        │   ├── s1b-iw1-slc-vh-20200821t095716-20200821t095741-023020-02bb48-001.tiff
-        │   ├── s1b-iw1-slc-vv-20200821t095716-20200821t095741-023020-02bb48-004.tiff
-        │   ├── s1b-iw2-slc-vh-20200821t095714-20200821t095740-023020-02bb48-002.tiff
-        │   ├── s1b-iw2-slc-vv-20200821t095714-20200821t095740-023020-02bb48-005.tiff
-        │   ├── s1b-iw3-slc-vh-20200821t095715-20200821t095741-023020-02bb48-003.tiff
-        │   └── s1b-iw3-slc-vv-20200821t095715-20200821t095741-023020-02bb48-006.tiff
+        │   ├── s1a-iw1-slc-vv-20200827t095748-20200827t095816-034091-03f552-001.tiff
+        │   ├── s1a-iw2-slc-vv-20200827t095749-20200827t095814-034091-03f552-002.tiff
+        │   └── s1a-iw3-slc-vv-20200827t095750-20200827t095815-034091-03f552-003.tiff
         ├── preview
         │   ├── icons
         │   │   └── logo.png
         │   ├── map-overlay.kml
         │   ├── product-preview.html
-        │   ├── quick-look.png
-        │   └── thumbnail.png
-        ├── S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD.SAFE-report-20200821T130013.pdf
+        │   └── quick-look.png
+        ├── S1A_IW_SLC__1SSV_20200827T095748_20200827T095816_034091_03F552_00E7.SAFE-report-20200827T124738.pdf
         └── support
             ├── s1-level-1-calibration.xsd
             ├── s1-level-1-measurement.xsd
@@ -254,21 +274,20 @@
 6.  Due to the retirement of the legacy server providing Sentinel-1 orbit fiiles (POEORB), the automatic download of those files does not work any more.
     They have therefore to be searched via the new search API at https://scihub.copernicus.eu/gnss/search and downloaded manually from the provided links.
     
-    The appropriate files (the orbit files covering both pre- and post-event) have to be added in a structure as shown below under the directory *snap/.snap/auxdata/Orbits/Sentinel-1/POEORB/* under the root directory of the conda environment. Note that the files have to be zipped.
+    The appropriate files (the orbit files covering both pre- and post-event) have to be added in a structure as shown below in the directory *snap/.snap/auxdata/Orbits/Sentinel-1/POEORB/* under the root directory that contains the conda environment. The full path would usually be */opt/anaconda/envs/env_snap/snap/.snap/auxdata/Orbits/Sentinel-1/POEORB/.  Note that the files have to be zipped.
 
     ```
     └── S1A
-        └── 2020
-            ├── 06
-            │   └── S1A_OPER_AUX_POEORB_OPOD_20210319T032445_V20200627T225942_20200629T005942.EOF.zip
-            └── 08
-                └── S1A_OPER_AUX_POEORB_OPOD_20210317T062946_V20200814T225942_20200816T005942.EOF.zip
+    │   └── 2020
+    │       └── 08
+    │           ├── S1A_OPER_AUX_POEORB_OPOD_20210317T062946_V20200814T225942_20200816T005942.EOF.zip
+    │           └── S1A_OPER_AUX_POEORB_OPOD_20210317T102135_V20200826T225942_20200828T005942.EOF.zip
     ```
 
     The included script *get-poeorb.py* automates this entire step. It takes the root dir of the conda environment and any number of Sentinel-1 input identifiers (of the pre- and post-event products), as in this example:
 
     ```bash
-    python get-poeorb.py /opt/anaconda/envs/env_snap/ S1A_IW_SLC__1SSV_20200815T095747_20200815T095815_033916_03EF29_E739 S1A_IW_SLC__1SSV_20200628T095744_20200628T095812_033216_03D91E_A07C
+    python get-poeorb.py /opt/anaconda/envs/env_snap/ S1A_IW_SLC__1SSV_20200815T095747_20200815T095815_033916_03EF29_E739 S1A_IW_SLC__1SSV_20200827T095748_20200827T095816_034091_03F552_00E7
     ```
 
     Make sure that the directory structure and contained files correspond to the above example. [40%]
@@ -285,7 +304,7 @@
     ```console
     $ gpt insar.xml \
     -Ppre_event=input_data/S1A_IW_SLC__1SSV_20200815T095747_20200815T095815_033916_03EF29_E739/S1A_IW_SLC__1SSV_20200815T095747_20200815T095815_033916_03EF29_E739.SAFE \
-    -Ppost_event=input_data/S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD/S1B_IW_SLC__1SDV_20200821T095714_20200821T095741_023020_02BB48_C5DD.SAFE
+    -Ppost_event=input_data/S1A_IW_SLC__1SSV_20200827T095748_20200827T095816_034091_03F552_00E7/S1A_IW_SLC__1SSV_20200827T095748_20200827T095816_034091_03F552_00E7.SAFE
     ```
 
     Make sure the processing starts correctly and does not produce an error within the first minute. [45%]
@@ -294,12 +313,13 @@
     Check the output directory structure and content (under *output_data/target.data*), it should look like this:
 
     ```
-    ├── coh_VV_15Aug2020_21Aug2020.hdr
-    ├── coh_VV_15Aug2020_21Aug2020.img
-    ├── i_ifg_VV_15Aug2020_21Aug2020.hdr
-    ├── i_ifg_VV_15Aug2020_21Aug2020.img
-    ├── q_ifg_VV_15Aug2020_21Aug2020.hdr
-    ├── q_ifg_VV_15Aug2020_21Aug2020.img
+    target.data/
+    ├── coh_VV_15Aug2020_27Aug2020.hdr
+    ├── coh_VV_15Aug2020_27Aug2020.img
+    ├── i_ifg_VV_15Aug2020_27Aug2020.hdr
+    ├── i_ifg_VV_15Aug2020_27Aug2020.img
+    ├── q_ifg_VV_15Aug2020_27Aug2020.hdr
+    ├── q_ifg_VV_15Aug2020_27Aug2020.img
     ├── tie_point_grids
     │   ├── incident_angle.hdr
     │   ├── incident_angle.img
