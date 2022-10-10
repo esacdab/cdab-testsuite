@@ -98,6 +98,8 @@ namespace cdabtesttools.Target
 
         private TargetType InitType()
         {
+            return TargetType.DIAS;
+
             if (Wrapper.Settings.ServiceUrl.Host == "catalogue.onda-dias.eu")
             {
                 log.DebugFormat("TARGET TYPE: DIAS");
@@ -172,6 +174,8 @@ namespace cdabtesttools.Target
         {
             var target_uri = targetSiteConfig.GetDataAccessUri();
             var target_creds = targetSiteConfig.GetDataAccessNetworkCredentials();
+
+            return new SampleWrapper(target_uri, target_creds);
 
             if (target_creds == null)
                 log.WarnFormat("Credentials are not set, target sites' services requiring credentials for data access will fail!");

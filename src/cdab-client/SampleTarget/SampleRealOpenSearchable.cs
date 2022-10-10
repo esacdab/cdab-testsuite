@@ -53,11 +53,11 @@ namespace Terradue.OpenSearch.DataHub.Dias
 
             if (templateUrl == null) throw new InvalidOperationException(string.Format("Could not find a URL template for entity {0} with type {1}", this.Identifier, querySettings.PreferredContentType));
 
-            // 1/ put everything FQDN
+            // 1. put everything FQDN
             var fqdnParameters = OpenSearchFactory.BuildFqdnParameterFromTemplate(templateUrl, parameters, querySettings);
 
-            // 2/ find the right collection from all params
-            return new SampleOpenSearchRequest(sampleWrapper, querySettings, fqdnParameters);
+            // 2. find the right collection from all params
+            return new SampleOpenSearchRequest(sampleWrapper, querySettings, fqdnParameters );
 
         }
 

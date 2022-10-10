@@ -33,9 +33,9 @@ namespace Terradue.OpenSearch.DataHub.Dias
             set { s3StorageSettings = value; }
         }
 
-        public SampleWrapper(ICredentials credentials = null, string osUrl = "https://sobloo.eu/api/v1/services/search", S3StorageSettings s3StorageSettings = null)
+        public SampleWrapper(Uri osUri, ICredentials credentials = null, S3StorageSettings s3StorageSettings = null)
         {
-            this.settings = new DataHubWrapperSettings(new Uri(osUrl), credentials);
+            this.settings = new DataHubWrapperSettings(osUri, credentials);
             this.s3StorageSettings = s3StorageSettings;
         }
 
