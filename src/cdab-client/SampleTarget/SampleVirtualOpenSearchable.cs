@@ -1,10 +1,28 @@
-﻿using System;
-using System.Linq;
+﻿/*
+cdab-client is part of the software suite used to run Test Scenarios 
+for bechmarking various Copernicus Data Provider targets.
+    
+    Copyright (C) 2020 Terradue Ltd, www.terradue.com
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published
+    by the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
+using System;
+using Terradue.OpenSearch;
 using Terradue.OpenSearch.Schema;
+using Terradue.OpenSearch.DataHub;
 using System.Collections.Specialized;
 using Terradue.ServiceModel.Syndication;
 
-namespace Terradue.OpenSearch.DataHub.Dias
+namespace cdabtesttools.SampleTarget
 {
 
     public class SampleVirtualOpenSearchable : DataHubOpenSearchable
@@ -12,63 +30,16 @@ namespace Terradue.OpenSearch.DataHub.Dias
 
         SampleWrapper sampleWrapper;
 
-        public SampleVirtualOpenSearchable(SampleWrapper wrapper, OpenSearchableFactorySettings settings) :
-        base(wrapper, settings)
+        public SampleVirtualOpenSearchable(SampleWrapper wrapper, OpenSearchableFactorySettings settings) : base(wrapper, settings)
         {
             sampleWrapper = wrapper;
         }
         
-        public override System.Collections.Specialized.NameValueCollection GetOpenSearchParameters(string mimeType)
-        {
-            // This gets a NameValueCollection of the basic OpenSearch parameters
-            // that the search has to support:
-            // count, startIndex, startPage, searchTerms, lang
-            NameValueCollection osdic = OpenSearchFactory.GetBaseOpenSearchParameter();
-
-            // Here specific search parameters are added:
-            osdic.Add("uid", "{geo:uid?}");
-            osdic.Add("psi", "{eo:platformSerialIdentifier?}");
-            osdic.Add("psn", "{eo:platform?}");
-            osdic.Add("isn", "{eo:instrument?}");
-            osdic.Add("geom", "{geo:geometry?}");
-            osdic.Add("start", "{time:start?}");
-            osdic.Add("end", "{time:end?}");
-            osdic.Add("pt", "{eo:productType?}");
-            osdic.Add("modified", "{dct:modified?}");
-            osdic.Add("timeliness", "{eo:timeliness?}");
-            osdic.Add("pl", "{eo:processingLevel?}");
-            osdic.Add("polc", "{eo:polarizationChannels?}");
-            osdic.Add("pm", "{eo:processingMode?}");
-            osdic.Add("track", "{eo:track?}");
-            osdic.Add("cc", "{eo:cloudCover?}");
-            return osdic;
-        }
-
-
         public override Terradue.OpenSearch.Request.OpenSearchRequest Create(QuerySettings querySettings, System.Collections.Specialized.NameValueCollection parameters)
         {
-            OpenSearchDescription osd = this.GetOpenSearchDescription();
-
-            OpenSearchDescriptionUrl templateUrl = OpenSearchFactory.GetOpenSearchUrlByType(osd, querySettings.PreferredContentType);
-
-            if (templateUrl == null) throw new InvalidOperationException(string.Format("Could not find a URL template for entity {0} with type {1}", this.Identifier, querySettings.PreferredContentType));
-
-            // 1/ put everything FQDN
-            var fqdnParameters = OpenSearchFactory.BuildFqdnParameterFromTemplate(templateUrl, parameters, querySettings);
-
-            // 2/ find the right collection from all params
-            return new SampleOpenSearchRequest(sampleWrapper, querySettings, fqdnParameters);
-
+            return new SampleVirtualOpenSearchRequest(sampleWrapper, parameters);
         }
 
-        protected NameValueCollection AdjustParameters(NameValueCollection parameters)
-        {
-            NameValueCollection nvc = new NameValueCollection(parameters);
-
-            // Make adjustments to values 
-
-            return MapParameters(nvc);
-        }
     }
 }
 

@@ -27,6 +27,7 @@ using System.Linq;
 using System.Net;
 using cdabtesttools.Config;
 using cdabtesttools.Data;
+using cdabtesttools.SampleTarget;
 using Terradue.OpenSearch;
 using Terradue.OpenSearch.Asf;
 using Terradue.OpenSearch.DataHub;
@@ -98,7 +99,8 @@ namespace cdabtesttools.Target
 
         private TargetType InitType()
         {
-            return TargetType.DIAS;
+            // Uncomment the following line for testing the sample target sites.
+            // return TargetType.DIAS;
 
             if (Wrapper.Settings.ServiceUrl.Host == "catalogue.onda-dias.eu")
             {
@@ -175,7 +177,8 @@ namespace cdabtesttools.Target
             var target_uri = targetSiteConfig.GetDataAccessUri();
             var target_creds = targetSiteConfig.GetDataAccessNetworkCredentials();
 
-            return new SampleWrapper(target_uri, target_creds);
+            // Uncomment the following line for testing the sample target sites.
+            // return new SampleWrapper(target_uri, target_creds);
 
             if (target_creds == null)
                 log.WarnFormat("Credentials are not set, target sites' services requiring credentials for data access will fail!");
