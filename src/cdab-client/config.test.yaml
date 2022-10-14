@@ -1,0 +1,801 @@
+global:
+  docker_config: "/Users/floeschau/Work/Projects/2020-10_CDAB_Tests/docker-config.json"
+  # Reference target site for TS05 and TS06
+  reference_target_site: ApiHub
+  country_shapefile_path: /Users/floeschau/Work/repo/tools//cdab-testsuite/src/cdab-client/App_Data/TM_WORLD_BORDERS-0.3/TM_WORLD_BORDERS-0.3
+  # Test Mode (Download limited to 20MB)
+  # test_mode: true
+  connect_retries: 60
+  connect_interval: 1
+  scenarios:
+    TS15.1:
+      timeout: 2700
+    TS13:
+      timeout: 2700
+      apihub_service_provider: ApiHub
+
+
+# Service Providers definition
+service_providers:
+  test:
+    max_catalogue_thread: 1
+    max_download_thread: 1
+    max_download_size: 1395864371
+    data:
+      url: https://catalog.terradue.com
+      catalogue:
+        sets:
+          Copernicus:
+            reference_set_id: Copernicus
+            type: baseline
+            reference_target_site: scihub
+            parameters: # All Copernicus products are baseline. Just remove the very recent one to avoid newly ingested bias
+              - key: sensingStop
+                full_name: "{http://a9.com/-/opensearch/extensions/time/1.0/}end"
+                value: "[NOW-1D]"
+                label: "before 1D"
+          DataOffer:
+            type: local
+            reference_target_site: scihub
+            parameters:
+              # Parameters to filter only locally managed products (for TC503)
+            collections:
+              Sentinel1-GRD:
+                label: "Sentinel-1 GRD World"
+                parameters:
+                  - key: missionName
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+                    value: "Sentinel-1"
+                    label: "Sentinel-1"
+                  - key: productType
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}productType"
+                    value: "GRD"
+                    label: "GRD"
+              Sentinel1-OCN:
+                label: "Sentinel-1 OCN World"
+                parameters:
+                  - key: missionName
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+                    value: "Sentinel-1"
+                    label: "Sentinel-1"
+                  - key: productType
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}productType"
+                    value: "OCN"
+                    label: "OCN"
+              Sentinel1-RAW:
+                label: "Sentinel-1 RAW World last 6 months"
+                parameters:
+                  - key: missionName
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+                    value: "Sentinel-1"
+                    label: "Sentinel-1"
+                  - key: productType
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}productType"
+                    value: "RAW"
+                    label: "RAW"
+                  - key: sensingStart
+                    full_name: "{http://a9.com/-/opensearch/extensions/time/1.0/}start"
+                    value: "[NOW-6M]"
+                    label: "Last 6M"
+              Sentinel1-SLC-Europe:
+                label: "Sentinel-1 SLC Europe"
+                parameters:
+                  - key: missionName
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+                    value: "Sentinel-1"
+                    label: "Sentinel-1"
+                  - key: productType
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}productType"
+                    value: "SLC"
+                    label: "SLC"
+                  - key: geom
+                    full_name: "{http://a9.com/-/opensearch/extensions/geo/1.0/}geometry"
+                    value: "POLYGON((-10.547 36.173,-2.109 36.031,6.855 38.548,11.25 37.996,20.391 34.452,35.156 34.162,42.363 67.942,26.895 72.342,-26.016 67.136,-10.547 36.173))"
+                    label: "Europe"
+              Sentinel1-SLC-World:
+                label: "Sentinel-1 SLC World last 6 months"
+                parameters:
+                  - key: missionName
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+                    value: "Sentinel-1"
+                    label: "Sentinel-1"
+                  - key: productType
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}productType"
+                    value: "SLC"
+                    label: "SLC"
+                  - key: sensingStart
+                    full_name: "{http://a9.com/-/opensearch/extensions/time/1.0/}start"
+                    value: "[NOW-6M]"
+                    label: "Last 6M"
+              Sentinel2-L1C:
+                label: "Sentinel-2 Level-1C World"
+                parameters:
+                  - key: missionName
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+                    value: "Sentinel-2"
+                    label: "Sentinel-2"
+                  - key: productType
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}productType"
+                    value: "S2MSI1C"
+                    label: "L1C"
+              Sentinel3-OLCI-L1-NonTimeCritical:
+                label: "Sentinel-3 OLCI Level-1 Non Time Critical"
+                parameters:
+                  - key: missionName
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+                    value: "Sentinel-3"
+                    label: "Sentinel-3"
+                  - key: instrument
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}instrument"
+                    value: "OLCI"
+                    label: "OLCI"
+                  - key: processingLevel
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}processingLevel"
+                    value: "L1"
+                    label: "L1"
+                  - key: timeliness
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}timeliness"
+                    value: "NTC"
+                    label: "NTC"
+              # We need to filter out L2 OCEAN/WATER products which are not hosted on the reference
+              # Open Hub, so we only consider LAND products (LFR and LRR)
+              Sentinel3-OLCI-L2-LFR-NonTimeCritical:
+                label: "Sentinel-3 OLCI Level-2 LFR Non Time Critical"
+                parameters:
+                  - key: missionName
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+                    value: "Sentinel-3"
+                    label: "Sentinel-3"
+                  - key: productType
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}productType"
+                    value: "OL_2_LFR___"
+                    label: "OLCI L2 Land FR"
+                  - key: timeliness
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}timeliness"
+                    value: "NTC"
+                    label: "NTC"
+              Sentinel3-OLCI-L2-LRR-NonTimeCritical:
+                label: "Sentinel-3 OLCI Level-2 LRR Non Time Critical"
+                parameters:
+                  - key: missionName
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+                    value: "Sentinel-3"
+                    label: "Sentinel-3"
+                  - key: productType
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}productType"
+                    value: "OL_2_LRR___"
+                    label: "OLCI L2 Land RR"
+                  - key: timeliness
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}timeliness"
+                    value: "NTC"
+                    label: "NTC"
+              Sentinel3-SRAL-L1-NonTimeCritical:
+                label: "Sentinel-3 SRAL Level-1 Non Time Critical"
+                parameters:
+                  - key: missionName
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+                    value: "Sentinel-3"
+                    label: "Sentinel-3"
+                  - key: instrument
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}instrument"
+                    value: "SRAL"
+                    label: "SRAL"
+                  - key: processingLevel
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}processingLevel"
+                    value: "L1"
+                    label: "L1"
+                  - key: timeliness
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}timeliness"
+                    value: "NTC"
+                    label: "NTC"
+              # We need to filter out L2 OCEAN/WATER products which are not hosted on the reference
+              # Open Hub, so we only consider LAND products (LAN)
+              Sentinel3-SRAL-L2-LAN-NonTimeCritical:
+                label: "Sentinel-3 SRAL Level-2 Land Non Time Critical"
+                parameters:
+                  - key: missionName
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+                    value: "Sentinel-3"
+                    label: "Sentinel-3"
+                  - key: productType
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}productType"
+                    value: "SR_2_LAN___"
+                    label: "SRAL L2 Land"
+                  - key: timeliness
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}timeliness"
+                    value: "NTC"
+                    label: "NTC"
+              Sentinel3-SLSTR-L1-NonTimeCritical:
+                label: "Sentinel-3 SLSTR Level-1 Non Time Critical"
+                parameters:
+                  - key: missionName
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+                    value: "Sentinel-3"
+                    label: "Sentinel-3"
+                  - key: instrument
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}instrument"
+                    value: "SLSTR"
+                    label: "SLSTR"
+                  - key: processingLevel
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}processingLevel"
+                    value: "L1"
+                    label: "L1"
+                  - key: timeliness
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}timeliness"
+                    value: "NTC"
+                    label: "NTC"
+              # We need to filter out L2 OCEAN/WATER products which are not hosted on the reference
+              # Open Hub, so we only consider LAND products (LST)
+              Sentinel3-SLSTR-L2-NonTimeCritical:
+                label: "Sentinel-3 SLSTR Level-2 Non Time Critical"
+                parameters:
+                  - key: missionName
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+                    value: "Sentinel-3"
+                    label: "Sentinel-3"
+                  - key: productType
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}productType"
+                    value: "SL_2_LST___"
+                    label: "SLSTR L2 Land"
+                  - key: timeliness
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}timeliness"
+                    value: "NTC"
+                    label: "NTC"
+
+
+  scihub:
+    # Maximum number of thread querying the target catalogue service in parallel
+    max_catalogue_thread: 1
+    # Maximum number of thread downloading the target download service in parallel
+    max_download_thread: 1
+    # Maximum product size to be downloaded, in bytes. Default: 1073741824 = 1GiB
+    max_download_size: 1395864371
+    # Data Access 
+    data:
+      # Entry Point (usually the URL to the catalogue). This is needed to choose the right API to be used.
+      url: https://apihub.copernicus.eu/apihub
+      # Base URL for web GUI access
+      web_url: https://scihub.copernicus.eu/dhus
+      # Credentials (usually username:password/apiKey)
+      credentials: cdab01:12qwasCDABzx
+      catalogue:
+        local_parameters:
+          # Parameters to filter only locally managed products for TC502 dataCoverage.
+          # If not present, only "Online" is considered.
+          - key: "archiveStatus"
+            full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}statusSubType"
+            value: ""
+            label: "All"
+        # Catalogue collections' set definition
+        sets:
+          # scihub has the Copernicus catalogue (see baselines definition).
+          Copernicus:
+            # Identifier of the catalogue set configured in the main data section
+            reference_set_id: Copernicus
+            # ... as a baseline (used in TC5O1, TC502, TC601 & TC602)...
+            type: baseline  # The catalogue collections' set of type baseline are referering to common baseline defined globally
+            # ... with scihub as a reference ...
+            reference_target_site: scihub
+            # ... and with the following parameters to filter out only baseline
+          DataOffer:
+            # ... defined as locally managed (TC503)
+            type: local
+            # ... with scihub as a reference
+            reference_target_site: scihub
+            # collections' set definition
+            collections:
+              # All Sentinel-1 products on scihub are NTC.
+              # The correct filter should be timeliness:"Fast-24h" but only part of the collection has this field,
+              # many products do not have it, so we should filter exluding NRT i.e. "NOT timeliness:NRT-3h" but NOT
+              # filters cannot be defined yet. So for the time being we include all products.
+              Sentinel1-RAW-NonTimeCritical:
+                label: "Sentinel-1 RAW"
+                parameters:
+                  - key: missionName
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+                    value: "Sentinel-1"
+                    label: "Sentinel-1"
+                  - key: productType
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}productType"
+                    value: "RAW"
+                    label: "RAW"
+              Sentinel1-SLC-NonTimeCritical:
+                label: "Sentinel-1 SLC"
+                parameters:
+                  - key: missionName
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+                    value: "Sentinel-1"
+                    label: "Sentinel-1"
+                  - key: productType
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}productType"
+                    value: "SLC"
+                    label: "SLC"
+              Sentinel1-GRD-NonTimeCritical:
+                label: "Sentinel-1 GRD"
+                parameters:
+                  - key: missionName
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+                    value: "Sentinel-1"
+                    label: "Sentinel-1"
+                  - key: productType
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}productType"
+                    value: "GRD"
+                    label: "GRD"
+              Sentinel1-OCN-NonTimeCritical:
+                label: "Sentinel-1 OCN"
+                parameters:
+                  - key: missionName
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+                    value: "Sentinel-1"
+                    label: "Sentinel-1"
+                  - key: productType
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}productType"
+                    value: "OCN"
+                    label: "OCN"
+              Sentinel2-L1C:
+                label: "Sentinel-2 Level-1C"
+                parameters:
+                  - key: missionName
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+                    value: "Sentinel-2"
+                    label: "Sentinel-2"
+                  - key: productType
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}productType"
+                    value: "S2MSI1C"
+                    label: "L1C"
+              Sentinel2-L2A:
+                label: "Sentinel-2 Level-2A"
+                parameters:
+                  - key: missionName
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+                    value: "Sentinel-2"
+                    label: "Sentinel-2"
+                  - key: productType
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}productType"
+                    value: "S2MSI2A"
+                    label: "L2A"
+              Sentinel3-OLCI-L1-NonTimeCritical:
+                label: "Sentinel-3 OLCI Level-1 Non Time Critical"
+                parameters:
+                  - key: missionName
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+                    value: "Sentinel-3"
+                    label: "Sentinel-3"
+                  - key: instrument
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}instrument"
+                    value: "OLCI"
+                    label: "OLCI"
+                  - key: processingLevel
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}processingLevel"
+                    value: "L1"
+                    label: "L1"
+                  - key: timeliness
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}timeliness"
+                    value: "NTC"
+                    label: "NTC"
+              Sentinel3-OLCI-L2-NonTimeCritical:
+                label: "Sentinel-3 OLCI Level-2 Non Time Critical"
+                parameters:
+                  - key: missionName
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+                    value: "Sentinel-3"
+                    label: "Sentinel-3"
+                  - key: instrument
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}instrument"
+                    value: "OLCI"
+                    label: "OLCI"
+                  - key: processingLevel
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}processingLevel"
+                    value: "L2"
+                    label: "L2"
+                  - key: timeliness
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}timeliness"
+                    value: "NTC"
+                    label: "NTC"
+              Sentinel3-SRAL-L1-NonTimeCritical:
+                label: "Sentinel-3 SRAL Level-1 Non Time Critical"
+                parameters:
+                  - key: missionName
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+                    value: "Sentinel-3"
+                    label: "Sentinel-3"
+                  - key: instrument
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}instrument"
+                    value: "SRAL"
+                    label: "SRAL"
+                  - key: processingLevel
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}processingLevel"
+                    value: "L1"
+                    label: "L1"
+                  - key: timeliness
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}timeliness"
+                    value: "NTC"
+                    label: "NTC"
+              Sentinel3-SRAL-L2-NonTimeCritical:
+                label: "Sentinel-3 SRAL Level-2 Non Time Critical"
+                parameters:
+                  - key: missionName
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+                    value: "Sentinel-3"
+                    label: "Sentinel-3"
+                  - key: instrument
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}instrument"
+                    value: "SRAL"
+                    label: "SRAL"
+                  - key: processingLevel
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}processingLevel"
+                    value: "L2"
+                    label: "L2"
+                  - key: timeliness
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}timeliness"
+                    value: "NTC"
+                    label: "NTC"
+              Sentinel3-SLSTR-L1-NonTimeCritical:
+                label: "Sentinel-3 SLSTR Level-1 Non Time Critical"
+                parameters:
+                  - key: missionName
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+                    value: "Sentinel-3"
+                    label: "Sentinel-3"
+                  - key: instrument
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}instrument"
+                    value: "SLSTR"
+                    label: "SLSTR"
+                  - key: processingLevel
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}processingLevel"
+                    value: "L1"
+                    label: "L1"
+                  - key: timeliness
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}timeliness"
+                    value: "NTC"
+                    label: "NTC"
+              Sentinel3-SLSTR-L2-NonTimeCritical:
+                label: "Sentinel-3 SLSTR Level-2 Non Time Critical"
+                parameters:
+                  - key: missionName
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+                    value: "Sentinel-3"
+                    label: "Sentinel-3"
+                  - key: instrument
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}instrument"
+                    value: "SLSTR"
+                    label: "SLSTR"
+                  - key: processingLevel
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}processingLevel"
+                    value: "L2"
+                    label: "L2"
+                  - key: timeliness
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}timeliness"
+                    value: "NTC"
+                    label: "NTC"
+              Sentinel3-SYNERGY-L2-NonTimeCritical:
+                label: "Sentinel-3 SYNERGY Level-2 Non Time Critical"
+                parameters:
+                  - key: missionName
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+                    value: "Sentinel-3"
+                    label: "Sentinel-3"
+                  - key: instrument
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}instrument"
+                    value: "SYNERGY"
+                    label: "SYNERGY"
+                  - key: processingLevel
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}processingLevel"
+                    value: "L2"
+                    label: "L2"
+                  - key: timeliness
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}timeliness"
+                    value: "NTC"
+                    label: "NTC"
+              Sentinel3-NearRealTime:
+                label: "Sentinel-3 Near Real Time"
+                parameters:
+                  - key: missionName
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+                    value: "Sentinel-3"
+                    label: "Sentinel-3"
+                  - key: timeliness
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}timeliness"
+                    value: "NRT"
+                    label: "NRT"
+              Sentinel3-ShortTimeCritical:
+                label: "Sentinel-3 Short Time Critical"
+                parameters:
+                  - key: missionName
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+                    value: "Sentinel-3"
+                    label: "Sentinel-3"
+                  - key: timeliness
+                    full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}timeliness"
+                    value: "STC"
+                    label: "STC"
+
+#
+#
+# ===========================================================================
+# DATA SETS DEFINITIONS
+# ===========================================================================
+data:
+  # This section defines all the logical sets of data
+  # OpenSearch syntax reference: http://docs.opengeospatial.org/is/13-026r8/13-026r8.html#17
+  sets:
+    # Copernicus set (without S5P not yet considered as operational)
+    Copernicus:
+      name: "Copernicus Product Types"
+      collections:
+        Sentinel1-RAW:
+          label: "Sentinel-1 RAW"
+          parameters:
+            - key: missionName
+              full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+              value: "Sentinel-1"
+              label: "Sentinel-1"
+            - key: productType
+              full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}productType"
+              value: "RAW"
+              label: "RAW"
+        Sentinel1-SLC:
+          label: "Sentinel-1 SLC"
+          parameters:
+            - key: missionName
+              full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+              value: "Sentinel-1"
+              label: "Sentinel-1"
+            - key: productType
+              full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}productType"
+              value: "SLC"
+              label: "SLC"
+        Sentinel1-GRD:
+          label: "Sentinel-1 GRD"
+          parameters:
+            - key: missionName
+              full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+              value: "Sentinel-1"
+              label: "Sentinel-1"
+            - key: productType
+              full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}productType"
+              value: "GRD"
+              label: "GRD"
+        Sentinel1-OCN:
+          label: "Sentinel-1 OCN"
+          parameters:
+            - key: missionName
+              full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+              value: "Sentinel-1"
+              label: "Sentinel-1"
+            - key: productType
+              full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}productType"
+              value: "OCN"
+              label: "OCN"
+        Sentinel2-L1C:
+          label: "Sentinel-2 Level-1C"
+          parameters:
+            - key: missionName
+              full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+              value: "Sentinel-2"
+              label: "Sentinel-2"
+            - key: productType
+              full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}productType"
+              value: "S2MSI1C"
+              label: "L1C"
+        Sentinel2-L2A:
+          label: "Sentinel-2 Level-2A"
+          parameters:
+            - key: missionName
+              full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+              value: "Sentinel-2"
+              label: "Sentinel-2"
+            - key: productType
+              full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}productType"
+              value: "S2MSI2A"
+              label: "L2A"
+        Sentinel3-OL_1_EFR___:
+          label: "Sentinel-3 OLCI L1 FR NTC"
+          parameters:
+            - key: missionName
+              full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+              value: "Sentinel-3"
+              label: "Sentinel-3"
+            - key: productType
+              full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}productType"
+              value: "OL_1_EFR___"
+              label: "OLCI L1 FR"
+            - key: timeliness
+              full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}timeliness"
+              value: "NTC"
+              label: "NTC"
+        Sentinel3-OL_1_ERR___:
+          label: "Sentinel-3 OLCI L1 RR NTC"
+          parameters:
+            - key: missionName
+              full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+              value: "Sentinel-3"
+              label: "Sentinel-3"
+            - key: productType
+              full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}productType"
+              value: "OL_1_ERR___"
+              label: "OLCI L1 RR"
+            - key: timeliness
+              full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}timeliness"
+              value: "NTC"
+              label: "NTC"
+        Sentinel3-OL_2_LRR___:
+          label: "Sentinel-3 OLCI L2 Land RR NTC"
+          parameters:
+            - key: missionName
+              full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+              value: "Sentinel-3"
+              label: "Sentinel-3"
+            - key: productType
+              full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}productType"
+              value: "OL_2_LRR___"
+              label: "OLCI L2 Land RR"
+            - key: timeliness
+              full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}timeliness"
+              value: "NTC"
+              label: "NTC"
+        Sentinel3-OL_2_LFR___:
+          label: "Sentinel-3 OLCI L2 Land FR NTC"
+          parameters:
+            - key: missionName
+              full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+              value: "Sentinel-3"
+              label: "Sentinel-3"
+            - key: productType
+              full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}productType"
+              value: "OL_2_LFR___"
+              label: "OLCI L2 Land FR"
+            - key: timeliness
+              full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}timeliness"
+              value: "NTC"
+              label: "NTC"
+        Sentinel3-SL_1_RBT___:
+          label: "Sentinel-3 SLSTR L1 RBT NTC"
+          parameters:
+            - key: missionName
+              full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+              value: "Sentinel-3"
+              label: "Sentinel-3"
+            - key: productType
+              full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}productType"
+              value: "SL_1_RBT___"
+              label: "SLSTR L1 RBT"
+            - key: timeliness
+              full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}timeliness"
+              value: "NTC"
+              label: "NTC"
+        Sentinel3-SL_2_LST___:
+          label: "Sentinel-3 SLSTR L2 Land NTC"
+          parameters:
+            - key: missionName
+              full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+              value: "Sentinel-3"
+              label: "Sentinel-3"
+            - key: productType
+              full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}productType"
+              value: "SL_2_LST___"
+              label: "SLSTR L2 Land"
+            - key: timeliness
+              full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}timeliness"
+              value: "NTC"
+              label: "NTC"
+        Sentinel3-SR_1_SRA___:
+          label: "Sentinel-3 SRAL L1 NTC"
+          parameters:
+            - key: missionName
+              full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+              value: "Sentinel-3"
+              label: "Sentinel-3"
+            - key: productType
+              full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}productType"
+              value: "SR_1_SRA___"
+              label: "SRAL L1"
+            - key: timeliness
+              full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}timeliness"
+              value: "NTC"
+              label: "NTC"
+        Sentinel3-SR_1_SRA_A_:
+          label: "Sentinel-3 SRAL L1 A NTC"
+          parameters:
+            - key: missionName
+              full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+              value: "Sentinel-3"
+              label: "Sentinel-3"
+            - key: productType
+              full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}productType"
+              value: "SR_1_SRA_A_"
+              label: "SRAL L1 A"
+            - key: timeliness
+              full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}timeliness"
+              value: "NTC"
+              label: "NTC"
+        Sentinel3-SR_1_SRA_BS:
+          label: "Sentinel-3 SRAL L1 BS NTC"
+          parameters:
+            - key: missionName
+              full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+              value: "Sentinel-3"
+              label: "Sentinel-3"
+            - key: productType
+              full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}productType"
+              value: "SR_1_SRA_BS"
+              label: "SRAL L1 BS"
+            - key: timeliness
+              full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}timeliness"
+              value: "NTC"
+              label: "NTC"
+        Sentinel3-SR_2_LAN___:
+          label: "Sentinel-3 SRAL L2 Land NTC"
+          parameters:
+            - key: missionName
+              full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+              value: "Sentinel-3"
+              label: "Sentinel-3"
+            - key: productType
+              full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}productType"
+              value: "SR_2_LAN___"
+              label: "SRAL L2 Land"
+            - key: timeliness
+              full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}timeliness"
+              value: "NTC"
+              label: "NTC"
+        Sentinel3-SY_2_SYN___:
+          label: "Sentinel-3 SYN L2 NTC"
+          parameters:
+            - key: missionName
+              full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+              value: "Sentinel-3"
+              label: "Sentinel-3"
+            - key: productType
+              full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}productType"
+              value: "SY_2_SYN___"
+              label: "SYN L2"
+            - key: timeliness
+              full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}timeliness"
+              value: "NTC"
+              label: "NTC"
+        Sentinel3-SY_2_VGP___:
+          label: "Sentinel-3 SYN L2 VGP NTC"
+          parameters:
+            - key: missionName
+              full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+              value: "Sentinel-3"
+              label: "Sentinel-3"
+            - key: productType
+              full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}productType"
+              value: "SY_2_VGP___"
+              label: "SYN L2 VGP"
+            - key: timeliness
+              full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}timeliness"
+              value: "NTC"
+              label: "NTC"
+        Sentinel3-SY_2_VG1___:
+          label: "Sentinel-3 SYN L2 VG1 NTC"
+          parameters:
+            - key: missionName
+              full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+              value: "Sentinel-3"
+              label: "Sentinel-3"
+            - key: productType
+              full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}productType"
+              value: "SY_2_VG1___"
+              label: "SYN L2 VG1"
+            - key: timeliness
+              full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}timeliness"
+              value: "NTC"
+              label: "NTC"
+        Sentinel3-SY_2_V10___:
+          label: "Sentinel-3 SYN L2 V10 NTC"
+          parameters:
+            - key: missionName
+              full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
+              value: "Sentinel-3"
+              label: "Sentinel-3"
+            - key: productType
+              full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}productType"
+              value: "SY_2_V10___"
+              label: "SYN L2 V10"
+            - key: timeliness
+              full_name: "{http://a9.com/-/opensearch/extensions/eo/1.0/}timeliness"
+              value: "NTC"
+              label: "NTC"
