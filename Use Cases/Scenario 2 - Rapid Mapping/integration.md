@@ -20,24 +20,19 @@
    sudo chown $USER:$USER /opt/anaconda/
    ```
 
-   Transfer the the included file _environment.yml_ there and create a new conda environment (name **env_burned_area**) and activate that environment using these commands:
+   Transfer the the included file _environment.yml_ there and create a new conda environment (name **env_burned_area**) and activate that environment using these commands and confirm where necessary (the environment creation takes a while; there might be some warnings, but they can be ignored):
   
    ```console
    conda env create --file environment.yml
-   # This takes a while. Follow the instructions and confirm.
 
    conda activate env_burned_area
    ```
 
    You may have to log out and log in again for the changes to take effect.
 
-3. Install and start Jupyter Lab.
+3. Start Jupyter Lab.
 
-   When in the correct environment (shown in the command prompt), you can install Jupyter Lab.
-
-   ```console
-   conda install -c conda-forge jupyterlab
-   ```
+   When in the correct environment (shown in the command prompt), you can configure and start Jupyter Lab.
 
    The following steps are taken from [this page](https://agent-jay.github.io/2018/03/jupyterserver/).
 
@@ -49,7 +44,7 @@
   
    # Set a password for accessing Jupyter and remember it,
    # the password hash is written to a file
-   jupyter notebook password
+   jupyter lab password
   
    # Create a self-signed certificate for a secure connection
    openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout mycert.pem -out mycert.pem
@@ -178,6 +173,36 @@
      mv $DATA_PATH/S2B_MSIL2A_20210305T171109_N0214_R112_T14RLP_20210305T212158/S2B_MSIL2A_20210305T171109_N0214_R112_T14RLP_20210305T212158 $DATA_PATH/S2B_MSIL2A_20210305T171109_N0214_R112_T14RLP_20210305T212158/S2B_MSIL2A_20210305T171109_N0214_R112_T14RLP_20210305T212158.SAFE
      mv $DATA_PATH/S2B_MSIL2A_20210424T170839_N0300_R112_T14RLP_20210424T211236/S2B_MSIL2A_20210424T170839_N0300_R112_T14RLP_20210424T211236 $DATA_PATH/S2B_MSIL2A_20210424T170839_N0300_R112_T14RLP_20210424T211236/S2B_MSIL2A_20210424T170839_N0300_R112_T14RLP_20210424T211236.SAFE
      ```
+
+   * For **WEkEO**, do the following:
+
+     The included file _wekeo-tool.py_ is intended to make the download from WEkEO easy. Transfer that file on the virtual machine.
+
+     Set the environment variable `WEKEO_CREDS` with your WEkEO username and password:
+
+     ```console
+     WEKEO_CREDS='<username>:<password>'
+     ```
+
+     Run the following commands:
+     
+     ```console
+     # If the VM does not have python3 installed, you can use ~/.conda/envs/env_burned_area/bin/python3 instead
+
+     python3 wekeo-tool.py query --credentials="$WEKEO_CREDS" --pn=Sentinel-2 --pt=S2MSI2A --uid=S2B_MSIL2A_20210305T171109_N0214_R112_T14RLP_20210305T212158 > S2B_MSIL2A_20210305T171109_N0214_R112_T14RLP_20210305T212158.url
+     python3 wekeo-tool.py query --credentials="$WEKEO_CREDS" --pn=Sentinel-2 --pt=S2MSI2A --uid=S2B_MSIL2A_20210424T170839_N0300_R112_T14RLP_20210424T211236 > S2B_MSIL2A_20210424T170839_N0300_R112_T14RLP_20210424T211236.url
+     ```
+     
+     If one of the two *\*.url* files is empty, that product is not available from WEkEO.
+     Download it from another source or find another pair in a different region and/or period.
+
+     If the files are available and contain URLs, you can download the products with these commands:
+
+     ```console
+     python3 wekeo-tool.py download --credentials="$WEKEO_CREDS" --url="$(cat S2B_MSIL2A_20210305T171109_N0214_R112_T14RLP_20210305T212158.url)" --dest="S2B_MSIL2A_20210305T171109_N0214_R112_T14RLP_20210305T212158.zip"
+     python3 wekeo-tool.py download --credentials="$WEKEO_CREDS" --url="$(cat S2B_MSIL2A_20210424T170839_N0300_R112_T14RLP_20210424T211236.url)" --dest="S2B_MSIL2A_20210424T170839_N0300_R112_T14RLP_20210424T211236.zip"
+     ```
+
 
    Make sure the contents of the product (if necessary, unzip archive from the correct directory) are available and located in a directory accessible by Jupyter Lab (adjust the notebook cell under *Data location* as required). [40%]
 

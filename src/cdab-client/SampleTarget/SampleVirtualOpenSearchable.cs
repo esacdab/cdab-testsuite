@@ -1,4 +1,4 @@
-/*
+﻿/*
 cdab-client is part of the software suite used to run Test Scenarios 
 for bechmarking various Copernicus Data Provider targets.
     
@@ -15,26 +15,31 @@ for bechmarking various Copernicus Data Provider targets.
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-using System.Collections.Generic;
+using System;
+using Terradue.OpenSearch;
+using Terradue.OpenSearch.Schema;
+using Terradue.OpenSearch.DataHub;
+using System.Collections.Specialized;
+using Terradue.ServiceModel.Syndication;
 
-namespace cdabtesttools.Config
+namespace cdabtesttools.SampleTarget
 {
-    /// <summary>
-    /// Data object class for the <em>data.sets.*.collections</em> and <em>service_providers.*.data.catalogue.sets.*.collections</em> nodes in the configuration YAML file.
-    /// </summary>
-    public class DataCollectionDefinition
+
+    public class SampleVirtualOpenSearchable : DataHubOpenSearchable
     {
-        public string Label { get; set; }
 
-        public List<OpenSearchParameter> Parameters { get; set; }
+        SampleWrapper sampleWrapper;
 
-        public bool? LatencyPolling { get; set; }
-
-        public int? LatencyCheckInterval { get; set; }
-
-        public int? LatencyCheckMaxDuration { get; set; }
-
-        public int? LatencyCheckOffset { get; set; }
+        public SampleVirtualOpenSearchable(SampleWrapper wrapper, OpenSearchableFactorySettings settings) : base(wrapper, settings)
+        {
+            sampleWrapper = wrapper;
+        }
+        
+        public override Terradue.OpenSearch.Request.OpenSearchRequest Create(QuerySettings querySettings, System.Collections.Specialized.NameValueCollection parameters)
+        {
+            return new SampleVirtualOpenSearchRequest(sampleWrapper, parameters);
+        }
 
     }
 }
+

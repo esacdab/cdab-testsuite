@@ -3,10 +3,10 @@
 %define __jar_repack  %{nil}
 
 Name:           cdab-client
-Url:            https://github.com/esa-cdab/cdab-testsuite
+Url:            https://github.com/Terradue/cdab-testsuite
 License:        AGPLv3
 Group:          Productivity/Networking/Web/Servers
-Version:        1.3.24
+Version:        1.10.1
 Release:        %{_release}
 Summary:        Copernicus Sentinels Data Access Worldwide Benchmark Test Client
 BuildArch:      noarch

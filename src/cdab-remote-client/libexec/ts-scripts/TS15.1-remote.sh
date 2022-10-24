@@ -1,6 +1,7 @@
 function prepare() {
     echo "Installing tools" >> cdab.stderr
     sudo yum install -y bc unzip gcc python3-devel
+    sudo pip3 install requests
     echo "Done" >> cdab.stderr
 
     echo "Installing Stars docker image" >> cdab.stderr
@@ -43,10 +44,51 @@ function stage_in() {
     # Temporarily using Terradue catalogue for query
     ref="https://catalog.terradue.com/${index}/search?uid=$id"
 
-    echo "docker run -u root --workdir /res -v ${PWD}:/res -v ${HOME}/config/etc/Stars:/etc/Stars/conf.d -v ${HOME}/config/Stars:/root/.config/Stars \"${stage_in_docker_image}\" Stars copy -v \"${ref}\" -r 4 -si ${provider} -o /res/input_data/ --allow-ordering --harvest" >> cdab.stderr
-    docker run -u root --workdir /res -v ${PWD}:/res -v ${HOME}/config/etc/Stars:/etc/Stars/conf.d -v ${HOME}/config/Stars:/root/.config/Stars "${stage_in_docker_image}" Stars copy -v "${ref}" -r 4 -si ${provider} -o /res/input_data/ --allow-ordering --harvest >> cdab.stdout 2>> cdab.stderr
-    res=$?
-    [ $res -ne 0 ] && return $res
+if [ "$provider" == "SOBLOO" ]
+    then
+        sobloo_uid=$(curl "https://sobloo.eu/api/v1/services/search?f=identification.externalId:eq:$id" | sed -E 's/.*"uid":"([^"]*)".*/\1/')
+        download_url="https://sobloo.eu/api/v1/services/download/${sobloo_uid}"
+        mkdir -p input_data/$id
+        apikey=$(echo $credentials | sed -E 's/.*:(.*)/\1/')
+        echo "curl -H \"Authorization: Apikey ...\" -o \"${id}.zip\" $download_url" >> cdab.stderr
+        curl -H "Authorization: Apikey ${apikey}" -o "${id}.zip" $download_url
+        # Set env variable, otherwise failure
+        export UNZIP_DISABLE_ZIPBOMB_DETECTION=TRUE
+        unzip -d input_data/$id "${id}.zip"
+        path=$(find ./input_data -type d -name IMG_DATA | grep $id)
+        if [ -z "$path" ]
+        then
+            res=1
+        else
+            res=0
+        fi
+    elif [ "$provider" == "WEKEO" ]
+    then
+        mkdir -p input_data/$id
+        echo "Obtaining download URL from WEkEO for $id" >> cdab.stderr
+        python3 wekeo-tool.py query --credentials="$credentials" --pn=Sentinel-2 --pt=S2MSI1C --uid=$id > download.url 2>> cdab.stderr
+        if [ ! -s download.url ]
+        then
+            return 1
+        fi
+        download_url=$(head -1 download.url)
+        echo "Downloading from WEkEO: $download_url" >> cdab.stderr
+        python3 wekeo-tool.py download --credentials="$credentials" --url="$download_url" --dest="${id}.zip" 2>> cdab.stderr
+        unzip -d input_data/$id "${id}.zip"
+        path=$(find ./input_data -type d -name IMG_DATA | grep $id)
+        if [ -z "$path" ]
+        then
+            res=1
+        else
+            res=0
+        fi
+
+    else
+        echo "docker run -u root --workdir /res -v ${PWD}:/res -v ${HOME}/config/etc/Stars:/etc/Stars/conf.d -v ${HOME}/config/Stars:/root/.config/Stars \"${stage_in_docker_image}\" Stars copy -v \"${ref}\" -r 4 -si ${provider} -o /res/input_data/ --allow-ordering" >> cdab.stderr
+        docker run -u root --workdir /res -v ${PWD}:/res -v ${HOME}/config/etc/Stars:/etc/Stars/conf.d -v ${HOME}/config/Stars:/root/.config/Stars "${stage_in_docker_image}" Stars copy -v "${ref}" -r 4 -si ${provider} -o /res/input_data/ --allow-ordering >> cdab.stdout 2>> cdab.stderr
+        res=$?
+        [ $res -ne 0 ] && return $res
+    fi
     
     return $res
 }
@@ -62,7 +104,7 @@ index="sentinel2"
 product_type="S2MSI1C"
 product_count=2
 
-stage_in_docker_image=terradue/stars-t2:0.5.38
+stage_in_docker_image=terradue/stars:1.3.6
 [ -z "$application_docker_image" ] && application_docker_image=docker.terradue.com/cdab-ndvi:latest
 
 cd "$1"
@@ -82,13 +124,23 @@ start_time=$(date +%s%N)
 
 for id in $(cat input)
 do
-    ((total_processings++))
-
     echo "Stage in $id" >> cdab.stderr
     # Stage in input product
-    stage_in $id >> cdab.stdout 2>> cdab.stderr
-    res=$?
-    echo "EXIT CODE = $res" >> cdab.stderr
+    retry=0
+    while [ $retry -lt 3 ]
+    do
+        if [ $retry -ne 0 ]
+        then
+            echo "Wait $((retry * 10)) seconds" >> cdab.stderr
+            sleep $((retry * 10))
+            echo "Retrying" >> cdab.stderr
+        fi
+        stage_in $id >> cdab.stdout 2>> cdab.stderr
+        res=$?
+        echo "EXIT CODE = $res" >> cdab.stderr
+        [ $res -eq 0 ] && break
+        ((retry++))
+    done
 
     if [ $res -ne 0 ]
     then
@@ -96,6 +148,9 @@ do
         echo "Stage in of $id FAILED" >> cdab.stderr
         continue
     fi
+
+    ((total_processings++))
+
     # Run tool
 
     path=$(find ./input_data -type d -name IMG_DATA | grep $id)/
@@ -124,7 +179,10 @@ do
             ((wrong_processings++))
         fi
     fi
+    rm -rf input_data/${id}* ${id}*
     rm -f output_data/*.tif
+    echo "TIFF files: ${count}, errors: ${errors}" >> cdab.stderr
+    echo "Processings: total: ${total_processings}, wrong: ${wrong_processings}" >> cdab.stderr
 done
 
 end_time=$(date +%s%N)

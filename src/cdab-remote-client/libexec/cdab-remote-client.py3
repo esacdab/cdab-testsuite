@@ -46,7 +46,7 @@ class TestClient:
     """Main class for remote execution of the test scenarios TS11, TS12, TS13 and TS15.
     """
 
-    VERSION = "1.48"
+    VERSION = "1.65"
 
     errors = {
         ERR_CONFIG: 'Missing or invalid configuration',
@@ -80,6 +80,7 @@ class TestClient:
             'test_target_url': 'https://catalog.terradue.com/sentinel3/search?uid=S3A_OL_1_EFR____20191110T230850_20191110T231150_20191112T030831_0179_051_215_3600_LN1_O_NT_002',
             'files': [ 's3-olci-composites.py' ],
             'timeout': 2 * 60 * 60,
+            'requires_apihub': True
         },
         'TS15.1': {
             'test_scenario_description': 'Remote execution of a predefined processing scenario test (NDVI)',
@@ -146,6 +147,9 @@ class TestClient:
         'SOBLOO': {
             'uri_prefix': 'https://sobloo.eu/'
         },
+        'WEKEO': {
+            'tools': [ 'wekeo-tool' ]
+        },
     }
 
     command_line = [
@@ -177,11 +181,20 @@ class TestClient:
         { 'name': 'password', 'description': 'Cloud password' },
         { 'name': 'project_name', 'description': 'Project name' },
         { 'name': 'project_id', 'description': 'Project ID' },
+        { 'name': 'identity_provider', 'description': 'Identity provider' },
+        { 'name': 'identity_provider_url', 'description': 'Identity provider URL' },
+        { 'name': 'project_domain_name', 'description': 'Project domain name' },
+        { 'name': 'project_domain_id', 'description': 'Project domain ID' },
         { 'name': 'user_domain_name', 'description': 'User domain name' },
         { 'name': 'region_name', 'description': 'Authentication region name' },
         { 'name': 'interface', 'description': 'Interface' },
         { 'name': 'identity_api_version', 'description': 'Volume API version' },
         { 'name': 'volume_api_version', 'description': 'Identity API version' },
+        { 'name': 'auth_type', 'description': 'Authentication type' },
+        { 'name': 'protocol', 'description': 'Authentication protocol' },
+        { 'name': 'discovery_endpoint', 'description': 'Discovery endpoint of IDP' },
+        { 'name': 'client_id', 'description': 'Client ID configured on IDP' },
+        { 'name': 'client_secret', 'description': 'Client secret configured on IDP' },
         { 'name': 'vm_name', 'description': 'Preferred name of virtual machines to be created (sequential number is appended)' },
         { 'name': 'key_name', 'description': 'Name of predefined public key for SSH connection to new VM' },
         { 'name': 'image_name', 'description': 'Name of image to be used for new VM' },
@@ -727,6 +740,13 @@ class TestClient:
                     self.processing_backup_download_source = self.test_scenario['backup_download_source']
                     self.get_target_site_access(self.processing_backup_download_source, True)
 
+            elif 'requires_apihub' in self.test_scenario and self.test_scenario['requires_apihub']:
+                if 'apihub_service_provider' in self.test_scenario:
+                    self.processing_backup_download_source = self.test_scenario['apihub_service_provider']
+                    self.get_target_site_access(self.processing_backup_download_source, True)
+                else:
+                    exit_client(ERR_CONFIG, "Configuration key 'apihub_service_provider' not specified under global.scenario.{0}".format(self.test_scenario_id))                    
+
                         
             if 'cdab_client_test_scenario_id' in self.test_scenario:
                 self.cdab_client_test_scenario_id = self.test_scenario['cdab_client_test_scenario_id']
@@ -1048,7 +1068,21 @@ class TestClient:
         except Exception as e:
             Logger.log(LogLevel.WARN, str(e), run=run)
 
+        tools = []
+        if 'tools' in self.test_scenario:
+            tools.extend(self.test_scenario['tools'])
+        if self.target_site_class and 'tools' in self.target_site_class:
+            tools.extend(self.target_site_class['tools'])
+
+
         if self.docker_run_command == 'CDAB_CLIENT_DEFAULT':
+
+            if 'onda-eodata' in tools:
+                copy_file(self.compute_config, run, "{0}/ts-scripts/link-onda-eodata.sh".format(os.path.dirname(sys.argv[0])), "link-onda-eodata.sh")
+                execute_remote_command(self.compute_config, run, "sudo sh link-onda-eodata.sh")
+            if 'codede-eodata' in tools:
+                copy_file(self.compute_config, run, "{0}/ts-scripts/link-codede-eodata.sh".format(os.path.dirname(sys.argv[0])), "link-codede-eodata.sh")
+                execute_remote_command(self.compute_config, run, "sudo sh link-codede-eodata.sh")
 
             script_name = "{0}-remote.sh".format(self.test_scenario_id)
             copy_file(self.compute_config, run, "{0}/ts-scripts/{1}".format(os.path.dirname(sys.argv[0]), script_name), script_name)
@@ -1058,7 +1092,7 @@ class TestClient:
             execute_remote_command(
                 self.compute_config,
                 run,
-                "nohup sh {0} {1} {2} {3} {4} {5} {6} {7} {8} > /dev/null 2>&1 &".format(
+                "nohup sh {0} {1} {2} {3} {4} '{5}' {6} {7} {8} > /dev/null 2>&1 &".format(
                     script_name,
                     working_dir,
                     self.docker_image_id if self.docker_image_id else '""',
@@ -1069,7 +1103,7 @@ class TestClient:
                     self.load_factor,
                     self.compute_config['download_origin'],
                 ),
-                display_command="nohup sh {0} {1} {2} {3} {4} {5} {6} {7} {8} > /dev/null 2>&1 &".format(
+                display_command="nohup sh {0} {1} {2} {3} {4} '{5}' {6} {7} {8} > /dev/null 2>&1 &".format(
                     script_name,
                     working_dir,
                     self.docker_image_id if self.docker_image_id else '""',
@@ -1093,12 +1127,6 @@ class TestClient:
                 script_name = "{0}-remote.sh".format(self.test_scenario_id)
 
             # Install tools specific for test scenarios and provider
-            tools = []
-            if 'tools' in self.test_scenario:
-                tools.extend(self.test_scenario['tools'])
-            if 'tools' in self.target_site_class:
-                tools.extend(self.target_site_class['tools'])
-
             if 'conda' in tools:
                 if self.compute_config['use_volume']:
                     conda_dir = "/mnt/cdab-volume/opt/anaconda"
@@ -1116,8 +1144,8 @@ class TestClient:
                 execute_remote_command(self.compute_config, run, "sudo unzip -d /usr/lib/ opensearch-client.zip")
                 execute_remote_command(self.compute_config, run, "sudo mv /usr/lib/opensearch-client/bin/opensearch-client /usr/bin/")
 
-            if 'Stars' in tools:
-                execute_remote_command(self.compute_config, run, "docker pull terradue/stars-t2:0.5.38")
+            if 'Stars' in tools and 'uri_prefix' in self.target_site_class:
+                execute_remote_command(self.compute_config, run, "docker pull terradue/stars:1.3.5")
                 execute_remote_command(self.compute_config, run, "mkdir -p config/Stars")
                 execute_remote_command(self.compute_config, run, "mkdir -p config/etc/Stars")
 
@@ -1160,6 +1188,8 @@ class TestClient:
             if 'onda-eodata' in tools:
                 copy_file(self.compute_config, run, "{0}/ts-scripts/link-onda-eodata.sh".format(os.path.dirname(sys.argv[0])), "link-onda-eodata.sh")
                 execute_remote_command(self.compute_config, run, "sudo sh link-onda-eodata.sh")
+            if 'wekeo-tool' in tools:
+                copy_file(self.compute_config, run, "{0}/ts-scripts/wekeo-tool.py".format(os.path.dirname(sys.argv[0])), "{0}/wekeo-tool.py".format(working_dir))
 
             if 'files' in self.test_scenario:
                 for f in self.test_scenario['files']:
@@ -1176,7 +1206,7 @@ class TestClient:
             execute_remote_command(
                 self.compute_config,
                 run,
-                "nohup sh {0} {1} {2} {3} {4} {5} {6} > /dev/null 2>&1 &".format(
+                "nohup sh {0} {1} {2} {3} {4} '{5}' '{6}' > /dev/null 2>&1 &".format(
                     script_name,
                     working_dir,
                     self.docker_image_id if self.docker_image_id else '""',
@@ -1185,7 +1215,7 @@ class TestClient:
                     self.target_credentials,
                     self.backup_download_credentials,
                 ),
-                display_command="nohup sh {0} {1} {2} {3} {4} {5} {6} > /dev/null 2>&1 &".format(
+                display_command="nohup sh {0} {1} {2} {3} {4} '{5}' '{6}' > /dev/null 2>&1 &".format(
                     script_name,
                     working_dir,
                     self.docker_image_id if self.docker_image_id else '""',
@@ -1211,9 +1241,13 @@ class TestClient:
                 time.sleep(30)
             else:
                 running = False
+                run.test_end_time = datetime.datetime.utcnow()
+                Logger.log(LogLevel.INFO, "Test completed", run=run)
 
-        run.test_end_time = datetime.datetime.utcnow()
-        Logger.log(LogLevel.INFO, "Test completed", run=run)
+        if running:
+            print("********************************************************************", file=run.stderr)
+            Logger.log(LogLevel.WARN, "Test not completed (timeout)", run=run)
+            print("********************************************************************", file=run.stderr)
 
         stdout_file = "cdab{0}.stdout".format(run.suffix)
         stderr_file = "cdab{0}.stderr".format(run.suffix)
@@ -1229,12 +1263,22 @@ class TestClient:
 
         Logger.log(LogLevel.INFO, "--------------------------------", run=run)
         Logger.log(LogLevel.INFO, "remote execution stdout (START)", run=run)
-        with open(stdout_file, 'r') as cdab_stdout:
-            print(cdab_stdout.read(), end="", file=run.stderr)
+        try:
+            with open(stdout_file, 'r') as cdab_stdout:
+                print(cdab_stdout.read(), end="", file=run.stderr)
+        except Exception as e:
+            print("Error opening file: {0}".format(str(e)), file=run.stderr)
+            with open(stdout_file, 'rb') as cdab_stdout:
+                print(str(cdab_stdout.read()).replace('\\n', '\n'), file=run.stderr)
         Logger.log(LogLevel.INFO, "remote execution stdout (END)", run=run)
         Logger.log(LogLevel.INFO, "remote execution stderr (START)", run=run)
-        with open(stderr_file, 'r') as cdab_stderr:
-            print(cdab_stderr.read(), end="", file=run.stderr)
+        try:
+            with open(stderr_file, 'r') as cdab_stderr:
+                print(cdab_stderr.read(), end="", file=run.stderr)
+        except Exception as e:
+            print("Error opening file: {0}".format(str(e)), file=run.stderr)
+            with open(stderr_file, 'rb') as cdab_stderr:
+                print(str(cdab_stderr.read()).replace('\\n', '\n'), file=run.stderr)
         Logger.log(LogLevel.INFO, "remote execution stderr (END)", run=run)
         Logger.log(LogLevel.INFO, "--------------------------------", run=run)
 

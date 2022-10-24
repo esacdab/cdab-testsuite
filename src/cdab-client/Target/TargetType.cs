@@ -23,6 +23,6 @@ namespace cdabtesttools.Target
 
         DIAS = 2,
 
-        UNKNOWN = 3
+        UNKNOWN = 3,
     }
 }

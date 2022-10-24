@@ -34,6 +34,7 @@ using log4net;
 using Terradue.OpenSearch;
 using Terradue.OpenSearch.Engine;
 using Terradue.OpenSearch.Result;
+using Terradue.OpenSearch.DataHub;
 
 namespace cdabtesttools.TestCases
 {
@@ -45,11 +46,15 @@ namespace cdabtesttools.TestCases
         protected readonly ILog log;
         private ServicePoint sp;
         protected OpenSearchEngine ose;
-        private readonly MaxParallelismTaskScheduler catalogue_scheduler;
-        private readonly TaskFactory catalogue_task_factory;
+        protected readonly MaxParallelismTaskScheduler catalogue_scheduler;
+        protected readonly TaskFactory catalogue_task_factory;
         protected ConcurrentQueue<FiltersDefinition> queryFilters = null;
-        private List<IOpenSearchResultItem> foundItems = null;
-        private bool ignoreEmptyResult = false;
+        protected List<IOpenSearchResultItem> foundItems = null;
+        protected bool ignoreEmptyResult = false;
+
+        // Whether or not data collections not supported on the target are specially marked and filtered
+        public virtual bool MarkUnsupportedData => false;
+
 
         public TestCase201(ILog log, TargetSiteWrapper target, int load_factor, IEnumerable<Data.Mission> missions, out List<IOpenSearchResultItem> foundItems, bool ignoreEmptyResult = false) :
             base("TC201", "Basic catalogue query")
@@ -80,7 +85,11 @@ namespace cdabtesttools.TestCases
                     return (r.Formatter.Replace(",", " TO "));
                 };
             }
-            queryFilters = new ConcurrentQueue<FiltersDefinition>(Mission.ShuffleSimpleRandomFiltersCombination(missions, baselines, load_factor, rangeReformatter));
+            try {
+                queryFilters = new ConcurrentQueue<FiltersDefinition>(Mission.ShuffleSimpleRandomFiltersCombination(missions, baselines, load_factor, rangeReformatter));
+            } catch (Exception e) {
+                throw;
+            }
 
         }
 
@@ -110,6 +119,7 @@ namespace cdabtesttools.TestCases
             catch (AggregateException e)
             {
                 log.WarnFormat("Test Case Execution Error : {0}", e.InnerException.Message);
+                log.WarnFormat("Stack Trace: {0}", e.InnerException.StackTrace);
                 throw e;
             }
 
@@ -135,6 +145,7 @@ namespace cdabtesttools.TestCases
                     var _testUnit = previousTask[j].ContinueWith<KeyValuePair<IOpenSearchable, FiltersDefinition>>((task) =>
                     {
                         prepTask.Wait();
+
                         FiltersDefinition randomFilter;
                         queryFilters.TryDequeue(out randomFilter);
                         return new KeyValuePair<IOpenSearchable, FiltersDefinition>(target.CreateOpenSearchableEntity(randomFilter, Configuration.Current.Global.QueryTryNumber), randomFilter);
@@ -149,6 +160,7 @@ namespace cdabtesttools.TestCases
                     i--;
                 }
             }
+
             try
             {
                 Task.WaitAll(_testUnits.ToArray());
@@ -168,7 +180,7 @@ namespace cdabtesttools.TestCases
             return _testUnits.Select(t => t.Result).Where(r => r != null);
         }
 
-        internal TestUnitResult MakeQuery(IOpenSearchable entity, FiltersDefinition fd)
+        public virtual TestUnitResult MakeQuery(IOpenSearchable entity, FiltersDefinition fd)
         {
 
             List<IMetric> metrics = new List<IMetric>();
@@ -195,10 +207,19 @@ namespace cdabtesttools.TestCases
                 catch (AggregateException e)
                 {
                     log.DebugFormat("[{0}] < No results for {2}. Exception: {1}", Task.CurrentId, e.InnerException.Message, fd.Label);
-                    log.Debug(e.InnerException.StackTrace);
+                    if (e.InnerException is UnsupportedDataException && MarkUnsupportedData)
+                    {
+                        log.Debug("Data collection not supported by target");
+                        metrics.Add(new LongMetric(MetricName.maxTotalResults, -2, "#"));
+                        metrics.Add(new LongMetric(MetricName.totalReadResults, -2, "#"));
+                    }
+                    else
+                    {
+                        log.Debug(e.InnerException.StackTrace);
+                        metrics.Add(new LongMetric(MetricName.maxTotalResults, -1, "#"));
+                        metrics.Add(new LongMetric(MetricName.totalReadResults, -1, "#"));
+                    }
                     metrics.Add(new ExceptionMetric(e.InnerException));
-                    metrics.Add(new LongMetric(MetricName.maxTotalResults, -1, "#"));
-                    metrics.Add(new LongMetric(MetricName.totalReadResults, -1, "#"));
                 }
                 finally
                 {

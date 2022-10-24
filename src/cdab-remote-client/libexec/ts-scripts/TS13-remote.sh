@@ -9,7 +9,6 @@ function prepare() {
     touch cdab.stderr
 }
 
-
 function select_input() {
     # If no inputs are given, select random files from less than a week ago
     if [ ! -s "input" ]
@@ -39,20 +38,25 @@ function select_input() {
 
 function stage_in() {
     id=$1
-    download_url=$2
-    curl "https://catalog.terradue.com/sentinel3/search/?pt=OL_1_EFR___&start=${start}&stop=${end}&count=1&do=terradue" | \
+    curl "https://catalog.terradue.com/sentinel3/search/?uid=${id}&do=terradue" | \
         xmllint --format - > current.atom.xml
 
-    download_url=$(grep "<link rel=\"enclosure" current.atom.xml | grep "store\.terradue\.com" | sed -E "s#.*href=\"(.*?)\".*#\1#g")
+    download_url=$(grep "<link rel=\"enclosure" current.atom.xml | grep "copernicus.eu" | sed -E "s#.*href=\"(.*?)\".*#\1#g")
+    echo "DOWNLOAD URL = $download_url" >> cdab.stderr >> cdab.stderr
 
     if [ -z "$download_url" ]
     then
         echo "No download URL found" >> cdab.stderr
         return 1
     fi
-
-    curl -L -v -o "${id}.zip" ${download_url}
+    
+    curl -L -v -u "${apihub_credentials}" -o "${id}.zip" ${download_url}
     unzip -o -d input_data "${id}.zip"
+    if [ $? -ne 0 ]
+    then
+	echo "Error while unzipping file" >> cdab.stderr
+        return 1
+    fi
 
     sen_folder=$(find input_data -type d -name "*.SEN3")/
 
@@ -63,10 +67,11 @@ function stage_in() {
 working_dir="$1"
 [ "$working_dir" == "." ] && working_dir=$HOME
 
-docker_image="$2" # docker-co.terradue.com/geohazards-tep/ewf-s3-olci-composites:0.41
-test_site="$3" # e.g. CREO
+docker_image="$2"   # docker-co.terradue.com/geohazards-tep/ewf-s3-olci-composites:0.41
+test_site="$3"   # e.g. CREO
 provider="$4"
-
+target_credentials=$5   # not used
+apihub_credentials="$6"   # API Hub credentials
 
 cd "$working_dir"
 
@@ -84,6 +89,7 @@ fi
 # Process input
 total_processings=0
 wrong_processings=0
+total_process_duration=0
 
 for id in $(cat input)
 do
@@ -100,6 +106,7 @@ do
     else
         ((wrong_processings++))
         echo "Stage in of $id FAILED" >> cdab.stderr
+        continue
     fi
 
     start_time=$(date +%s%N)
@@ -120,6 +127,8 @@ do
         cat cdab.stderr >&2
         ((wrong_processings++))
         echo "Processing of $id FAILED" >> cdab.stderr
+        echo "Files:" >> cdab.stderr
+        for dir in $(find . -type d); do echo "--------" >> cdab.stderr; echo $dir >> cdab.stderr; ls -l $dir >> cdab.stderr; done
     else
         ls -l *.tif >> cdab.stderr
         errors=0
@@ -136,16 +145,11 @@ do
         fi
     fi
     rm -f S3-OLCI-*
-    break
+
+    process_duration=$(((end_time - start_time) / 1000000))
+    total_process_duration=$((total_process_duration + process_duration))
 done
 
-if [ -z "$start_time" ]
-then
-    start_time=$(date +%s%N)
-    end_time=$(date +%s%N)
-fi
-
-process_duration=$(((end_time - start_time) / 1000000))
 
 if [ ${total_processings} -eq 0 ]
 then
@@ -159,7 +163,7 @@ else
     then
         avg_process_duration=-1
     else
-        avg_process_duration=$((process_duration / correct_processings))
+        avg_process_duration=$((total_process_duration / correct_processings))
     fi
 fi
 

@@ -32,18 +32,37 @@ function select_input() {
     pre_start_date=$(date -d@$((event_date_sec - 10 * 24 * 60 * 60)) +%Y-"%m-%dT00:00:00Z")
 
     echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Selecting post-event product from catalogue" >> cdab.stderr
-    echo "opensearch-client -m Scihub -p \"geom=POINT($lon $lat)\" -p \"start=$event_date\" -p \"stop=$post_end_date\" -p \"pt=SLC\" -p \"count=1\" \"${catalogue_base_url}\" {}" >> cdab.stderr
-    opensearch-client $cat_creds -m Scihub -p "geom=POINT($lon $lat)" -p "start=$event_date" -p "stop=$post_end_date" -p "pt=SLC" -p "count=1" "${catalogue_base_url}" {} | xmllint --format - > result.post.atom.xml
-    post_id=$(grep "<dc:identifier>" result.post.atom.xml | sed -E "s#.*<.*?>(.*)<.*>.*#\1#g")
-    mv result.post.atom.xml ${post_id}.atom.xml
+
+    if [ "$provider" == "WEKEO" ]
+    then
+        /opt/anaconda/envs/env_snap/bin/python wekeo-tool.py query --credentials="$credentials" --pn=Sentinel-1 --pt=SLC --geom="POINT($lon $lat)" --dates="${event_date}/${post_end_date}" --count=1 > urls.list 2>> cdab.stderr
+        post_id=$(head -1 urls.list | sed -E "s/.*(S1[AB][A-Z0-9_]+).*/\1/g")
+    else
+        echo "opensearch-client -m Scihub -p \"geom=POINT($lon $lat)\" -p \"start=$event_date\" -p \"stop=$post_end_date\" -p \"pt=SLC\" -p \"count=1\" \"${catalogue_base_url}\" {}" >> cdab.stderr
+        opensearch-client $cat_creds -m Scihub -p "geom=POINT($lon $lat)" -p "start=$event_date" -p "stop=$post_end_date" -p "pt=SLC" -p "count=1" "${catalogue_base_url}" {} | xmllint --format - > result.post.atom.xml
+        post_id=$(grep "<dc:identifier>" result.post.atom.xml | sed -E "s#.*<.*?>(.*)<.*>.*#\1#g")
+        mv result.post.atom.xml ${post_id}.atom.xml
+    fi
     track=$(get_track $post_id)
     echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Done (post-event product = $post_id, track = $track)" >> cdab.stderr
 
     echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Selecting pre-event product from catalogue" >> cdab.stderr
-    echo "opensearch-client -m Scihub -p \"geom=POINT($lon $lat)\" -p \"start=$pre_start_date\" -p \"stop=$event_date\" -p \"pt=SLC\" -p \"track=$track\" -p \"count=1\" \"${catalogue_base_url}\" {}" >> cdab.stderr
-    opensearch-client $cat_creds -m Scihub -p "geom=POINT($lon $lat)" -p "start=$pre_start_date" -p "stop=$event_date" -p "pt=SLC" -p "track=$track" -p "count=1" "${catalogue_base_url}" {} | xmllint --format - > result.pre.atom.xml
-    pre_id=$(grep "<dc:identifier>" result.pre.atom.xml | sed -E "s#.*<.*?>(.*)<.*>.*#\1#g")
-    mv result.pre.atom.xml ${pre_id}.atom.xml
+
+    if [ "$provider" == "WEKEO" ]
+    then
+        /opt/anaconda/envs/env_snap/bin/python wekeo-tool.py query --credentials="$credentials" --pn=Sentinel-1 --pt=SLC --geom="POINT($lon $lat)" --dates="${pre_start_date}/${event_date}" --count=10 > urls.list 2>> cdab.stderr
+        for url in $(cat urls.list)
+        do
+            pre_id=$(echo $url | sed -E "s/.*(S1[AB][A-Z0-9_]+).*/\1/g")
+            track_new=$(get_track $pre_id)
+            [ $track_new -eq $track ] && break
+        done
+    else
+        echo "opensearch-client -m Scihub -p \"geom=POINT($lon $lat)\" -p \"start=$pre_start_date\" -p \"stop=$event_date\" -p \"pt=SLC\" -p \"track=$track\" -p \"count=1\" \"${catalogue_base_url}\" {}" >> cdab.stderr
+        opensearch-client $cat_creds -m Scihub -p "geom=POINT($lon $lat)" -p "start=$pre_start_date" -p "stop=$event_date" -p "pt=SLC" -p "track=$track" -p "count=1" "${catalogue_base_url}" {} | xmllint --format - > result.pre.atom.xml
+        pre_id=$(grep "<dc:identifier>" result.pre.atom.xml | sed -E "s#.*<.*?>(.*)<.*>.*#\1#g")
+        mv result.pre.atom.xml ${pre_id}.atom.xml
+    fi
     track_new=$(get_track $pre_id)
     echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Done (pre-event product = $pre_id, track = $track_new)" >> cdab.stderr
     
@@ -520,13 +539,28 @@ function process_stack() {
         ((count++))
         select_start_date=$(date -d@$((event_date_sec - count * 100 * 24 * 60 * 60)) +%Y-"%m-%dT00:00:00Z")
         select_end_date=$(date -d@$((event_date_sec - (count * 100 - 50) * 24 * 60 * 60)) +%Y-"%m-%dT00:00:00Z")
+        
+        
         atom_file="result.stackitem.atom.xml"
-
         echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Selecting stack product ${count}/${max_stack_size} from catalogue" >> cdab.stderr
-        echo "opensearch-client -m Scihub -p \"geom=POINT($lon $lat)\" -p \"start=$select_start_date\" -p \"stop=$select_end_date\" -p \"pt=SLC\" -p \"track=$track\" -p \"count=1\" \"${catalogue_base_url}\" {}" >> cdab.stderr
-        opensearch-client $cat_creds -m Scihub -p "geom=POINT($lon $lat)" -p "start=$select_start_date" -p "stop=$select_end_date" -p "pt=SLC" -p "track=$track" -p "count=1" "${catalogue_base_url}" {} | xmllint --format - > $atom_file
+        
+        if [ "$provider" == "WEKEO" ]
+        then
+            /opt/anaconda/envs/env_snap/bin/python wekeo-tool.py query --credentials="$credentials" --pn=Sentinel-1 --pt=SLC --geom="POINT($lon $lat)" --dates="${select_start_date}/${select_end_date}" --count=10 > urls.list 2>> cdab.stderr
+            for url in $(cat urls.list)
+            do
+                product_id=$(echo $url | sed -E "s/.*(S1[AB][A-Z0-9_]+).*/\1/g")
+                track_new=$(get_track $product_id)
+                [ $track_new -eq $track ] && break
+            done
+            [ $track_new -ne $track ] && product_id=
+        else
+            echo "opensearch-client -m Scihub -p \"geom=POINT($lon $lat)\" -p \"start=$select_start_date\" -p \"stop=$select_end_date\" -p \"pt=SLC\" -p \"track=$track\" -p \"count=1\" \"${catalogue_base_url}\" {}" >> cdab.stderr
+            opensearch-client $cat_creds -m Scihub -p "geom=POINT($lon $lat)" -p "start=$select_start_date" -p "stop=$select_end_date" -p "pt=SLC" -p "track=$track" -p "count=1" "${catalogue_base_url}" {} | xmllint --format - > $atom_file
 
-        product_id=$(grep "<dc:identifier>" ${atom_file} | sed -E "s#.*<.*?>(.*)<.*>.*#\1#g")
+            product_id=$(grep "<dc:identifier>" ${atom_file} | sed -E "s#.*<.*?>(.*)<.*>.*#\1#g")
+            mv $atom_file "${product_id}.atom.xml"
+        fi
 
         if [ -z "$product_id" ]
         then
@@ -545,8 +579,6 @@ function process_stack() {
             continue
         fi
         
-        mv $atom_file "${product_id}.atom.xml"
-
         echo $product_id >> stack-ids.list
     done
 
@@ -590,31 +622,64 @@ function download() {
         product_folder=$(find ${PWD}/input_data -type d -name "${id}.SAFE")
         if [ -z "$product_folder" ]
         then
-            atom_file="file:///res/${id}.atom.xml"
             echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Downloading product ${count}/${size}" >> cdab.stderr
-            echo "docker run -u root --workdir /res -v ${PWD}:/res -v ${HOME}/config/etc/Stars:/etc/Stars/conf.d -v ${HOME}/config/Stars:/root/.config/Stars \"${stage_in_docker_image}\" Stars copy -v \"${atom_file}\" -r 4 -si ${provider} -o /res/input_data/ --allow-ordering --harvest" >> cdab.stderr
-            docker run -u root --workdir /res -v ${PWD}:/res -v ${HOME}/config/etc/Stars:/etc/Stars/conf.d -v ${HOME}/config/Stars:/root/.config/Stars "${stage_in_docker_image}" Stars copy -v "${atom_file}" -r 4 -si ${provider} -o /res/input_data/ --allow-ordering --harvest >> cdab.stdout 2>> cdab.stderr
-            res=$?
-            if [ $res -ne 0 ]
+            if [ "$provider" == "SOBLOO" ]
             then
-                echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Error during download" >> cdab.stderr
-                present=
-                # MUNDI workaround
-                if [ ${provider} == "MUNDI" ] && [ -s "${PWD}/input_data/${id}/${id}.zip" ]
+                sobloo_uid=$(curl "https://sobloo.eu/api/v1/services/search?f=identification.externalId:eq:$id" | sed -E 's/.*"uid":"([^"]*)".*/\1/')
+                download_url="https://sobloo.eu/api/v1/services/download/${sobloo_uid}"
+                mkdir -p input_data/$id
+                apikey=$(echo $credentials | sed -E 's/.*:(.*)/\1/')
+                echo "curl -H \"Authorization: Apikey ...\" -o \"${id}.zip\" $download_url" >> cdab.stderr
+                curl -H "Authorization: Apikey ${apikey}" -o "${id}.zip" $download_url
+                # Set env variable, otherwise failure
+                export UNZIP_DISABLE_ZIPBOMB_DETECTION=TRUE
+                unzip -d input_data/$id "${id}.zip"
+            elif [ "$provider" == "WEKEO" ]
+            then
+                mkdir -p input_data/$id
+                echo "Obtaining download URL from WEkEO for $id" >> cdab.stderr
+                /opt/anaconda/envs/env_snap/bin/python wekeo-tool.py query --credentials="$credentials" --pn=Sentinel-1 --pt=SLC --uid=$id > download.url 2>> cdab.stderr
+                if [ ! -s download.url ]
                 then
-                    echo "Previous error can be ignored, .zip file is present" >> cdab.stderr
-                    sudo chown -R $USER "${PWD}/input_data/${id}"
-                    product_folder=$(find ${PWD}/input_data -type d -name "${id}.SAFE")
-                    if [ -z "$product_folder" ]
-                    then
-                        unzip -d "${PWD}/input_data/${id}" "${PWD}/input_data/${id}/${id}.zip" >> cdab.stderr 2>> cdab.stderr
-                        present=true
-                    fi
+                    return 1
                 fi
-                if [ -z "$present" ]
+                download_url=$(head -1 download.url)
+                echo "Downloading from WEkEO: $download_url" >> cdab.stderr
+                /opt/anaconda/envs/env_snap/bin/python wekeo-tool.py download --credentials="$credentials" --url="$download_url" --dest="${id}.zip" 2>> cdab.stderr
+                unzip -d input_data/$id "${id}.zip"
+                path=$(find ./input_data -type d -name IMG_DATA | grep $id)
+                if [ -z "$path" ]
                 then
-                    ((missing++))
-                    continue
+                    res=1
+                else
+                    res=0
+                fi
+            else
+                atom_file="file:///res/${id}.atom.xml"
+                echo "docker run -u root --workdir /res -v ${PWD}:/res -v ${HOME}/config/etc/Stars:/etc/Stars/conf.d -v ${HOME}/config/Stars:/root/.config/Stars \"${stage_in_docker_image}\" Stars copy -v \"${atom_file}\" -r 4 -si ${provider} -o /res/input_data/ --allow-ordering" >> cdab.stderr
+                docker run -u root --workdir /res -v ${PWD}:/res -v ${HOME}/config/etc/Stars:/etc/Stars/conf.d -v ${HOME}/config/Stars:/root/.config/Stars "${stage_in_docker_image}" Stars copy -v "${atom_file}" -r 4 -si ${provider} -o /res/input_data/ --allow-ordering >> cdab.stdout 2>> cdab.stderr
+                res=$?
+                if [ $res -ne 0 ]
+                then
+                    echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Error during download" >> cdab.stderr
+                    # MUNDI workaround
+                    if [ ${provider} == "MUNDI" ] && [ -s "${PWD}/input_data/${id}/${id}.zip" ]
+                    then
+                        present=
+                        echo "Previous error can be ignored, .zip file is present" >> cdab.stderr
+                        sudo chown -R $USER "${PWD}/input_data/${id}"
+                        product_folder=$(find ${PWD}/input_data -type d -name "${id}.SAFE")
+                        if [ -z "$product_folder" ]
+                        then
+                            unzip -d "${PWD}/input_data/${id}" "${PWD}/input_data/${id}/${id}.zip" >> cdab.stderr 2>> cdab.stderr
+                            present=true
+                        fi
+                        if [ -z "$present" ]
+                        then
+                            ((missing++))
+                            continue
+                        fi
+                    fi
                 fi
             fi
 
@@ -676,7 +741,7 @@ provider="$4"
 credentials="$5"
 cat_creds=""
 
-stage_in_docker_image=terradue/stars-t2:0.5.38
+stage_in_docker_image=terradue/stars:1.3.6
 
 case "$provider" in
     CREO)

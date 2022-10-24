@@ -165,6 +165,17 @@ ADD sadf_in.py /home/jenkins/cdab-tools/
 RUN chmod 755 /home/jenkins/cdab-tools/sadf*
 RUN chown -R jenkins:jenkins /home/jenkins/cdab-tools
 
+# Add new root certificate ISRG Root X1
+RUN curl -O https://letsencrypt.org/certs/isrgrootx1.pem && \
+    mv isrgrootx1.pem isrgrootx1.crt && \
+    cert-sync isrgrootx1.crt && \
+    rm -f isrgrootx1.crt
+RUN curl -O https://curl.se/ca/cacert.pem && \
+    mv cacert.pem cacert.crt && \
+    cert-sync cacert.crt && \
+    rm -f cacert.crt
+
+
 # a complete update
 RUN yum update -y
 

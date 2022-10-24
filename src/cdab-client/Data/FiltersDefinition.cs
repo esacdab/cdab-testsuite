@@ -22,15 +22,21 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using cdabtesttools.Config;
 using Terradue.OpenSearch.Result;
+using Newtonsoft.Json;
+
 
 namespace cdabtesttools.Data
 {
     public class FiltersDefinition
     {
         private string name;
+        private DataCollectionDefinition dataCollection;
         private List<FilterDefinition> filters;
 
         public string Name { get => name; set => name = value; }
+
+        [JsonIgnore]
+        public DataCollectionDefinition DataCollection { get => dataCollection; set => dataCollection = value; }
         
         public string Label
         {
@@ -49,9 +55,10 @@ namespace cdabtesttools.Data
 
         public List<FilterDefinition> Filters { get => filters; set => filters = value; }
 
-        public FiltersDefinition(string name)
+        public FiltersDefinition(string name, DataCollectionDefinition dataCollection = null)
         {
             this.name = name;
+            this.dataCollection = dataCollection;
             filters = new List<FilterDefinition>();
         }
 

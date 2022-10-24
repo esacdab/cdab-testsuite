@@ -122,7 +122,6 @@ namespace cdabtesttools.Measurement
                     {
                         _totalErrors += ((LongMetric)tryNumber).Value / ((LongMetric)maxTryNumber).Value;
                     }
-
                 }
                 DoubleMetric _errorRate = new DoubleMetric(MetricName.errorRate,
                         (_totalErrors / tasksCount) * 100,
@@ -231,6 +230,20 @@ namespace cdabtesttools.Measurement
                 metrics.Add(_dataCollectionDivisions);
             }
 
+            if (metricsToAnalyze.Contains(MetricName.dataAccess) && results.SelectMany(r => r.Metrics).Where(m => m.Name == MetricName.dataAccess).Count() > 0)
+            {
+                List<string> dataAccessValues = new List<string>();
+                foreach (var result in results)
+                {
+                    StringMetric resultDataAccess = result.Metrics.FirstOrDefault(m => m.Name == MetricName.dataAccess) as StringMetric;
+                    dataAccessValues.Add(resultDataAccess == null ? null : resultDataAccess.Value);
+                }
+                StringArrayMetric _dataAccesses = new StringArrayMetric(MetricName.dataAccess, dataAccessValues.ToArray(), "string");
+                metrics.Add(_dataAccesses);
+                log.DebugFormat("Data Access Methods : {0}", string.Join(",", _dataAccesses.Value));
+            }
+
+
             if (metricsToAnalyze.Contains(MetricName.offlineDataAvailabilityLatency) && testCase is TestCase304)
             {
                 TestCase304 testCase304 = testCase as TestCase304;
@@ -239,6 +252,7 @@ namespace cdabtesttools.Measurement
                 {
                     if (result.Status != TestUnitResultStatus.Complete)
                         continue;
+                    
                     var _httpStatus = result.Metrics.Where(m => m.Name == MetricName.httpStatusCode).Cast<StringMetric>().Select(m => m.Value);
                     int statusCode = int.Parse(_httpStatus.First().Split(':').First());
                     if (statusCode == 200)
@@ -469,7 +483,7 @@ namespace cdabtesttools.Measurement
             DoubleArrayMetric _dataCoverage = new DoubleArrayMetric(MetricName.dataOfferConsistency,
                     onlinePct.Values.ToArray(),
                      "%");
-            log.DebugFormat("Data Offer COnsistency : {0}{1}", string.Join(",", _dataCoverage.Value), _dataCoverage.Uom);
+            log.DebugFormat("Data Offer Consistency : {0}{1}", string.Join(",", _dataCoverage.Value), _dataCoverage.Uom);
             metrics.Add(_dataCoverage);
 
             var _tcr = new TestCaseResult(testCase503.Id, metrics, testCase503.StartTime, testCase503.EndTime);
@@ -501,7 +515,9 @@ namespace cdabtesttools.Measurement
             Dictionary<string, long> opsMaxLatencies = new Dictionary<string, long>();
             // Dictionary<string, ExceptionMetric> exceptions = new Dictionary<string, ExceptionMetric>();
 
-            double errors = 0;
+            int testCaseCount = 0;
+            int errors = 0;
+
             foreach (var testUnit in testCase601.Results)
             {
                 string dataCollectionDivision = testUnit.Metrics.Where(m => m.Name == MetricName.dataCollectionDivision).Cast<StringMetric>().Select(m => m.Value).FirstOrDefault();
@@ -512,31 +528,31 @@ namespace cdabtesttools.Measurement
                 long wrongResultsCount = testUnit.Metrics.Where(m => m.Name == MetricName.wrongResultsCount).Cast<LongMetric>().Select(m => m.Value).FirstOrDefault();
                 ExceptionMetric exception = (ExceptionMetric)testUnit.Metrics.Where(m => m.Name == MetricName.exception).FirstOrDefault();
 
-                if (exception != null)
-                {
-                    errors++;
-                }
+                if (totalResult != -2) {
+                    testCaseCount++;
+                    if (exception != null) errors++;
 
-                totalResults.Add(dataCollectionDivision, totalResult);
-                validatedResultsCounts.Add(dataCollectionDivision, validatedResultsCount);
-                readResultsCounts.Add(dataCollectionDivision, readResultsCount);
-                wrongResultsCounts.Add(dataCollectionDivision, wrongResultsCount);
-                // exceptions.Add(dataCollectionDivision, exception);
+                    totalResults.Add(dataCollectionDivision, totalResult);
+                    validatedResultsCounts.Add(dataCollectionDivision, validatedResultsCount);
+                    readResultsCounts.Add(dataCollectionDivision, readResultsCount);
+                    wrongResultsCounts.Add(dataCollectionDivision, wrongResultsCount);
+                    // exceptions.Add(dataCollectionDivision, exception);
 
-                try
-                {
-                    opsAvgLatencies.Add(dataCollectionDivision, ((LongMetric)testUnit.Metrics.FirstOrDefault(m => m.Name == MetricName.avgDataOperationalLatency)).Value);
-                    opsMaxLatencies.Add(dataCollectionDivision, ((LongMetric)testUnit.Metrics.FirstOrDefault(m => m.Name == MetricName.maxDataOperationalLatency)).Value);
-                }
-                catch
-                {
-                    opsAvgLatencies.Add(dataCollectionDivision, -1);
-                    opsMaxLatencies.Add(dataCollectionDivision, -1);
+                    try
+                    {
+                        opsAvgLatencies.Add(dataCollectionDivision, ((LongMetric)testUnit.Metrics.FirstOrDefault(m => m.Name == MetricName.avgDataOperationalLatency)).Value);
+                        opsMaxLatencies.Add(dataCollectionDivision, ((LongMetric)testUnit.Metrics.FirstOrDefault(m => m.Name == MetricName.maxDataOperationalLatency)).Value);
+                    }
+                    catch
+                    {
+                        opsAvgLatencies.Add(dataCollectionDivision, -1);
+                        opsMaxLatencies.Add(dataCollectionDivision, -1);
+                    }
                 }
             }
 
             DoubleMetric _errorRate = new DoubleMetric(MetricName.errorRate,
-                    (errors / testCase601.Results.Count()) * 100,
+                    (testCaseCount == 0 ? 100 : (double)errors / testCaseCount) * 100,
                      "%");
             log.DebugFormat("Error Rate : {0}{1}", _errorRate.Value, _errorRate.Uom);
             metrics.Add(_errorRate);
@@ -618,7 +634,9 @@ namespace cdabtesttools.Measurement
             Dictionary<string, long> avaMaxLatencies = new Dictionary<string, long>();
             Dictionary<string, ExceptionMetric> exceptions = new Dictionary<string, ExceptionMetric>();
 
-            long errors = 0;
+            int testCaseCount = 0;
+            int errors = 0;
+
             foreach (var testUnit in testCase602.Results)
             {
                 string dataCollectionDivision = testUnit.Metrics.Where(m => m.Name == MetricName.dataCollectionDivision).Cast<StringMetric>().Select(m => m.Value).FirstOrDefault();
@@ -628,38 +646,38 @@ namespace cdabtesttools.Measurement
                 long wrongResultsCount = testUnit.Metrics.Where(m => m.Name == MetricName.wrongResultsCount).Cast<LongMetric>().Select(m => m.Value).FirstOrDefault();
                 ExceptionMetric exception = (ExceptionMetric)testUnit.Metrics.Where(m => m.Name == MetricName.exception).FirstOrDefault();
 
-                if (exception != null)
-                {
-                    errors++;
-                }
-
                 if (totalResults.ContainsKey(dataCollectionDivision))
                 {
-                    log.WarnFormat("Data collection with key '{0} is duplicated, please check the config");
+                    log.WarnFormat("Data collection with key '{0} is duplicated, please check the config", dataCollectionDivision);
                     continue;
                 }
-                totalResults.Add(dataCollectionDivision, totalResult);
-                validatedResultsCounts.Add(dataCollectionDivision, validatedResultsCount);
-                readResultsCounts.Add(dataCollectionDivision, readResultsCount);
-                wrongResultsCounts.Add(dataCollectionDivision, wrongResultsCount);
-                exceptions.Add(dataCollectionDivision, exception);
+                if (totalResult != -2) {
+                    testCaseCount++;
+                    if (exception != null) errors++;
 
-                var avaAvgLatency = testUnit.Metrics.FirstOrDefault(m => m.Name == MetricName.avgDataAvailabilityLatency);
-                var avaMaxLatency = testUnit.Metrics.FirstOrDefault(m => m.Name == MetricName.maxDataAvailabilityLatency);
+                    totalResults.Add(dataCollectionDivision, totalResult);
+                    validatedResultsCounts.Add(dataCollectionDivision, validatedResultsCount);
+                    readResultsCounts.Add(dataCollectionDivision, readResultsCount);
+                    wrongResultsCounts.Add(dataCollectionDivision, wrongResultsCount);
+                    exceptions.Add(dataCollectionDivision, exception);
 
-                if (avaAvgLatency != null)
-                    avaAvgLatencies.Add(dataCollectionDivision, ((LongMetric)avaAvgLatency).Value);
-                else
-                    avaAvgLatencies.Add(dataCollectionDivision, -1);
-                if (avaMaxLatency != null)
-                    avaMaxLatencies.Add(dataCollectionDivision, ((LongMetric)avaMaxLatency).Value);
-                else
-                    avaMaxLatencies.Add(dataCollectionDivision, -1);
+                    var avaAvgLatency = testUnit.Metrics.FirstOrDefault(m => m.Name == MetricName.avgDataAvailabilityLatency);
+                    var avaMaxLatency = testUnit.Metrics.FirstOrDefault(m => m.Name == MetricName.maxDataAvailabilityLatency);
+
+                    if (avaAvgLatency != null)
+                        avaAvgLatencies.Add(dataCollectionDivision, ((LongMetric)avaAvgLatency).Value);
+                    else
+                        avaAvgLatencies.Add(dataCollectionDivision, -1);
+                    if (avaMaxLatency != null)
+                        avaMaxLatencies.Add(dataCollectionDivision, ((LongMetric)avaMaxLatency).Value);
+                    else
+                        avaMaxLatencies.Add(dataCollectionDivision, -1);
+                }
 
             }
 
             DoubleMetric _errorRate = new DoubleMetric(MetricName.errorRate,
-                   (errors / testCase602.Results.Count()) * 100,
+                   (testCaseCount == 0 ? 100 : (double)errors / testCaseCount) * 100,
                     "%");
             log.DebugFormat("Error Rate : {0}{1}", _errorRate.Value, _errorRate.Uom);
             metrics.Add(_errorRate);

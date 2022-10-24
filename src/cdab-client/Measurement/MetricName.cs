@@ -79,6 +79,7 @@ namespace cdabtesttools.Measurement
 
         maxDataAvailabilityLatency,
         analysisTime,
+        dataAccess,
         httpStatusCode,
         url,
         dataCoverage,

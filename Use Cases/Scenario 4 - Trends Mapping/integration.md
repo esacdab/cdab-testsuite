@@ -36,7 +36,7 @@
 
 1.  Connect to a shell on the virtual machine. [5%]
 
-2.  Upload the three python files used for the scenario (_s3\_slstr\_lst.py_, _snap\_util\_helpers.py_ and _stage-in.py_) to the working directory using the _scp_ tool. [10%]
+2.  Upload the three python files used for the scenario (_s3\_slstr\_lst.py_, _snap\_util\_helpers.py_ and _stage-in.py_) to the working directory using the _scp_ tool. If you use a WEkEO virtual machine, upload the _wekeo-tool.py_ script instead of _stage-in.py_. [10%]
 
 3.  **Using the target site data access and following the documentation available at the target site**, get the identifiers of a list of relevant Sentinel-3 SLSTR Level 2 LST products. [20%]
    
@@ -123,6 +123,30 @@
         Not recommended as it consists in complicated steps and many individual downloads.
     
     
+   * For **WEkEO**, do the following:
+
+      - Semi-automatic procedure
+
+        Set the environment variable `WEKEO_CREDS` with your WEkEO username and password:
+
+        ```console
+
+        # Set the credentials with your WEkEO username and password
+        WEKEO_CREDS='<username>:<password>'
+
+        # Replace <identifier> with a product identifier
+        /opt/anaconda/envs/env_s3/bin/python3 wekeo-tool.py query --credentials="$WEKEO_CREDS" --pn=Sentinel-3 --pt=SL_2_LST___ --uid=<identifier> > <identifier>.url
+
+        /opt/anaconda/envs/env_s3/bin/python3 wekeo-tool.py download --credentials="$WEKEO_CREDS" --url="$(cat <identifier>.url)" --dest="<identifier>.zip"
+
+        unzip -d input_data/ <identifier>.zip
+        ```
+
+      - Manual procedure
+
+        There is no manual procedure for the download. It would be complicated to do the necessary requests without the support from a script.
+
+
     At the end of this, the `input_data` directory should contain a number of directories with names ending in `.SEN3`, containing the actual files that compose each product.
     
     ```

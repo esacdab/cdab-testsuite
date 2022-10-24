@@ -15,6 +15,7 @@ for bechmarking various Copernicus Data Provider targets.
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+using System;
 using System.Collections.Generic;
 
 namespace cdabtesttools.Config
@@ -41,6 +42,24 @@ namespace cdabtesttools.Config
         public string SystematicSearchAoiDescription { get; set; }
 
         public int SystematicSearchDays { get; set; }
+
+        public bool AllowOpenSearch { get; set; }
+
+        public bool? LatencyPolling { get; set; }
+
+        public int? LatencyCheckInterval { get; set; }
+
+        public int? LatencyCheckMaxDuration { get; set; }
+
+        public int? LatencyCheckOffset { get; set; }
+
+        public bool? LimitQuery { get; set; }
+
+        public string DefaultBoundingBox { get; set; }
+
+        public string DefaultStartTime { get; set; }
+
+        public string DefaultEndTime { get; set; }
 
     }
 }
