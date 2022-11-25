@@ -100,7 +100,7 @@ RUN mkdir /home/jenkins/workspace
 RUN chown jenkins:jenkins /home/jenkins/workspace
 
 # install jenkins dependencies
-RUN yum install -y git java-1.8.0-openjdk rpm-build which sudo
+RUN yum install -y git java-11-openjdk rpm-build which sudo
 
 # install shunit
 ADD shunit2-2.1.6-3.el6.noarch.rpm /tmp/shunit2-2.1.6-3.el6.noarch.rpm
