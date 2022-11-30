@@ -57,9 +57,14 @@ namespace cdabtesttools.Config
 
         public string DefaultBoundingBox { get; set; }
 
+        public double? MaxAreaDegrees { get; set; }
+
         public string DefaultStartTime { get; set; }
 
         public string DefaultEndTime { get; set; }
 
+        public long? MaxPeriodSeconds { get; set; }
+
+        public int? QueryPollingInterval { get; set; }
     }
 }

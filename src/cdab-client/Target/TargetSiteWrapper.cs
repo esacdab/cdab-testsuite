@@ -258,6 +258,10 @@ namespace cdabtesttools.Target
                         }
                         wekeoDiasWrapper.DefaultBoundingBox = boundingBox;
                     }
+                    if (targetSiteConfig.Data.Catalogue.MaxAreaDegrees != null)
+                    {
+                        wekeoDiasWrapper.MaxAreaDegrees = targetSiteConfig.Data.Catalogue.MaxAreaDegrees.Value;
+                    }
 
                     if (targetSiteConfig.Data.Catalogue.DefaultStartTime != null)
                     {
@@ -280,6 +284,14 @@ namespace cdabtesttools.Target
                         {
                             throw new Exception("The default end time for limited queries must be ISO-formatted");
                         }
+                    }
+                    if (targetSiteConfig.Data.Catalogue.MaxPeriodSeconds != null)
+                    {
+                        wekeoDiasWrapper.MaxPeriodSeconds = targetSiteConfig.Data.Catalogue.MaxPeriodSeconds.Value;
+                    }
+                    if (targetSiteConfig.Data.Catalogue.QueryPollingInterval != null)
+                    {
+                        wekeoDiasWrapper.PollingInterval = targetSiteConfig.Data.Catalogue.QueryPollingInterval.Value;
                     }
                 }
 
