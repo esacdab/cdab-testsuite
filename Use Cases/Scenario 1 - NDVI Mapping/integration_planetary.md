@@ -11,13 +11,13 @@ It can take a few working days to be accepted. Once accepted, you can start a se
 
 ## Start a server
 
-[Hub main page](https://pccompute.westeurope.cloudapp.azure.com/compute/hub/home)
+With a web browser, open the [Hub main page](https://pccompute.westeurope.cloudapp.azure.com/compute/hub/home).
 
 Click on the *Start My Server* button. The *Choose your environment* menu appears.
 
 From the menu, choose **CPU - Python** and press *Start*.
 
-After a few seconds **Jupyter Lab** opens. You will see a *README.md* which contains links to many examples.
+After a few seconds **Jupyter Lab** GUI opens. You will see a *README.md* which contains links to many examples.
 
 
 ## Develop and run the application
