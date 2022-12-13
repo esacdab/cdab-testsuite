@@ -4,7 +4,7 @@
 
 It is necessary to be a registered user in order to use the Microsoft Planetary Computer resources. You can register at the registration address:
 
-[Registration](https://planetarycomputer.microsoft.com/account/request)
+https://planetarycomputer.microsoft.com/account/request
 
 It can take a few working days to be accepted, you will be informed via email.
 
@@ -26,7 +26,7 @@ After a few seconds **Jupyter Lab** GUI opens. You will see a *README.md* which 
 
 You can create a new notebook as you normally would in a Jupyter Lab or upload a ready-made notebook for Microsoft Planetary Computer.
 
-To do the latter, you can use the file ![Jupyter Notebook for NDVI on Microsoft Planetary Computer Hub](ndvi_planetary.ipynb)] in this folder. Upload that file using the *Upload Files* button at the top of the *File Browser* panel.
+To do the latter, you can use the file ![Jupyter Notebook for NDVI on Microsoft Planetary Computer Hub](ndvi_planetary.ipynb) in this folder. Upload that file using the *Upload Files* button at the top of the *File Browser* panel.
 
 Open the notebook and adjust the AOI and date range if needed. [10%]
 
