@@ -2,18 +2,20 @@
 
 ## Set up an account
 
-It is necessary to be a registered user in order to use the Microsoft Planetary Computer resources. You can register at the following address:
+It is necessary to be a registered user in order to use the Microsoft Planetary Computer resources. You can register at the registration address:
 
 [Registration](https://planetarycomputer.microsoft.com/account/request)
 
-It can take a few working days to be accepted. Once accepted, you can start a server with Jupyter Lab running at a link like the following (depending on the world region):
+It can take a few working days to be accepted, you will be informed via email.
 
 
 ## Start a server
 
-With a web browser, open the [Hub main page](https://pccompute.westeurope.cloudapp.azure.com/compute/hub/home).
+Once accepted as a user, you can start a server with Jupyter Lab from the **Hub Main Page** at a link like the following (depending on the world region):
 
-Click on the *Start My Server* button. The *Choose your environment* menu appears.
+https://pccompute.westeurope.cloudapp.azure.com/compute/hub/home
+
+With a web browser, open link and click on the *Start My Server* button. The *Choose your environment* menu appears.
 
 From the menu, choose **CPU - Python** and press *Start*.
 
@@ -40,5 +42,5 @@ After executing the cell **Show NDVI result**, you should see a greyscale image,
 
 The execution result of the last cell is the visible image for reference and comparison [100%].
 
-After completing the test, go back to the [Hub main page](https://pccompute.westeurope.cloudapp.azure.com/compute/hub/home) and choose *Stop My Server* to release the computing resources. Your changes are preserved and you can restart the server later continuing from where you left.
+After completing the test, go back to the **Hub main page** (the same where you started the server, e.g. https://pccompute.westeurope.cloudapp.azure.com/compute/hub/home) and choose *Stop My Server* to release the computing resources. Your changes are preserved and you can restart the server later continuing from where you left.
 
