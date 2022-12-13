@@ -11,7 +11,7 @@ It can take a few working days to be accepted. Once accepted, you can start a se
 
 ## Start a server
 
-[Hub](https://pccompute.westeurope.cloudapp.azure.com/compute/hub/home)
+[Hub main page](https://pccompute.westeurope.cloudapp.azure.com/compute/hub/home)
 
 Click on the *Start My Server* button. The *Choose your environment* menu appears.
 
@@ -40,5 +40,5 @@ After executing the cell **Show NDVI result**, you should see a greyscale image,
 
 The execution result of the last cell is the visible image for reference and comparison [100%].
 
-After
+After completing the test, go back to the [Hub main page](https://pccompute.westeurope.cloudapp.azure.com/compute/hub/home) and choose *Stop My Server* to release the computing resources. Your changes are preserved and you can restart the server later continuing from where you left.
 
