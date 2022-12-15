@@ -145,8 +145,10 @@ namespace cdabtesttools.Data
                     new LabelString("EW", "Extra Wide swath", GetIdentifierValidator(new Regex(@"^S1.*_EW_.*"))),
                     new LabelString("WV", "Wave", GetIdentifierValidator(new Regex(@"^S1.*_WV_.*"))),
                 });
-            s1Mission.RelativeOrbit = new ItemNumberRange("track", "{http://a9.com/-/opensearch/extensions/eo/1.0/}track", 1, 175, 1, "[{0},{1}]",
-             new Regex(@"\[([0-9]+(\\.[0-9]+)?),([0-9]+(\\.[0-9]+)?)\]"), "Track", GetTrackValidator, null);
+            if (!(target.Wrapper is Terradue.OpenSearch.DataHub.Dias.WekeoDiasWrapper)) {
+                s1Mission.RelativeOrbit = new ItemNumberRange("track", "{http://a9.com/-/opensearch/extensions/eo/1.0/}track", 1, 175, 1, "[{0},{1}]",
+                new Regex(@"\[([0-9]+(\\.[0-9]+)?),([0-9]+(\\.[0-9]+)?)\]"), "Track", GetTrackValidator, null);
+            }
 
             // s1Mission.Timeliness = new StringListChoice("timeliness", "{http://a9.com/-/opensearch/extensions/eo/1.0/}timeliness",
             //     new LabelString[] {
@@ -197,7 +199,7 @@ namespace cdabtesttools.Data
                         new LabelString("S2MSI1C", "Level-1C", GetIdentifierValidator(new Regex(@"^S2.*_(MSI)?L1C_.*"))),
                         new LabelString("S2MSI2A", "Level-2A", GetIdentifierValidator(new Regex(@"^S2.*_(MSI)?L2A_.*"))),
                     });
-                if (target.Type != TargetType.THIRDPARTY) {
+                if (target.Type != TargetType.THIRDPARTY && !(target.Wrapper is Terradue.OpenSearch.DataHub.Dias.WekeoDiasWrapper)) {
                     s2Mission.RelativeOrbit = new ItemNumberRange("track", "{http://a9.com/-/opensearch/extensions/eo/1.0/}track", 1, 143, 1, "[{0},{1}]",
                         new Regex(@"\[([0-9]+(\\.[0-9]+)?),([0-9]+(\\.[0-9]+)?)\]"), "Track", GetTrackValidator, null);
                 }
@@ -250,8 +252,10 @@ namespace cdabtesttools.Data
                     new LabelString("SY_2_SYN___", "Synergy Level-2 Surface Reflectance", GetIdentifierValidator(new Regex(@"^S3.*SY_2_SYN___.*"))),
                     // new LabelString("SY_2_VGP___", "Synergy Level-2 Vegetation",  GetIdentifierValidator(new Regex(@"^S3.*SY_2_VGP___.*"))),
                 });
-            s3Mission.RelativeOrbit = new ItemNumberRange("track", "{http://a9.com/-/opensearch/extensions/eo/1.0/}track", 1, 385, 1, "[{0},{1}]",
-                new Regex(@"\[([0-9]+(\\.[0-9]+)?),([0-9]+(\\.[0-9]+)?)\]"), "Track", GetTrackValidator, null);
+            if (!(target.Wrapper is Terradue.OpenSearch.DataHub.Dias.WekeoDiasWrapper)) {
+                s3Mission.RelativeOrbit = new ItemNumberRange("track", "{http://a9.com/-/opensearch/extensions/eo/1.0/}track", 1, 385, 1, "[{0},{1}]",
+                    new Regex(@"\[([0-9]+(\\.[0-9]+)?),([0-9]+(\\.[0-9]+)?)\]"), "Track", GetTrackValidator, null);
+            }
 
             s3Mission.Count = new ItemNumberRange("count", "{http://a9.com/-/spec/opensearch/1.1/}count", 1, 50, 1, "{0}",
                 new Regex(@"([0-9]+(\\.[0-9]+)?)"), "Count", null, GetCountValidator);
