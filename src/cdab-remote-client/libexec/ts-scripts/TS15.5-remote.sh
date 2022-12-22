@@ -38,8 +38,8 @@ function select_input() {
         /opt/anaconda/envs/env_snap/bin/python wekeo-tool.py query --credentials="$credentials" --pn=Sentinel-1 --pt=SLC --geom="POINT($lon $lat)" --dates="${event_date}/${post_end_date}" --count=1 > urls.list 2>> cdab.stderr
         post_id=$(head -1 urls.list | sed -E "s/.*(S1[AB][A-Z0-9_]+).*/\1/g")
     else
-        echo "opensearch-client -m Scihub -p \"geom=POINT($lon $lat)\" -p \"start=$event_date\" -p \"stop=$post_end_date\" -p \"pt=SLC\" -p \"count=1\" \"${catalogue_base_url}\" {}" >> cdab.stderr
-        opensearch-client $cat_creds -m Scihub -p "geom=POINT($lon $lat)" -p "start=$event_date" -p "stop=$post_end_date" -p "pt=SLC" -p "count=1" "${catalogue_base_url}" {} | xmllint --format - > result.post.atom.xml
+        echo "docker run --rm terradue/opensearch-client opensearch-client -m Scihub -p \"geom=POINT($lon $lat)\" -p \"start=$event_date\" -p \"stop=$post_end_date\" -p \"pt=SLC\" -p \"count=1\" \"${catalogue_base_url}\" {}" >> cdab.stderr
+        docker run --rm terradue/opensearch-client opensearch-client $cat_creds -m Scihub -p "geom=POINT($lon $lat)" -p "start=$event_date" -p "stop=$post_end_date" -p "pt=SLC" -p "count=1" "${catalogue_base_url}" {} | xmllint --format - > result.post.atom.xml
         post_id=$(grep "<dc:identifier>" result.post.atom.xml | sed -E "s#.*<.*?>(.*)<.*>.*#\1#g")
         mv result.post.atom.xml ${post_id}.atom.xml
     fi
@@ -58,8 +58,8 @@ function select_input() {
             [ $track_new -eq $track ] && break
         done
     else
-        echo "opensearch-client -m Scihub -p \"geom=POINT($lon $lat)\" -p \"start=$pre_start_date\" -p \"stop=$event_date\" -p \"pt=SLC\" -p \"track=$track\" -p \"count=1\" \"${catalogue_base_url}\" {}" >> cdab.stderr
-        opensearch-client $cat_creds -m Scihub -p "geom=POINT($lon $lat)" -p "start=$pre_start_date" -p "stop=$event_date" -p "pt=SLC" -p "track=$track" -p "count=1" "${catalogue_base_url}" {} | xmllint --format - > result.pre.atom.xml
+        echo "docker run --rm terradue/opensearch-client opensearch-client -m Scihub -p \"geom=POINT($lon $lat)\" -p \"start=$pre_start_date\" -p \"stop=$event_date\" -p \"pt=SLC\" -p \"track=$track\" -p \"count=1\" \"${catalogue_base_url}\" {}" >> cdab.stderr
+        docker run --rm terradue/opensearch-client opensearch-client $cat_creds -m Scihub -p "geom=POINT($lon $lat)" -p "start=$pre_start_date" -p "stop=$event_date" -p "pt=SLC" -p "track=$track" -p "count=1" "${catalogue_base_url}" {} | xmllint --format - > result.pre.atom.xml
         pre_id=$(grep "<dc:identifier>" result.pre.atom.xml | sed -E "s#.*<.*?>(.*)<.*>.*#\1#g")
         mv result.pre.atom.xml ${pre_id}.atom.xml
     fi
@@ -555,8 +555,8 @@ function process_stack() {
             done
             [ $track_new -ne $track ] && product_id=
         else
-            echo "opensearch-client -m Scihub -p \"geom=POINT($lon $lat)\" -p \"start=$select_start_date\" -p \"stop=$select_end_date\" -p \"pt=SLC\" -p \"track=$track\" -p \"count=1\" \"${catalogue_base_url}\" {}" >> cdab.stderr
-            opensearch-client $cat_creds -m Scihub -p "geom=POINT($lon $lat)" -p "start=$select_start_date" -p "stop=$select_end_date" -p "pt=SLC" -p "track=$track" -p "count=1" "${catalogue_base_url}" {} | xmllint --format - > $atom_file
+            echo "docker run --rm terradue/opensearch-client opensearch-client -m Scihub -p \"geom=POINT($lon $lat)\" -p \"start=$select_start_date\" -p \"stop=$select_end_date\" -p \"pt=SLC\" -p \"track=$track\" -p \"count=1\" \"${catalogue_base_url}\" {}" >> cdab.stderr
+            docker run --rm terradue/opensearch-client opensearch-client $cat_creds -m Scihub -p "geom=POINT($lon $lat)" -p "start=$select_start_date" -p "stop=$select_end_date" -p "pt=SLC" -p "track=$track" -p "count=1" "${catalogue_base_url}" {} | xmllint --format - > $atom_file
 
             product_id=$(grep "<dc:identifier>" ${atom_file} | sed -E "s#.*<.*?>(.*)<.*>.*#\1#g")
             mv $atom_file "${product_id}.atom.xml"
@@ -748,7 +748,7 @@ case "$provider" in
         catalogue_base_url="https://finder.creodias.eu/resto/api/collections/Sentinel1/describe.xml"
         ;;
     MUNDI)
-        catalogue_base_url="https://mundiwebservices.com/acdc/catalog/proxy/search"
+        catalogue_base_url="https://sentinel1.browse.catalog.mundiwebservices.com/opensearch"
         cat_creds="-a $credentials"
         ;;
     ONDA)

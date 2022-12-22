@@ -1167,6 +1167,8 @@ class TestClient:
                 execute_remote_command(self.compute_config, run, "sudo sh conda-install.sh {0}".format(conda_dir))
 
             if 'opensearch-client' in tools:
+                execute_remote_command(self.compute_config, run, "docker pull terradue/opensearch-client:2.1.2")
+                # Previously used:
                 execute_remote_command(self.compute_config, run, "sudo yum install -y unzip yum-utils")
                 execute_remote_command(self.compute_config, run, "sudo yum-config-manager --add-repo http://download.mono-project.com/repo/centos/")
                 execute_remote_command(self.compute_config, run, "sudo yum install -y mono-devel --nogpgcheck > /dev/null 2> /dev/null")

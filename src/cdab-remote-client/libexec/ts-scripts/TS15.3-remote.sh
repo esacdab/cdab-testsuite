@@ -66,8 +66,8 @@ function select_input() {
         $PWD/env_s3/bin/python wekeo-tool.py query --credentials="$credentials" --pn=Sentinel-3 --pt=OL_2_LFR___ --bbox="$bbox" --dates="${start_date}/${end_date}" > urls.list 2>> cdab.stderr
         echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Done ($(cat urls.list | wc -l) items)" >> cdab.stderr
     else
-        echo "opensearch-client -m Scihub -p start=${start_date} -p stop=${end_date} -p \"geom=${geom}\" $search_params -p count=$count \"${catalogue_base_url}\" {}" >> cdab.stderr
-        opensearch-client $cat_creds -m Scihub -p start=${start_date} -p stop=${end_date} -p "geom=${geom}" $search_params -p count=$count "${catalogue_base_url}" {} | xmllint --format - > result.atom.xml
+        echo "docker run --rm terradue/opensearch-client opensearch-client -m Scihub -p start=${start_date} -p stop=${end_date} -p \"geom=${geom}\" $search_params -p count=$count \"${catalogue_base_url}\" {}" >> cdab.stderr
+        docker run --rm terradue/opensearch-client opensearch-client $cat_creds -m Scihub -p start=${start_date} -p stop=${end_date} -p "geom=${geom}" $search_params -p count=$count "${catalogue_base_url}" {} | xmllint --format - > result.atom.xml
         if [ $? -ne 0 ]
         then
             echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Invalid or empty result from ${catalogue_base_url}" >> cdab.stderr
@@ -216,7 +216,7 @@ case "$provider" in
         catalogue_base_url="https://finder.creodias.eu/resto/api/collections/Sentinel3/describe.xml"
         ;;
     MUNDI)
-        catalogue_base_url="https://mundiwebservices.com/acdc/catalog/proxy/search"
+        catalogue_base_url="https://sentinel3.browse.catalog.mundiwebservices.com/opensearch"
         cat_creds="-a $credentials"
         ;;
     ONDA)
