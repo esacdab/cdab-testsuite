@@ -179,8 +179,10 @@ namespace cdabtesttools.Measurement
             {
                 var _totalBytes = results.SelectMany(r => r.Metrics).Where(m => m.Name == MetricName.size).Cast<LongMetric>().Select(m => m.Value).Sum();
 
+                double throuphputValue = (_totalBytes == 0 ? -1 : Math.Round((double)_totalBytes / ((double)(_maxStop - _minStart) / 1000), 0));
+
                 DoubleMetric _throughput = new DoubleMetric(MetricName.throughput,
-                    Math.Round((double)_totalBytes / ((double)(_maxStop - _minStart) / 1000), 0),
+                    throuphputValue,
                      "bytes/second");
                 log.DebugFormat("Total Throughput : {0}{1}", _throughput.Value, _throughput.Uom);
                 metrics.Add(_throughput);
