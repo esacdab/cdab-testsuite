@@ -295,11 +295,11 @@
 
 7.  Run the graph processor **gpt** with the arguments explained below.
 
-    The first argument is the graph definition file as from the use case folder.
+    The first argument is the graph definition file that can be uploaded from the use case folder (*insar.xml*).
     The second argument (**pre_event**) has as value the location of the *.SAFE* folder of the unzipped pre-event product.
     Likewise, the third argument (**post_event**) has as value the location of the *.SAFE* folder of the unzipped post-event product.
 
-    The command could look similar to this if the above pre- and post-event files are used:
+    The command would look similar to this if the above pre- and post-event files are used:
 
     ```console
     $ gpt insar.xml \
