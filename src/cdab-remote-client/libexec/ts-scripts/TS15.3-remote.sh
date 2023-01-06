@@ -7,10 +7,11 @@ function prepare() {
 
     echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Creating conda environment with snap and cwltool" >> cdab.stderr
     CONDA_DIR="/opt/anaconda"
-    CONDA_PREFIX="${PWD}/env_snap"
+    CONDA_PREFIX="${PWD}/env_s3"
 
     sudo $CONDA_DIR/bin/conda env create -p $PWD/env_s3 --file environment.yml
-    sudo ln -s "${PWD}/env_s3" "${CONDA_DIR}/envs/env_s3"
+    sudo ln -s "${CONDA_PREFIX}" "${CONDA_DIR}/envs/env_s3"
+    sudo chown -R $USER:$USER ${CONDA_PREFIX}/snap/
     export PATH="${CONDA_DIR}/bin:${CONDA_PREFIX}/bin:${CONDA_PREFIX}/snap/bin:${CONDA_PREFIX}/snap/jre/bin:$PATH"
     echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Done (conda environment)" >> cdab.stderr
 

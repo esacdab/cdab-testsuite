@@ -146,8 +146,10 @@ namespace cdabtesttools.Data
                     new LabelString("WV", "Wave", GetIdentifierValidator(new Regex(@"^S1.*_WV_.*"))),
                 });
             if (!(target.Wrapper is Terradue.OpenSearch.DataHub.Dias.WekeoDiasWrapper)) {
-                s1Mission.RelativeOrbit = new ItemNumberRange("track", "{http://a9.com/-/opensearch/extensions/eo/1.0/}track", 1, 175, 1, "[{0},{1}]",
-                new Regex(@"\[([0-9]+(\\.[0-9]+)?),([0-9]+(\\.[0-9]+)?)\]"), "Track", GetTrackValidator, null);
+                // Disabled for WEkEO because it leads to query timeouts
+                s1Mission.RelativeOrbit = new ItemNumberRange("track", "{http://a9.com/-/opensearch/extensions/eo/1.0/}track",
+                    1, 175, 1, "[{0},{1}]", new Regex(@"\[([0-9]+(\\.[0-9]+)?),([0-9]+(\\.[0-9]+)?)\]"), "Track", GetTrackValidator, null
+                );
             }
 
             // s1Mission.Timeliness = new StringListChoice("timeliness", "{http://a9.com/-/opensearch/extensions/eo/1.0/}timeliness",
@@ -157,11 +159,13 @@ namespace cdabtesttools.Data
             //         new LabelString("Fast-24h", "Fast 24h", null, GetMultiFiltersConditioner("productType", new string[]{"SLC", "GRD"})),
             //     });
 
-            s1Mission.ArchivingStatus = new StringListChoice("archiveStatus", "{http://a9.com/-/opensearch/extensions/eo/1.0/}statusSubType",
-                new LabelString[] {
-                    new LabelString("Online", "Online", GetArchivingStatusValidator(Terradue.ServiceModel.Ogc.Eop21.StatusSubTypeValueEnumerationType.ONLINE), null),
-                    new LabelString("Offline", "Offline", GetArchivingStatusValidator(Terradue.ServiceModel.Ogc.Eop21.StatusSubTypeValueEnumerationType.OFFLINE), null),
-                });
+            if (!(target.Wrapper is Terradue.OpenSearch.DataHub.Dias.WekeoDiasWrapper)) {
+                s1Mission.ArchivingStatus = new StringListChoice("archiveStatus", "{http://a9.com/-/opensearch/extensions/eo/1.0/}statusSubType",
+                    new LabelString[] {
+                        new LabelString("Online", "Online", GetArchivingStatusValidator(Terradue.ServiceModel.Ogc.Eop21.StatusSubTypeValueEnumerationType.ONLINE), null),
+                        new LabelString("Offline", "Offline", GetArchivingStatusValidator(Terradue.ServiceModel.Ogc.Eop21.StatusSubTypeValueEnumerationType.OFFLINE), null),
+                    });
+            }
 
             s1Mission.Count = new ItemNumberRange("count", "{http://a9.com/-/spec/opensearch/1.1/}count", 1, 50, 1, "{0}",
                 new Regex(@"([0-9]+(\\.[0-9]+)?)"), "Count", null, GetCountValidator);
