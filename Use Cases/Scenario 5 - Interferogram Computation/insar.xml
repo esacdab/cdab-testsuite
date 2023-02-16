@@ -286,7 +286,7 @@
       <sourceProduct refid="TOPSAR-Merge"/>
     </sources>
     <parameters class="com.bc.ceres.binding.dom.XppDomElement">
-      <file>target.dim</file>
+      <file>output_data/target.dim</file>
       <formatName>BEAM-DIMAP</formatName>
     </parameters>
   </node>

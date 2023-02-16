@@ -1,39 +1,38 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Project ToolsVersion="Current" Sdk="Microsoft.NET.Sdk">
+  <!-- https://nvd.codes/post/dotnet-build-target-net4x-on-unix-systems/ -->
+  <Import Project="./netfx.props" />
   <PropertyGroup>
     <ProjectGuid>{B25D47F1-FB9B-4F66-A6E2-FD49CA36E8CB}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>cdabtesttools</RootNamespace>
     <AssemblyName>cdab-testtools</AssemblyName>
-    <_ExtraTargetFrameworks Condition="'$(OS)' == 'Windows_NT' or '$(MSBuildRuntimeType)' == 'Mono'">net472</_ExtraTargetFrameworks>
-    <TargetFrameworks>netcoreapp2.1;$(RoslynPortableTargetFrameworks);$(_ExtraTargetFrameworks)</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net472</TargetFrameworks>
     <RuntimeIdentifiers>win;linux</RuntimeIdentifiers>
     <Title>CDAB Test Tools</Title>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <Version>1.11.3</Version>
+    <Version>1.12</Version>
     <Authors>Emmanuel Mathot</Authors>
     <Company>Terradue</Company>
     <RepositoryUrl>https://git.terradue.com/systems/cdab-cli</RepositoryUrl>
     <PackageTags>ESA;Terradue;Copernicus</PackageTags>
     <PackageOutputPath>$(SolutionDir)\build</PackageOutputPath>
-    <AssetTargetFallback>$(AssetTargetFallback);portable-net45+net45;</AssetTargetFallback>
     <IsTool>true</IsTool>
     <NoWarn>$(NoWarn);NU1605;NU1701</NoWarn>
   </PropertyGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'net472' ">
-    <Reference Include="System" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Net" />
-    <Reference Include="System.Xml" />
-    <Reference Include="System.Runtime.Serialization" />
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="log4net" Version="2.0.8" />
-    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="Mono.Options" Version="5.3.0.1" />
-    <PackageReference Include="Terradue.OpenSearch" Version="1.17.5" />
-    <PackageReference Include="Terradue.OpenSearch.SciHub" Version="1.22.4"/>
-    <PackageReference Include="Terradue.OpenSearch.Usgs" Version="1.5.0"/>
+    <PackageReference Include="Terradue.OpenSearch" Version="1.20.2" />
+    <PackageReference Include="Terradue.OpenSearch.SciHub" Version="1.24.0" />
+    <PackageReference Include="Terradue.OpenSearch.Usgs" Version="1.5.0" />
     <PackageReference Include="Terradue.OpenSearch.Asf" Version="1.2.15" />
     <PackageReference Include="Terradue.GeoJson" Version="1.12.0" />
     <PackageReference Include="Terradue.ServiceModel.Syndication" Version="1.1.1" />
