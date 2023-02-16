@@ -27,7 +27,7 @@ using System.Linq;
 using System.Net;
 using cdabtesttools.Config;
 using cdabtesttools.Data;
-using cdabtesttools.SampleTarget;
+// using cdabtesttools.SampleTarget;
 using Terradue.OpenSearch;
 using Terradue.OpenSearch.Asf;
 using Terradue.OpenSearch.DataHub;
@@ -92,7 +92,8 @@ namespace cdabtesttools.Target
             Name = name;
             this.targetSiteConfig = targetSiteConfig;
             ose = new Terradue.OpenSearch.Engine.OpenSearchEngine();
-            ose.LoadPlugins();
+            ose.RegisterExtension(new Terradue.OpenSearch.Engine.Extensions.AtomOpenSearchEngineExtension());
+            ose.RegisterExtension(new Terradue.OpenSearch.GeoJson.Extensions.FeatureCollectionOpenSearchEngineExtension());
             wrapper = CreateDataAccessWrapper(targetSiteConfig, null, enableDirectDataAccess);
             target_type = InitType();
         }
@@ -108,7 +109,7 @@ namespace cdabtesttools.Target
                 return TargetType.DIAS;
             }
 
-            if (Wrapper.Settings.ServiceUrl.Host == "finder.creodias.eu" || Wrapper.Settings.ServiceUrl.Host == "finder.code-de.org")
+            if (Wrapper.Settings.ServiceUrl.Host == "finder.creodias.eu" || Wrapper.Settings.ServiceUrl.Host == "datahub.creodias.eu" || Wrapper.Settings.ServiceUrl.Host == "finder.code-de.org")
             {
                 log.DebugFormat("TARGET TYPE: DIAS");
                 return TargetType.DIAS;
@@ -192,7 +193,7 @@ namespace cdabtesttools.Target
 
             }
 
-            if (target_uri.Host == "finder.creodias.eu")
+            if (target_uri.Host == "finder.creodias.eu" || target_uri.Host == "datahub.creodias.eu")
             {
                 CreoDiasWrapper creoDiasWrapper;
                 if (targetSiteConfig.Data.Url != null)
@@ -348,14 +349,15 @@ namespace cdabtesttools.Target
 
         internal IOpenSearchable CreateOpenSearchableEntity(FiltersDefinition filters = null, int maxRetries = 3, bool forceTotalResults = false)
         {
-            OpenSearchableFactorySettings ossettings = new OpenSearchableFactorySettings(ose)
-            {
-                Credentials = Wrapper.Settings.Credentials,
-                MaxRetries = maxRetries
-            };
             IDataHubSourceWrapper wrapper = CreateDataAccessWrapper(TargetSiteConfig, filters, false);
             wrapper.Settings.MaxRetries = 3;
-            
+
+            OpenSearchableFactorySettings ossettings = new OpenSearchableFactorySettings(ose)
+            {
+                Credentials = (wrapper is CreoDiasWrapper ? null : Wrapper.Settings.Credentials),   // CREODIAS datahub does not tolerate unnecessary authorization header
+                MaxRetries = maxRetries
+            };
+
             if (forceTotalResults && wrapper is AmazonStacWrapper) {
                 (wrapper as AmazonStacWrapper).ForceTotalResults = true;
             }
