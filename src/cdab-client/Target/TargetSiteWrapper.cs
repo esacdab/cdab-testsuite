@@ -92,7 +92,8 @@ namespace cdabtesttools.Target
             Name = name;
             this.targetSiteConfig = targetSiteConfig;
             ose = new Terradue.OpenSearch.Engine.OpenSearchEngine();
-            ose.LoadPlugins();
+            ose.RegisterExtension(new Terradue.OpenSearch.Engine.Extensions.AtomOpenSearchEngineExtension());
+            ose.RegisterExtension(new Terradue.OpenSearch.GeoJson.Extensions.FeatureCollectionOpenSearchEngineExtension());
             wrapper = CreateDataAccessWrapper(targetSiteConfig, null, enableDirectDataAccess);
             target_type = InitType();
         }
