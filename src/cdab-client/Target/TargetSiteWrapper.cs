@@ -109,7 +109,7 @@ namespace cdabtesttools.Target
                 return TargetType.DIAS;
             }
 
-            if (Wrapper.Settings.ServiceUrl.Host == "finder.creodias.eu" || Wrapper.Settings.ServiceUrl.Host == "datahub.creodias.eu" || Wrapper.Settings.ServiceUrl.Host == "finder.code-de.org")
+            if (Wrapper.Settings.ServiceUrl.Host == "finder.creodias.eu" || Wrapper.Settings.ServiceUrl.Host == "datahub.creodias.eu" || Wrapper.Settings.ServiceUrl.Host == "catalogue.dataspace.copernicus.eu" || Wrapper.Settings.ServiceUrl.Host == "finder.code-de.org")
             {
                 log.DebugFormat("TARGET TYPE: DIAS");
                 return TargetType.DIAS;
@@ -193,7 +193,7 @@ namespace cdabtesttools.Target
 
             }
 
-            if (target_uri.Host == "finder.creodias.eu" || target_uri.Host == "datahub.creodias.eu")
+            if (target_uri.Host == "finder.creodias.eu" || target_uri.Host == "datahub.creodias.eu" || target_uri.Host == "catalogue.dataspace.copernicus.eu")
             {
                 CreoDiasWrapper creoDiasWrapper;
                 if (targetSiteConfig.Data.Url != null)
