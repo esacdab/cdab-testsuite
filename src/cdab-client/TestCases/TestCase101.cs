@@ -120,7 +120,7 @@ namespace cdabtesttools.TestCases
         {
             List<IMetric> metrics = new List<IMetric>();
 
-            log.DebugFormat("> HTTP HEAD {0} ...", request.RequestUri);
+            log.DebugFormat("> HTTP HEAD/GET {0} ...", request.RequestUri);
 
             Stopwatch sw = new Stopwatch();
 

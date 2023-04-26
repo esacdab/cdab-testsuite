@@ -5,7 +5,7 @@ pipeline {
     stages {
         stage('Build CDAB client') {
             agent { 
-                docker { 
+                docker {
                     image 'mono:6.8' 
                 } 
             }
