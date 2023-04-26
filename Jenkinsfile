@@ -5,7 +5,8 @@ pipeline {
     stages {
         stage('Build CDAB client') {
             agent { 
-                docker { 
+                docker {
+                    registryUrl 'https://index.docker.io' 
                     image 'mono:6.8' 
                 } 
             }
