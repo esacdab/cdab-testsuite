@@ -185,6 +185,13 @@ namespace cdabtesttools.Target
                 log.WarnFormat("Credentials are not set, target sites' services requiring credentials for data access will fail!");
 
 
+            if (target_uri.Host == "catalogue.dataspace.copernicus.eu")
+            {
+                CopernicusOdataWrapper copernicusOdataWrapper = new CopernicusOdataWrapper((NetworkCredential)target_creds, String.Format("https://catalogue.dataspace.copernicus.eu/odata/v1"));
+                return copernicusOdataWrapper;
+
+            }
+
             if (target_uri.Host == "catalogue.onda-dias.eu")
             {
                 OndaDiasWrapper ondaDiasWrapper = new OndaDiasWrapper(new Uri(string.Format("https://catalogue.onda-dias.eu/dias-catalogue")), (NetworkCredential)target_creds, targetSiteConfig.Storage.ToOpenStackStorageSettings());
