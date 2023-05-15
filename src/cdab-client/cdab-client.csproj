@@ -6,8 +6,8 @@
     <RootNamespace>cdabtesttools</RootNamespace>
     <AssemblyName>cdab-testtools</AssemblyName>
     <_ExtraTargetFrameworks Condition="'$(OS)' == 'Windows_NT' or '$(MSBuildRuntimeType)' == 'Mono'">net472</_ExtraTargetFrameworks>
-    <TargetFrameworks>netcoreapp2.1;$(RoslynPortableTargetFrameworks);$(_ExtraTargetFrameworks)</TargetFrameworks>
-    <!--<TargetFrameworks>netstandard2.0;net472</TargetFrameworks>-->
+    <!--<TargetFrameworks>netcoreapp2.1;$(RoslynPortableTargetFrameworks);$(_ExtraTargetFrameworks)</TargetFrameworks>-->
+    <TargetFrameworks>netstandard2.0;net472</TargetFrameworks>
     <RuntimeIdentifiers>win;linux</RuntimeIdentifiers>
     <Title>CDAB Test Tools</Title>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
