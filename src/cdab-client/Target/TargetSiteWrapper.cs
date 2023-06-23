@@ -354,7 +354,7 @@ namespace cdabtesttools.Target
             return null;
         }
 
-        internal IOpenSearchable CreateOpenSearchableEntity(FiltersDefinition filters = null, int maxRetries = 3, bool forceTotalResults = false)
+        internal IOpenSearchable CreateOpenSearchableEntity(FiltersDefinition filters = null, int maxRetries = 3, bool forceTotalResults = false, bool optimizeForCounting = false)
         {
             IDataHubSourceWrapper wrapper = CreateDataAccessWrapper(TargetSiteConfig, filters, false);
             wrapper.Settings.MaxRetries = 3;
@@ -365,6 +365,9 @@ namespace cdabtesttools.Target
                 MaxRetries = maxRetries
             };
 
+            if (forceTotalResults && wrapper is CopernicusOdataWrapper) {
+                (wrapper as CopernicusOdataWrapper).ForceTotalResults = true;
+            }
             if (forceTotalResults && wrapper is AmazonStacWrapper) {
                 (wrapper as AmazonStacWrapper).ForceTotalResults = true;
             }
@@ -373,6 +376,9 @@ namespace cdabtesttools.Target
             }
             if (forceTotalResults && wrapper is MicrosoftWrapper) {
                 (wrapper as MicrosoftWrapper).ForceTotalResults = true;
+            }
+            if (optimizeForCounting && wrapper is CreoDiasWrapper) {
+                (wrapper as CreoDiasWrapper).OptimizeForCounting = true;
             }
 
             return wrapper.CreateOpenSearchable(ossettings);

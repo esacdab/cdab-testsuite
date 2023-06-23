@@ -88,7 +88,7 @@ namespace cdabtesttools.TestCases
                     var _testUnitRef = previousTask[j].ContinueWith<IOpenSearchable>((task) =>
                     {
                         prepTask.Wait();
-                        return coverageFilter.Reference.Target.CreateOpenSearchableEntity(coverageFilter.Reference.FiltersDefinition);
+                        return coverageFilter.Reference.Target.CreateOpenSearchableEntity(coverageFilter.Reference.FiltersDefinition, 3, true, true);
                     }).ContinueWith((request) =>
                         {
                             return MakeQuery(request.Result, coverageFilter.Reference.FiltersDefinition);
@@ -97,7 +97,7 @@ namespace cdabtesttools.TestCases
                     var _testUnit = previousTask[j].ContinueWith<IOpenSearchable>((task) =>
                     {
                         prepTask.Wait();
-                        return coverageFilter.Target.Target.CreateOpenSearchableEntity(coverageFilter.Target.FiltersDefinition, 3, true);
+                        return coverageFilter.Target.Target.CreateOpenSearchableEntity(coverageFilter.Target.FiltersDefinition, 3, true, true);
                     }).ContinueWith((request) =>
                         {
                             return MakeQuery(request.Result, coverageFilter.Target.FiltersDefinition);
