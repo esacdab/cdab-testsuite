@@ -447,12 +447,14 @@ namespace cdabtesttools.TestCases
                 }
                 DateTimeOffset creationDate;
                 creationDate = item.PublishDate;
-                var dateStrings = item.ElementExtensions.ReadElementExtensions<string>("creationDate", "http://www.terradue.com/");
+                
+                // Times incorrect for CREODIAS target (local times assumed)
+                IEnumerable<string> dateStrings = item.ElementExtensions.ReadElementExtensions<string>("creationDate", "http://www.terradue.com/");
                 if (dateStrings != null && dateStrings.Count() > 0)
                 {
                     DateTimeOffset.TryParse(dateStrings.FirstOrDefault(), System.Globalization.CultureInfo.InstalledUICulture, System.Globalization.DateTimeStyles.AssumeUniversal, out creationDate);
                 }
-                log.DebugFormat("Target item creation date ({0}): {1}", item.Id, creationDate.ToString("yyyy-MM-ddTHH:mm:ssZ"));
+                log.DebugFormat("Target item creation date ({0}): {1} --- {2}", item.Id, creationDate.ToString("yyyy-MM-ddTHH:mm:ssZ"), item.PublishDate.ToString("yyyy-MM-ddTHH:mm:ssZ"));
 
                 DateTimeOffset ingestionDate = DateTime.MinValue;
                 dateStrings = referenceItem.ElementExtensions.ReadElementExtensions<string>("ingestionDate", "http://www.terradue.com/");
