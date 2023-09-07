@@ -189,15 +189,12 @@ namespace cdabtesttools.Target
             {
                 CopernicusOdataWrapper copernicusOdataWrapper = new CopernicusOdataWrapper((NetworkCredential)target_creds, String.Format("https://catalogue.dataspace.copernicus.eu/odata/v1"));
                 return copernicusOdataWrapper;
-
             }
 
             if (target_uri.Host == "catalogue.onda-dias.eu")
             {
                 OndaDiasWrapper ondaDiasWrapper = new OndaDiasWrapper(new Uri(string.Format("https://catalogue.onda-dias.eu/dias-catalogue")), (NetworkCredential)target_creds, targetSiteConfig.Storage.ToOpenStackStorageSettings());
-                ondaDiasWrapper.EnableDirectDataAccess = enableDirectDataAccess;
                 return ondaDiasWrapper;
-
             }
 
             if (target_uri.Host == "finder.creodias.eu" || target_uri.Host == "datahub.creodias.eu" || target_uri.Host == "catalogue.dataspace.copernicus.eu")
