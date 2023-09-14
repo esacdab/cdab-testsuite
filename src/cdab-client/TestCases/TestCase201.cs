@@ -82,7 +82,7 @@ namespace cdabtesttools.TestCases
             Func<ItemNumberRange, string> rangeReformatter = null;
             if (target.Wrapper.Settings.ServiceUrl.Host == "catalogue.onda-dias.eu") {
                 rangeReformatter = (r) => {
-                    return (r.Formatter.Replace(",", " TO "));
+                    return r.Formatter.Replace(",", " TO ");
                 };
             }
             try {

@@ -28,11 +28,17 @@ namespace cdabtesttools.Config
 
         public bool TestMode { get; set; }
 
+        public int SimpleFilterLimit { get; set; }
+
+        public int ComplexFilterLimit { get; set; }
+
         public GlobalConfiguration()
         {
             QueryTryNumber = 3;
             CountryShapefilePath = "App_Data/TM_WORLD_BORDERS-0.3/TM_WORLD_BORDERS-0.3";
             TestMode = false;
+            SimpleFilterLimit = 3;
+            ComplexFilterLimit = 2;
         }
     }
 }

@@ -139,14 +139,17 @@ namespace cdabtesttools
 
             ValidateOptions();
 
-            InitScheduler();
-
             try
             {
                 if (scenarios_handlers.Count >= 1)
+                {
+                    InitScheduler();
                     ExecuteScenarios();
+                }
                 else
+                {
                     log.WarnFormat("No compatible scenarios to be executed. Exiting.");
+                }
             }
             catch (ThreadAbortException)
             {
