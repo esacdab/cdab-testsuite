@@ -185,9 +185,9 @@ namespace cdabtesttools.Target
                 log.WarnFormat("Credentials are not set, target sites' services requiring credentials for data access will fail!");
 
 
-            if (target_uri.Host == "catalogue.dataspace.copernicus.eu" && target_uri.AbsolutePath.Contains("odata"))
+            if ((target_uri.Host == "catalogue.dataspace.copernicus.eu" || target_uri.Host == "datahub.creodias.eu") && target_uri.AbsolutePath.Contains("odata"))
             {
-                CopernicusOdataWrapper copernicusOdataWrapper = new CopernicusOdataWrapper((NetworkCredential)target_creds, String.Format("https://catalogue.dataspace.copernicus.eu/odata/v1"));
+                CopernicusOdataWrapper copernicusOdataWrapper = new CopernicusOdataWrapper((NetworkCredential)target_creds, targetSiteConfig.Data.Url);
                 return copernicusOdataWrapper;
             }
 

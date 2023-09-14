@@ -90,7 +90,6 @@ namespace cdabtesttools.TestCases
             } catch (Exception e) {
                 throw;
             }
-
         }
 
         public override TestCaseResult CompleteTest(Task<IEnumerable<TestUnitResult>> tasks)
