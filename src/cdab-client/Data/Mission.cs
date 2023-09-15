@@ -502,7 +502,7 @@ namespace cdabtesttools.Data
                 var collections = baselines.SelectMany(b => b.Collections.Where(c =>
                             c.Value.Parameters.Any(p => p.FullName == "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
                                 && p.Value == _mission.MissionName.Value))).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-                var fd = Mission.ShuffleSimpleRandomFiltersCombination(_mission, collections, string.Format("Simple-Random-{0}", i), rangeReformatter);
+                var fd = Mission.ShuffleSimpleRandomFiltersCombination(_mission, collections, string.Format("Simple-Random-{0}", i), rangeReformatter, Configuration.Current.Global.SimpleFilterLimit);
                 // fd.AddFilter("archiveStatus", "{http://a9.com/-/opensearch/extensions/eo/1.0/}statusSubType", "online", "Online", null, null);
                 _randomCombinations.Add(fd);
             }
@@ -531,7 +531,7 @@ namespace cdabtesttools.Data
                     var collections = baselines.SelectMany(b => b.Collections.Where(c =>
                                c.Value.Parameters.Any(p => p.FullName == "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
                                    && p.Value == _mission.MissionName.Value))).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-                    var fd = Mission.ShuffleComplexRandomFiltersCombination(_mission, collections, string.Format("Complex-Random-{0}", i));
+                    var fd = Mission.ShuffleComplexRandomFiltersCombination(_mission, collections, string.Format("Complex-Random-{0}", i), Configuration.Current.Global.ComplexFilterLimit);
                     // fd.AddFilter("archiveStatus", "{http://a9.com/-/opensearch/extensions/eo/1.0/}statusSubType", "online", "Online", null, null);
                     _randomCombinations.Add(fd);
 
@@ -551,7 +551,6 @@ namespace cdabtesttools.Data
             FiltersDefinition _filtersDefinition = new FiltersDefinition(FilterSetkey);
             var collection = collections.ToArray()[rnd.Next(0, collections.Count())].Value;
             _filtersDefinition.AddFilters(collection.Parameters, mission);
-            // _filtersDefinition.AddFilter("missionName", "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform",  mission.MissionName.Value, mission.MissionName.Label, mission.MissionName.Validator, null);
 
             IEnumerable<System.Reflection.PropertyInfo> props = mission.GetType().GetProperties().Where(
                 prop => Attribute.IsDefined(prop, typeof(SimpleChoiceAttribute)));
@@ -597,9 +596,9 @@ namespace cdabtesttools.Data
 
         }
 
-        private static FiltersDefinition ShuffleComplexRandomFiltersCombination(Mission mission, Dictionary<string, DataCollectionDefinition> collections, string filterSetKey)
+        private static FiltersDefinition ShuffleComplexRandomFiltersCombination(Mission mission, Dictionary<string, DataCollectionDefinition> collections, string filterSetKey, int limit = 2)
         {
-            FiltersDefinition _filtersDefinition = ShuffleSimpleRandomFiltersCombination(mission, collections, filterSetKey, null, 2);
+            FiltersDefinition _filtersDefinition = ShuffleSimpleRandomFiltersCombination(mission, collections, filterSetKey, null, limit);
 
             IEnumerable<System.Reflection.PropertyInfo> props = mission.GetType().GetProperties().Where(
                 prop => Attribute.IsDefined(prop, typeof(ComplexChoiceAttribute)));

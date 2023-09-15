@@ -348,6 +348,11 @@ namespace cdabtesttools.TestCases
                                 
                                 double latencySeconds = creationDate.Subtract(ingestionDate).TotalSeconds;
                                 log.DebugFormat("Latency (seconds) ({0}): {1}", referenceItem.Id, latencySeconds);
+                                if (latencySeconds < 0)
+                                {
+                                    latencySeconds = 0;
+                                    log.DebugFormat("(negative latency set to 0)");
+                                }
 
                                 avaLatencies.Add(latencySeconds);
                                 validatedResults++;
@@ -466,6 +471,11 @@ namespace cdabtesttools.TestCases
 
                 double latencySeconds = creationDate.Subtract(ingestionDate).TotalSeconds;
                 log.DebugFormat("Latency (seconds) ({0}): {1}", item.Id, latencySeconds);
+                if (latencySeconds < 0)
+                {
+                    latencySeconds = 0;
+                    log.DebugFormat("(negative latency set to 0)");
+                }
 
                 avaLatencies.Add(latencySeconds);
                 validatedResults++;

@@ -46,7 +46,7 @@ class TestClient:
     """Main class for remote execution of the test scenarios TS11, TS12, TS13 and TS15.
     """
 
-    VERSION = "1.67"
+    VERSION = "1.68"
 
     errors = {
         ERR_CONFIG: 'Missing or invalid configuration',
@@ -146,7 +146,6 @@ class TestClient:
         },
         'ONDA': {
             'uri_prefix': 'https://catalogue.onda-dias.eu/',
-            'tools': [ 'onda-eodata' ]
         },
         'SOBLOO': {
             'uri_prefix': 'https://sobloo.eu/'
@@ -1107,9 +1106,6 @@ class TestClient:
 
         if self.docker_run_command == 'CDAB_CLIENT_DEFAULT':
 
-            if 'onda-eodata' in tools:
-                copy_file(self.compute_config, run, "{0}/ts-scripts/link-onda-eodata.sh".format(os.path.dirname(sys.argv[0])), "link-onda-eodata.sh")
-                execute_remote_command(self.compute_config, run, "sudo sh link-onda-eodata.sh")
             if 'codede-eodata' in tools:
                 copy_file(self.compute_config, run, "{0}/ts-scripts/link-codede-eodata.sh".format(os.path.dirname(sys.argv[0])), "link-codede-eodata.sh")
                 execute_remote_command(self.compute_config, run, "sudo sh link-codede-eodata.sh")
@@ -1217,9 +1213,6 @@ class TestClient:
                 copy_file(self.compute_config, run, "{0}/ts-scripts/s3cmd-install.sh".format(os.path.dirname(sys.argv[0])), "s3cmd-install.sh")
                 execute_remote_command(self.compute_config, run, "sudo sh s3cmd-install.sh {0} {1} {2}".format(self.compute_config['remote_user'], self.target_site_s3_key_id, self.target_site_s3_secret_key))
 
-            if 'onda-eodata' in tools:
-                copy_file(self.compute_config, run, "{0}/ts-scripts/link-onda-eodata.sh".format(os.path.dirname(sys.argv[0])), "link-onda-eodata.sh")
-                execute_remote_command(self.compute_config, run, "sudo sh link-onda-eodata.sh")
             if 'codede-eodata' in tools:
                 copy_file(self.compute_config, run, "{0}/ts-scripts/link-codede-eodata.sh".format(os.path.dirname(sys.argv[0])), "link-codede-eodata.sh")
                 execute_remote_command(self.compute_config, run, "sudo sh link-codede-eodata.sh")

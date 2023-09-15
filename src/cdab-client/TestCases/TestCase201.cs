@@ -82,7 +82,7 @@ namespace cdabtesttools.TestCases
             Func<ItemNumberRange, string> rangeReformatter = null;
             if (target.Wrapper.Settings.ServiceUrl.Host == "catalogue.onda-dias.eu") {
                 rangeReformatter = (r) => {
-                    return (r.Formatter.Replace(",", " TO "));
+                    return r.Formatter.Replace(",", " TO ");
                 };
             }
             try {
@@ -90,7 +90,6 @@ namespace cdabtesttools.TestCases
             } catch (Exception e) {
                 throw;
             }
-
         }
 
         public override TestCaseResult CompleteTest(Task<IEnumerable<TestUnitResult>> tasks)
