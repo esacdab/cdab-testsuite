@@ -66,5 +66,7 @@ namespace cdabtesttools.Config
         public long? MaxPeriodSeconds { get; set; }
 
         public int? QueryPollingInterval { get; set; }
+
+        public bool? SplitCoverageQueries { get; set; }
     }
 }
