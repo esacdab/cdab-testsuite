@@ -179,9 +179,19 @@ namespace cdabtesttools.TestCases
             return _testUnits.Select(t => t.Result).Where(r => r != null);
         }
 
+
+        public virtual TestUnitResult MakeQueryOrSplitQuery(IOpenSearchable entity, TargetAndFiltersDefinition def, string provider = null)
+        {
+            if (def.Target.TargetSiteConfig.Data.Catalogue.SplitCoverageQueries != null && def.Target.TargetSiteConfig.Data.Catalogue.SplitCoverageQueries.Value)
+            {
+                return MakeSplitQuery(entity, def.FiltersDefinition, provider);
+            }
+            return MakeQuery(entity, def.FiltersDefinition);
+        }
+
+
         public virtual TestUnitResult MakeQuery(IOpenSearchable entity, FiltersDefinition fd)
         {
-
             List<IMetric> metrics = new List<IMetric>();
 
             log.DebugFormat("[{1}] > Query {0} {2}...", fd.Name, Task.CurrentId, fd.Label);
@@ -322,6 +332,176 @@ namespace cdabtesttools.TestCases
                 return new TestUnitResult(metrics, fd);
             }).Result;
         }
+
+
+        // Does the same as MakeQuery, but splits the request in separate requests by year
+        // (only to be used for TS05 for providers with long response times, i.e. CREODIAS/Copernicus DAS)
+        public virtual TestUnitResult MakeSplitQuery(IOpenSearchable entity, FiltersDefinition fd, string provider = null)
+        {
+            List<IMetric> metrics = new List<IMetric>();
+
+            log.DebugFormat("[{1}] > Query {0} {2}...", fd.Name, Task.CurrentId, fd.Label);
+
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            DateTimeOffset timeStart = DateTimeOffset.UtcNow;
+
+            var parameters = fd.GetNameValueCollection();
+
+            return catalogue_task_factory.StartNew(() =>
+            {
+                int currentYear = DateTime.UtcNow.Year;
+                int endYear = currentYear;
+                string endTimeStr = parameters[""];
+                if (endTimeStr != null) Int32.TryParse(endTimeStr.Substring(0, 4), out endYear);
+
+                long totalTotalResults = 0;
+                long totalCount = 0;
+                long totalResponseTime = 0;
+                long totalBeginResponseTime = 0;
+                long totalEndResponseTime = 0;
+                long totalSerializedSize = 0;
+                long totalRetryNumber = 0;
+
+
+                for (int year = 2014; year <= endYear; year++)
+                {
+                    NameValueCollection periodParameters = new NameValueCollection(parameters);
+                    periodParameters["{http://a9.com/-/opensearch/extensions/time/1.0/}start"] = String.Format("{0}-01-01T00:00:00Z", year);
+                    if (year < endYear || periodParameters["{http://a9.com/-/opensearch/extensions/time/1.0/}end"] == null)
+                    {
+                        periodParameters["{http://a9.com/-/opensearch/extensions/time/1.0/}end"] = String.Format("{0}-01-01T00:00:00Z", year + 1);
+                    }
+
+                    Stopwatch periodSw = new Stopwatch();
+                    periodSw.Start();
+                    List<IMetric> periodMetrics = new List<IMetric>();
+                    
+                    IOpenSearchResultCollection results;
+                    try
+                    {
+                        results = ose.Query(entity, periodParameters);
+                    }
+                    catch (Exception e)
+                    {
+                        log.DebugFormat("[{0}] < No results for {2}. Exception: {1}", Task.CurrentId, e.InnerException.Message, fd.Label);
+                        if (e.InnerException is UnsupportedDataException && MarkUnsupportedData)
+                        {
+                            log.Debug("Data collection not supported by target");
+                        }
+                        else
+                        {
+                            log.Debug(e.InnerException.StackTrace);
+                        }
+                        throw;
+                    }
+                    finally
+                    {
+                        periodSw.Stop();
+                    }
+                    var respTime = periodSw.ElapsedMilliseconds;
+                    DateTimeOffset timeStop = DateTimeOffset.UtcNow;
+                    
+                    long serializedSize = 0;
+                    try
+                    {
+                        serializedSize = Encoding.Default.GetBytes(results.SerializeToString()).Length;
+                    }
+                    catch {}
+
+                    var metricsArray = results.ElementExtensions.ReadElementExtensions<Terradue.OpenSearch.Benchmarking.Metrics>("Metrics", "http://www.terradue.com/metrics", Terradue.OpenSearch.Benchmarking.MetricFactory.Serializer);
+                    if (metricsArray == null || metricsArray.Count() == 0)
+                    {
+                        log.Warn("No query metrics found! Response Time and error rate may be biased!");
+                        totalResponseTime += respTime;
+                        totalSerializedSize += serializedSize;
+                        if (totalBeginResponseTime == 0) totalBeginResponseTime = timeStart.Ticks;
+                        totalEndResponseTime = timeStop.Ticks;
+                    }
+                    else
+                    {
+                        Terradue.OpenSearch.Benchmarking.Metrics osMetrics = metricsArray.First();
+                        Terradue.OpenSearch.Benchmarking.Metric _sizeMetric = osMetrics.Metric.FirstOrDefault(m => m.Identifier == "size");
+                        Terradue.OpenSearch.Benchmarking.Metric _responseTimeMetric = osMetrics.Metric.FirstOrDefault(m => m.Identifier == "responseTime");
+                        Terradue.OpenSearch.Benchmarking.Metric _retryNumberMetric = osMetrics.Metric.FirstOrDefault(m => m.Identifier == "retryNumber");
+                        Terradue.OpenSearch.Benchmarking.Metric _beginGetResponseTime = osMetrics.Metric.FirstOrDefault(m => m.Identifier == "beginGetResponseTime");
+                        Terradue.OpenSearch.Benchmarking.Metric _endGetResponseTime = osMetrics.Metric.FirstOrDefault(m => m.Identifier == "endGetResponseTime");
+
+                        log.DebugFormat("[{4}] < {0}/{1} entries for {6} {5}. {2}bytes in {3}ms", results.Count, results.TotalResults, _sizeMetric.Value, _responseTimeMetric.Value, Task.CurrentId, fd.Label, fd.Name);
+
+                        totalResponseTime += _responseTimeMetric == null ? respTime : Convert.ToInt64(_responseTimeMetric.Value);
+                        totalSerializedSize += _sizeMetric == null ? serializedSize : Convert.ToInt64(_sizeMetric.Value);
+                        totalRetryNumber += _retryNumberMetric == null ? 1 : Convert.ToInt64(_retryNumberMetric.Value);
+                        
+                        if (_beginGetResponseTime != null && _endGetResponseTime != null)
+                        {
+                            if (totalBeginResponseTime == 0) totalBeginResponseTime = Convert.ToInt64(_beginGetResponseTime.Value);
+                            totalEndResponseTime = Convert.ToInt64(_endGetResponseTime.Value);
+                        }
+                        else
+                        {
+                            if (totalBeginResponseTime == 0) totalBeginResponseTime = timeStart.Ticks;
+                            totalEndResponseTime = timeStop.Ticks;
+                        }
+                    }
+                    totalTotalResults += results.TotalResults;
+                    totalCount = results.Count;
+
+                    log.DebugFormat("[{0}]: Total results since beginning: {1} (for year {2}: {3})", provider, totalTotalResults, year, results.TotalResults);
+                }
+
+                List<IMetric> overallMetrics = new List<IMetric>();
+                overallMetrics.Add(new LongMetric(MetricName.responseTime, totalResponseTime, "ms"));
+                overallMetrics.Add(new LongMetric(MetricName.size, totalSerializedSize, "bytes"));
+                overallMetrics.Add(new LongMetric(MetricName.retryNumber, totalRetryNumber, "#"));
+                overallMetrics.Add(new LongMetric(MetricName.beginGetResponseTime, totalBeginResponseTime, "ticks"));
+                overallMetrics.Add(new LongMetric(MetricName.endGetResponseTime, totalEndResponseTime, "ticks"));
+                overallMetrics.Add(new LongMetric(MetricName.maxTotalResults, totalTotalResults, "#"));
+                overallMetrics.Add(new LongMetric(MetricName.totalReadResults, totalCount, "#"));
+
+                return overallMetrics;
+
+            }).ContinueWith<TestUnitResult>(task =>
+            {
+                List<IMetric> returnedMetrics = task.Result;
+                try
+                {
+                    foreach (IMetric m in returnedMetrics)
+                    {
+                        metrics.Add(m);
+                    }
+                }
+                catch (AggregateException e)
+                {
+                    log.DebugFormat("[{0}] < No results for {2}. Exception: {1}", Task.CurrentId, e.InnerException.Message, fd.Label);
+                    if (e.InnerException is UnsupportedDataException && MarkUnsupportedData)
+                    {
+                        log.Debug("Data collection not supported by target");
+                        metrics.Add(new LongMetric(MetricName.maxTotalResults, -2, "#"));
+                        metrics.Add(new LongMetric(MetricName.totalReadResults, -2, "#"));
+                    }
+                    else
+                    {
+                        log.Debug(e.InnerException.StackTrace);
+                        metrics.Add(new LongMetric(MetricName.maxTotalResults, -1, "#"));
+                        metrics.Add(new LongMetric(MetricName.totalReadResults, -1, "#"));
+                    }
+                    metrics.Add(new ExceptionMetric(e.InnerException));
+                }
+                finally
+                {
+                    sw.Stop();
+                }
+                DateTimeOffset timeStop = DateTimeOffset.UtcNow;
+                metrics.Add(new DateTimeMetric(MetricName.startTime, timeStart, "dateTime"));
+                metrics.Add(new DateTimeMetric(MetricName.endTime, timeStop, "dateTime"));
+                metrics.Add(new StringMetric(MetricName.dataCollectionDivision, fd.Label, "string"));
+
+                return new TestUnitResult(metrics, fd);
+            }).Result;
+        }
+
+
 
         protected virtual IEnumerable<IMetric> AnalyzeResults(IOpenSearchResultCollection results, FiltersDefinition fd)
         {

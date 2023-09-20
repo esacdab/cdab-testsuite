@@ -91,7 +91,7 @@ namespace cdabtesttools.TestCases
                         return coverageFilter.Reference.Target.CreateOpenSearchableEntity(coverageFilter.Reference.FiltersDefinition, 3, true, true);
                     }).ContinueWith((request) =>
                         {
-                            return MakeQuery(request.Result, coverageFilter.Reference.FiltersDefinition);
+                            return MakeQueryOrSplitQuery(request.Result, coverageFilter.Reference, "reference");
                         });
                     _testUnits.Add(_testUnitRef);
                     var _testUnit = previousTask[j].ContinueWith<IOpenSearchable>((task) =>
@@ -100,7 +100,7 @@ namespace cdabtesttools.TestCases
                         return coverageFilter.Target.Target.CreateOpenSearchableEntity(coverageFilter.Target.FiltersDefinition, 3, true, true);
                     }).ContinueWith((request) =>
                         {
-                            return MakeQuery(request.Result, coverageFilter.Target.FiltersDefinition);
+                            return MakeQueryOrSplitQuery(request.Result, coverageFilter.Target, "target");
                         });
                     _testUnits.Add(_testUnit);
                     previousTask[j] = _testUnit;
@@ -127,6 +127,7 @@ namespace cdabtesttools.TestCases
 
             return _testUnits.Select(t => t.Result).Where(r => r != null);
         }
+
 
         public override TestCaseResult CompleteTest(Task<IEnumerable<TestUnitResult>> tasks)
         {

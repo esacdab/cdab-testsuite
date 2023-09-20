@@ -96,7 +96,7 @@ namespace cdabtesttools.TestCases
                         return filters.Target.Target.CreateOpenSearchableEntity(filters.Target.FiltersDefinition, 3, true, true);
                     }).ContinueWith((request) =>
                         {
-                            return MakeQuery(request.Result, filters.Target.FiltersDefinition);
+                            return MakeQueryOrSplitQuery(request.Result, filters.Target, "target");
                         });
                     _testUnits.Add(_testUnitOnline);
 
@@ -106,7 +106,7 @@ namespace cdabtesttools.TestCases
                         return filters.Reference.Target.CreateOpenSearchableEntity(filters.Reference.FiltersDefinition, 3, true, true);
                     }).ContinueWith((request) =>
                         {
-                            return MakeQuery(request.Result, filters.Reference.FiltersDefinition);
+                            return MakeQueryOrSplitQuery(request.Result, filters.Reference, "reference");
                         });
                     _testUnits.Add(_testUnit);
                     previousTask[j] = _testUnitOnline;
