@@ -68,5 +68,7 @@ namespace cdabtesttools.Config
         public int? QueryPollingInterval { get; set; }
 
         public bool? SplitCoverageQueries { get; set; }
+
+        public int? CoverageMonths { get; set; }
     }
 }

@@ -180,11 +180,17 @@ namespace cdabtesttools.TestCases
         }
 
 
-        public virtual TestUnitResult MakeQueryOrSplitQuery(IOpenSearchable entity, TargetAndFiltersDefinition def, string provider = null)
+        public virtual TestUnitResult MakeQueryOrSplitQuery(IOpenSearchable entity, TargetAndFiltersDefinition def, string provider)
         {
             if (def.Target.TargetSiteConfig.Data.Catalogue.SplitCoverageQueries != null && def.Target.TargetSiteConfig.Data.Catalogue.SplitCoverageQueries.Value)
             {
-                return MakeSplitQuery(entity, def.FiltersDefinition, provider);
+                int coverageMonths = 0;
+                if (def.Target.TargetSiteConfig.Data.Catalogue.CoverageMonths != null)
+                {
+                    coverageMonths = def.Target.TargetSiteConfig.Data.Catalogue.CoverageMonths.Value;
+                }
+                if (coverageMonths <= 0 || coverageMonths > 12) coverageMonths = 12;
+                return MakeSplitQuery(entity, def.FiltersDefinition, provider, coverageMonths);
             }
             return MakeQuery(entity, def.FiltersDefinition);
         }
@@ -336,7 +342,7 @@ namespace cdabtesttools.TestCases
 
         // Does the same as MakeQuery, but splits the request in separate requests by year
         // (only to be used for TS05 for providers with long response times, i.e. CREODIAS/Copernicus DAS)
-        public virtual TestUnitResult MakeSplitQuery(IOpenSearchable entity, FiltersDefinition fd, string provider = null)
+        public virtual TestUnitResult MakeSplitQuery(IOpenSearchable entity, FiltersDefinition fd, string provider, int coverageMonths = 12)
         {
             List<IMetric> metrics = new List<IMetric>();
 
@@ -350,10 +356,13 @@ namespace cdabtesttools.TestCases
 
             return catalogue_task_factory.StartNew(() =>
             {
-                int currentYear = DateTime.UtcNow.Year;
-                int endYear = currentYear;
-                string endTimeStr = parameters[""];
-                if (endTimeStr != null) Int32.TryParse(endTimeStr.Substring(0, 4), out endYear);
+                int finalYear = DateTime.UtcNow.Year;
+                int finalMonth = DateTime.UtcNow.Month;
+                string finalTimeStr = parameters[""];
+                if (finalTimeStr != null) {
+                    Int32.TryParse(finalTimeStr.Substring(0, 4), out finalYear);
+                    Int32.TryParse(finalTimeStr.Substring(5, 2), out finalMonth);
+                }
 
                 long totalTotalResults = 0;
                 long totalCount = 0;
@@ -364,36 +373,54 @@ namespace cdabtesttools.TestCases
                 long totalRetryNumber = 0;
 
 
-                for (int year = 2014; year <= endYear; year++)
+                int monthCounter = -1;   // month (0 = 2014-01, 12 = 2015-01, etc.)
+                bool inLoop = true;
+                while (inLoop)
                 {
-                    NameValueCollection periodParameters = new NameValueCollection(parameters);
-                    periodParameters["{http://a9.com/-/opensearch/extensions/time/1.0/}start"] = String.Format("{0}-01-01T00:00:00Z", year);
-                    if (year < endYear || periodParameters["{http://a9.com/-/opensearch/extensions/time/1.0/}end"] == null)
+                    if (monthCounter == -1)
                     {
-                        periodParameters["{http://a9.com/-/opensearch/extensions/time/1.0/}end"] = String.Format("{0}-01-01T00:00:00Z", year + 1);
+                        monthCounter = 0;
+                    }
+                    else
+                    {
+                        monthCounter += coverageMonths;
+                    }
+                    int year = monthCounter / 12 + 2014;
+                    int month = monthCounter % 12 + 1;
+
+                    int endYear = (monthCounter + coverageMonths) / 12 + 2014;
+                    int endMonth = (monthCounter + coverageMonths) % 12 + 1;
+
+                    inLoop = (endYear < finalYear || endYear == finalYear && endMonth <= finalMonth);
+
+                    NameValueCollection periodParameters = new NameValueCollection(parameters);
+                    periodParameters["{http://a9.com/-/opensearch/extensions/time/1.0/}start"] = String.Format("{0}-{1:00}-01T00:00:00Z", year, month);
+                    if (endYear < finalYear || endYear == finalYear && endMonth < finalMonth || periodParameters["{http://a9.com/-/opensearch/extensions/time/1.0/}end"] == null)
+                    {
+                        periodParameters["{http://a9.com/-/opensearch/extensions/time/1.0/}end"] = String.Format("{0}-{1:00}-01T00:00:00Z", endYear, endMonth);
                     }
 
                     Stopwatch periodSw = new Stopwatch();
                     periodSw.Start();
                     List<IMetric> periodMetrics = new List<IMetric>();
                     
-                    IOpenSearchResultCollection results;
+                    IOpenSearchResultCollection results = null;
                     try
                     {
                         results = ose.Query(entity, periodParameters);
                     }
                     catch (Exception e)
                     {
-                        log.DebugFormat("[{0}] < No results for {2}. Exception: {1}", Task.CurrentId, e.InnerException.Message, fd.Label);
-                        if (e.InnerException is UnsupportedDataException && MarkUnsupportedData)
+                        log.DebugFormat("[{0}] < No results for {2}. Exception: {1}", Task.CurrentId, e.Message, fd.Label);
+                        if (e is UnsupportedDataException && MarkUnsupportedData)
                         {
                             log.Debug("Data collection not supported by target");
                         }
                         else
                         {
-                            log.Debug(e.InnerException.StackTrace);
+                            log.Debug(e.StackTrace);
                         }
-                        throw;
+                        continue;
                     }
                     finally
                     {
@@ -447,7 +474,7 @@ namespace cdabtesttools.TestCases
                     totalTotalResults += results.TotalResults;
                     totalCount = results.Count;
 
-                    log.DebugFormat("[{0}]: Total results since beginning: {1} (for year {2}: {3})", provider, totalTotalResults, year, results.TotalResults);
+                    log.DebugFormat("[{0}]: Total results since beginning: {1} (for {2}-month period starting {3}-{4:00}-01: {5})", provider, totalTotalResults, coverageMonths, year, month, results.TotalResults);
                 }
 
                 List<IMetric> overallMetrics = new List<IMetric>();
