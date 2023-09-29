@@ -503,7 +503,7 @@ namespace cdabtesttools.Data
                             c.Value.Parameters.Any(p => p.FullName == "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
                                 && p.Value == _mission.MissionName.Value))).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
                 var fd = Mission.ShuffleSimpleRandomFiltersCombination(_mission, collections, string.Format("Simple-Random-{0}", i), rangeReformatter, Configuration.Current.Global.SimpleFilterLimit);
-                // fd.AddFilter("archiveStatus", "{http://a9.com/-/opensearch/extensions/eo/1.0/}statusSubType", "online", "Online", null, null);
+                fd.AddFilter("archiveStatus", "{http://a9.com/-/opensearch/extensions/eo/1.0/}statusSubType", "online", "Online", null, null);
                 _randomCombinations.Add(fd);
             }
 
@@ -532,7 +532,7 @@ namespace cdabtesttools.Data
                                c.Value.Parameters.Any(p => p.FullName == "{http://a9.com/-/opensearch/extensions/eo/1.0/}platform"
                                    && p.Value == _mission.MissionName.Value))).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
                     var fd = Mission.ShuffleComplexRandomFiltersCombination(_mission, collections, string.Format("Complex-Random-{0}", i), Configuration.Current.Global.ComplexFilterLimit);
-                    // fd.AddFilter("archiveStatus", "{http://a9.com/-/opensearch/extensions/eo/1.0/}statusSubType", "online", "Online", null, null);
+                    fd.AddFilter("archiveStatus", "{http://a9.com/-/opensearch/extensions/eo/1.0/}statusSubType", "online", "Online", null, null);
                     _randomCombinations.Add(fd);
 
                 }
@@ -644,11 +644,27 @@ namespace cdabtesttools.Data
                 if (choice is GeometryFilterCollection)
                 {
                     var gfc = choice as GeometryFilterCollection;
-                    var feature = gfc.Features.ToArray()[rnd.Next(0, gfc.Features.Count())];
-                    _filtersDefinition.AddFilter(gfc.Key, "{http://a9.com/-/opensearch/extensions/geo/1.0/}geometry", wktWriter.Write(feature.Geometry), string.Format("intersecting {0}", feature.Attributes["NAME"]),
+
+                    var geomFilter = _filtersDefinition.Filters.FirstOrDefault(fd => fd.FullName == "{http://a9.com/-/opensearch/extensions/geo/1.0/}geometry");
+
+                    Feature[] features = null;
+                    if (geomFilter == null)
+                    {
+                        features = gfc.Features.ToArray();
+                    }
+                    else if (Configuration.Current.GeometryFilters != null && Configuration.Current.GeometryFilters.Keys.Contains(geomFilter.Label))
+                    {
+                        List<string> shapeList = Configuration.Current.GeometryFilters[geomFilter.Label];
+                        features = gfc.Features.Where(f => shapeList.Contains(f.Attributes["NAME"])).ToArray();
+                    }
+                    if (features != null)
+                    {
+                        var feature = features[rnd.Next(0, features.Length)];
+                        _filtersDefinition.AddFilter(gfc.Key, "{http://a9.com/-/opensearch/extensions/geo/1.0/}geometry", wktWriter.Write(feature.Geometry), string.Format("intersecting {0}", feature.Attributes["NAME"]),
                             GetGeometryValidator(feature),
                             null
-                            );
+                        );
+                    }
 
                 }
             }

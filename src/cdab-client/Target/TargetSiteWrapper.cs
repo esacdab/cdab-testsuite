@@ -245,6 +245,7 @@ namespace cdabtesttools.Target
             if (target_uri.Host.Contains("wekeo.eu"))
             {
                 var wekeoDiasWrapper = new WekeoDiasWrapper(target_creds, targetSiteConfig.Data.Url, "application/json", targetSiteConfig.Storage.ToOpenStackStorageSettings());
+                wekeoDiasWrapper.EnableDirectDataAccess = enableDirectDataAccess;
                 if (targetSiteConfig.Data.Catalogue.LimitQuery != null && targetSiteConfig.Data.Catalogue.LimitQuery.Value)
                 {
                     wekeoDiasWrapper.LimitQuery = true;
