@@ -44,6 +44,8 @@ namespace cdabtesttools.Config
 
         public DataGlobalConfiguration Data { get; set; }
 
+        public Dictionary<string, List<string>> GeometryFilters { get; set; }
+
 
         /// <summary>
         /// Gets the configuration of the target site with the specified name if it exists in the configuration YAML file.

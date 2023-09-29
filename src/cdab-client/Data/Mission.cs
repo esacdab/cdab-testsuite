@@ -644,11 +644,27 @@ namespace cdabtesttools.Data
                 if (choice is GeometryFilterCollection)
                 {
                     var gfc = choice as GeometryFilterCollection;
-                    var feature = gfc.Features.ToArray()[rnd.Next(0, gfc.Features.Count())];
-                    _filtersDefinition.AddFilter(gfc.Key, "{http://a9.com/-/opensearch/extensions/geo/1.0/}geometry", wktWriter.Write(feature.Geometry), string.Format("intersecting {0}", feature.Attributes["NAME"]),
+
+                    var geomFilter = _filtersDefinition.Filters.FirstOrDefault(fd => fd.FullName == "{http://a9.com/-/opensearch/extensions/geo/1.0/}geometry");
+
+                    Feature[] features = null;
+                    if (geomFilter == null)
+                    {
+                        features = gfc.Features.ToArray();
+                    }
+                    else if (Configuration.Current.GeometryFilters != null && Configuration.Current.GeometryFilters.Keys.Contains(geomFilter.Label))
+                    {
+                        List<string> shapeList = Configuration.Current.GeometryFilters[geomFilter.Label];
+                        features = gfc.Features.Where(f => shapeList.Contains(f.Attributes["NAME"])).ToArray();
+                    }
+                    if (features != null)
+                    {
+                        var feature = features[rnd.Next(0, features.Length)];
+                        _filtersDefinition.AddFilter(gfc.Key, "{http://a9.com/-/opensearch/extensions/geo/1.0/}geometry", wktWriter.Write(feature.Geometry), string.Format("intersecting {0}", feature.Attributes["NAME"]),
                             GetGeometryValidator(feature),
                             null
-                            );
+                        );
+                    }
 
                 }
             }
