@@ -19,13 +19,10 @@ FROM centos:7
 # CDAB release and timestamp
 ARG CDAB_RELEASE
 ENV CDAB_RELEASE ${CDAB_RELEASE:-00}
-RUN echo "Docker image built on $(date -u) - CDAB Release v${CDAB_RELEASE}" >/etc/cdabbuild
 
-# install openssh server
-RUN yum -y install openssh-server
-
-# install openssh clients
-RUN yum -y install openssh-clients
+# install openssh server and clients
+RUN yum install -y openssh-server openssh-clients
+RUN yum install -y git java-11-openjdk rpm-build which sudo
 
 # make ssh directories
 RUN mkdir /root/.ssh
@@ -52,17 +49,14 @@ RUN echo 'export PS1="[\u@docker] \W # "' >> /root/.bash_profile
 # enable networking
 RUN echo 'NETWORKING=yes' >> /etc/sysconfig/network
 
-# install EPEL release repo
-RUN yum -y install epel-release python-setuptools
-
 # install Python
-RUN yum install -y python python-all python-pip
-# upgrade breaks pip, deactivated temporarily (produces error: No module named typing)
-# RUN pip install --upgrade pip
+RUN yum install -y gcc openssl-devel bzip2-devel libffi-devel zlib-devel xz-devel make
+RUN cd /usr/src && curl -O "https://www.python.org/ftp/python/3.7.11/Python-3.7.11.tgz" && tar xzf Python-3.7.11.tgz
+RUN cd /usr/src/Python-3.7.11 && ./configure --enable-optimizations && make altinstall
 
 # install supervisord
-RUN pip install supervisor
-RUN /usr/bin/echo_supervisord_conf > /etc/supervisord.conf
+RUN pip3.7 install supervisor
+RUN echo_supervisord_conf > /etc/supervisord.conf
 RUN mkdir -p /var/log/supervisor
 
 # make supervisor run in foreground
@@ -122,34 +116,21 @@ RUN echo 'startretries=0' >> /etc/supervisord.d/binfmt.ini
 RUN echo  >> /etc/supervisord.d/binfmt.ini
 RUN echo 'binfmt_misc /proc/sys/fs/binfmt_misc binfmt_misc none' >>/etc/fstab
 
-# install cdab-client
-ARG CDAB_CLIENT_RPM
-ADD $CDAB_CLIENT_RPM /tmp/$CDAB_CLIENT_RPM
-RUN yum localinstall -y /tmp/$CDAB_CLIENT_RPM
-
-# install cdab-remote-client
-ARG CDAB_REMOTE_CLIENT_RPM
-RUN yum install -y centos-release-scl
-ADD $CDAB_REMOTE_CLIENT_RPM /tmp/$CDAB_REMOTE_CLIENT_RPM
-RUN yum localinstall -y /tmp/$CDAB_REMOTE_CLIENT_RPM
-
 # Install traceroute
 RUN yum install -y traceroute
 
 # Install sysstat
-RUN yum install -y \ 
-    sysstat \
-    sed
+RUN yum install -y sysstat sed
 
-# add sysstat program to supervisord config
+# Add sysstat program to supervisord config
 RUN echo [program:sysstat] >> /etc/supervisord.d/sysstat.ini
 RUN echo 'command=/usr/lib64/sa/sa1 --boot' >> /etc/supervisord.d/sysstat.ini
 RUN echo  >> /etc/supervisord.d/sysstat.ini
 
-# change sysstat conf
+# Change sysstat conf
 RUN sed -i -e 's|-S DISK|-S XDISK|' /etc/sysconfig/sysstat
 
-# add crond program to supervisord config
+# Add crond program to supervisord config
 RUN sed -i -e 's|*/10|*/3|' /etc/cron.d/sysstat
 RUN echo [program:crond] >> /etc/supervisord.d/crond.ini
 RUN echo 'command=/usr/sbin/crond -n' >> /etc/supervisord.d/crond.ini
@@ -175,9 +156,21 @@ RUN curl -O https://curl.se/ca/cacert.pem && \
     cert-sync cacert.crt && \
     rm -f cacert.crt
 
-
-# a complete update
+# A complete update
 RUN yum update -y
+
+# Install cdab-client
+ARG CDAB_CLIENT_RPM
+ADD $CDAB_CLIENT_RPM /tmp/$CDAB_CLIENT_RPM
+RUN yum localinstall -y /tmp/$CDAB_CLIENT_RPM
+
+# Install cdab-remote-client
+ARG CDAB_REMOTE_CLIENT_RPM
+RUN yum install -y centos-release-scl
+ADD $CDAB_REMOTE_CLIENT_RPM /tmp/$CDAB_REMOTE_CLIENT_RPM
+RUN yum localinstall -y /tmp/$CDAB_REMOTE_CLIENT_RPM
+
+RUN echo "Docker image built on $(date -u) - CDAB Release v${CDAB_RELEASE}" >/etc/cdabbuild
 
 # launch the supervisor
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]

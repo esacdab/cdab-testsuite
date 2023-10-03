@@ -8,11 +8,11 @@ Name:           cdab-remote-client
 Url:            https://github.com/Terradue/cdab-testsuite
 License:        AGPLv3
 Group:          Productivity/Networking/Web/Servers
-Version:        1.68
+Version:        1.69
 Release:        %{_release}
 Summary:        Copernicus Sentinels Data Access Worldwide Benchmark Test Remote Client
 BuildArch:      noarch
-Requires:       bash, coreutils, centos-release-scl, rh-python36
+Requires:       bash, coreutils, centos-release-scl
 AutoReqProv:    no
 
 %description
@@ -36,16 +36,17 @@ cp -r %{_sourcedir}/etc %{buildroot}/usr/lib/cdab-remote-client/etc
 SUCCESS=0
 
 # Install OpenStack client, Google Cloud Platform Python API and Amazon AWS EC2 Python API
-/opt/rh/rh-python36/root/usr/bin/pip install --upgrade pip
-/opt/rh/rh-python36/root/usr/bin/pip install pyyaml lxml netifaces
-/opt/rh/rh-python36/root/usr/bin/pip install python-openstackclient==5.1.0
-/opt/rh/rh-python36/root/usr/bin/pip install google-api-python-client boto3
-/opt/rh/rh-python36/root/usr/bin/pip install python-cinderclient==2.2.0
+/usr/local/bin/pip3.7 install --upgrade pip
+/usr/local/bin/pip3.7 install pyyaml lxml netifaces
+/usr/local/bin/pip3.7 install python-openstackclient==5.1.0
+/usr/local/bin/pip3.7 install python-cinderclient==2.2.0
+/usr/local/bin/pip3.7 install google-api-python-client boto3
+/usr/local/bin/pip3.7 install azure-cli azure-identity azure-mgmt-resource azure-mgmt-authorization azure-mgmt-compute azure-mgmt-network urllib3==1.26.6
 
 # Add symlink to cdab-remote-client
 [ ! -f /usr/lib/cdab-remote-client/etc/config.yaml ] && cp /usr/lib/cdab-remote-client/etc/config.yaml.sample /usr/lib/cdab-remote-client/etc/config.yaml
 
-/opt/rh/rh-python36/root/usr/bin/pip install --upgrade pip
+/usr/local/bin/pip3.7 install --upgrade pip
 
 exit ${SUCCESS}
 

@@ -25,7 +25,7 @@
 # the resulting work.
 
 from cdab_shared import *
-from connectors import openstack, google, amazon
+from connectors import openstack, google, amazon, azure
 import datetime
 from enum import Enum
 import io
@@ -46,7 +46,7 @@ class TestClient:
     """Main class for remote execution of the test scenarios TS11, TS12, TS13 and TS15.
     """
 
-    VERSION = "1.68"
+    VERSION = "1.69"
 
     errors = {
         ERR_CONFIG: 'Missing or invalid configuration',
@@ -903,6 +903,8 @@ class TestClient:
                 self.connector = google.GoogleConnector(self)
             elif connector_str == 'amazon':
                 self.connector = amazon.AmazonConnector(self)
+            elif connector_str == 'azure':
+                self.connector = azure.AzureConnector(self)
             else:
                 exit_client(ERR_CONFIG, "Unknown connector: {0}".format(self.compute_config['connector']))
 
