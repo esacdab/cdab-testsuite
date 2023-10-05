@@ -40,6 +40,7 @@ namespace cdabtesttools.Data
         private static WKTWriter wktWriter = new WKTWriter();
         private static WKTReader wktreader = new WKTReader();
         private readonly LabelString psn;
+        private static Regex dateRegex = new Regex(@"_(?'yyyy'\d{4})(?'MM'\d{2})(?'dd'\d{2})T(?'HH'\d{2})(?'mm'\d{2})(?'ss'\d{2})_");
 
         public string Name { get; set; }
 
