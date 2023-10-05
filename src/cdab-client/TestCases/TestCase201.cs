@@ -356,12 +356,21 @@ namespace cdabtesttools.TestCases
 
             return catalogue_task_factory.StartNew(() =>
             {
-                int finalYear = DateTime.UtcNow.Year;
-                int finalMonth = DateTime.UtcNow.Month;
-                string finalTimeStr = parameters[""];
-                if (finalTimeStr != null) {
-                    Int32.TryParse(finalTimeStr.Substring(0, 4), out finalYear);
-                    Int32.TryParse(finalTimeStr.Substring(5, 2), out finalMonth);
+                int endYear = DateTime.UtcNow.Year;
+                int endMonth = DateTime.UtcNow.Month;
+                int startYear = 2014;
+                int startMonth = 1;
+                
+                string startTimeStr = parameters["{http://a9.com/-/opensearch/extensions/time/1.0/}start"];
+                if (!String.IsNullOrEmpty(startTimeStr)) {
+                    Int32.TryParse(startTimeStr.Substring(0, 4), out startYear);
+                    Int32.TryParse(startTimeStr.Substring(5, 2), out startMonth);
+                }
+
+                string endTimeStr = parameters["{http://a9.com/-/opensearch/extensions/time/1.0/}end"];
+                if (!String.IsNullOrEmpty(endTimeStr)) {
+                    Int32.TryParse(endTimeStr.Substring(0, 4), out endYear);
+                    Int32.TryParse(endTimeStr.Substring(5, 2), out endMonth);
                 }
 
                 long totalTotalResults = 0;
@@ -388,16 +397,24 @@ namespace cdabtesttools.TestCases
                     int year = monthCounter / 12 + 2014;
                     int month = monthCounter % 12 + 1;
 
-                    int endYear = (monthCounter + coverageMonths) / 12 + 2014;
-                    int endMonth = (monthCounter + coverageMonths) % 12 + 1;
+                    int periodEndYear = (monthCounter + coverageMonths) / 12 + 2014;
+                    int periodEndMonth = (monthCounter + coverageMonths) % 12 + 1;
 
-                    inLoop = (endYear < finalYear || endYear == finalYear && endMonth <= finalMonth);
+                    bool afterStart = (periodEndYear > startYear || periodEndYear == startYear && periodEndMonth >= startMonth);
+                    if (!afterStart) continue;
+
+                    inLoop = (year < endYear || year == endYear && month <= endMonth);
+                    if (!inLoop) break;
 
                     NameValueCollection periodParameters = new NameValueCollection(parameters);
-                    periodParameters["{http://a9.com/-/opensearch/extensions/time/1.0/}start"] = String.Format("{0}-{1:00}-01T00:00:00Z", year, month);
-                    if (endYear < finalYear || endYear == finalYear && endMonth < finalMonth || periodParameters["{http://a9.com/-/opensearch/extensions/time/1.0/}end"] == null)
+
+                    if (year > startYear || year == startYear && month > startMonth || periodParameters["{http://a9.com/-/opensearch/extensions/time/1.0/}start"] == null)
                     {
-                        periodParameters["{http://a9.com/-/opensearch/extensions/time/1.0/}end"] = String.Format("{0}-{1:00}-01T00:00:00Z", endYear, endMonth);
+                        periodParameters["{http://a9.com/-/opensearch/extensions/time/1.0/}start"] = String.Format("{0}-{1:00}-01T00:00:00Z", year, month);
+                    }
+                    if (periodEndYear < endYear || periodEndYear == endYear && periodEndMonth < endMonth || periodParameters["{http://a9.com/-/opensearch/extensions/time/1.0/}end"] == null)
+                    {
+                        periodParameters["{http://a9.com/-/opensearch/extensions/time/1.0/}end"] = String.Format("{0}-{1:00}-01T00:00:00Z", periodEndYear, periodEndMonth);
                     }
 
                     Stopwatch periodSw = new Stopwatch();

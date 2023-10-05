@@ -35,13 +35,13 @@ cp -r %{_sourcedir}/etc %{buildroot}/usr/lib/cdab-remote-client/etc
 %post
 SUCCESS=0
 
-# Install OpenStack client, Google Cloud Platform Python API and Amazon AWS EC2 Python API
+# Install OpenStack client, Google Cloud Platform Python API, Amazon AWS EC2 Python API and Microsoft Azure Python API
 /usr/local/bin/pip3.7 install --upgrade pip
 /usr/local/bin/pip3.7 install pyyaml lxml netifaces
 /usr/local/bin/pip3.7 install python-openstackclient==5.1.0
 /usr/local/bin/pip3.7 install python-cinderclient==2.2.0
 /usr/local/bin/pip3.7 install google-api-python-client boto3
-/usr/local/bin/pip3.7 install azure-cli azure-identity azure-mgmt-resource azure-mgmt-authorization azure-mgmt-compute azure-mgmt-network urllib3==1.26.6
+/usr/local/bin/pip3.7 install azure-identity azure-mgmt-resource azure-mgmt-authorization azure-mgmt-compute azure-mgmt-network urllib3==1.26.6
 
 # Add symlink to cdab-remote-client
 [ ! -f /usr/lib/cdab-remote-client/etc/config.yaml ] && cp /usr/lib/cdab-remote-client/etc/config.yaml.sample /usr/lib/cdab-remote-client/etc/config.yaml

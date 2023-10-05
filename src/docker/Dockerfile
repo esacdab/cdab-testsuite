@@ -54,8 +54,10 @@ RUN yum install -y gcc openssl-devel bzip2-devel libffi-devel zlib-devel xz-deve
 RUN cd /usr/src && curl -O "https://www.python.org/ftp/python/3.7.11/Python-3.7.11.tgz" && tar xzf Python-3.7.11.tgz
 RUN cd /usr/src/Python-3.7.11 && ./configure --enable-optimizations && make altinstall
 
+RUN yum install -y epel-release python-setuptools
+RUN yum install -y python-pip
 # install supervisord
-RUN pip3.7 install supervisor
+RUN /usr/bin/pip install supervisor
 RUN echo_supervisord_conf > /etc/supervisord.conf
 RUN mkdir -p /var/log/supervisor
 

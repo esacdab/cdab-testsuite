@@ -635,7 +635,24 @@ namespace cdabtesttools.Data
                             (IOpenSearchResultItem item) =>
                             {
                                 var date = Terradue.Metadata.EarthObservation.OpenSearch.Extensions.EarthObservationOpenSearchResultExtensions.FindEndDate(item);
-                                return date < stop;
+                                if (date.Year == 9999)
+                                {
+                                    Match dateMatch = dateRegex.Match(item.Identifier);
+                                    if (dateMatch.Success)
+                                    {
+                                        date = new DateTime(
+                                            Int32.Parse(dateMatch.Groups["yyyy"].Value),
+                                            Int32.Parse(dateMatch.Groups["MM"].Value),
+                                            Int32.Parse(dateMatch.Groups["dd"].Value),
+                                            Int32.Parse(dateMatch.Groups["HH"].Value),
+                                            Int32.Parse(dateMatch.Groups["mm"].Value),
+                                            Int32.Parse(dateMatch.Groups["ss"].Value),
+                                            DateTimeKind.Utc
+                                        );
+                                    }
+                                    Console.WriteLine("ITEM DATE: {0} {1:O}", item.Identifier, date);
+                                }
+                                return date < stop.AddDays(1);
                             },
                             null
                             );
