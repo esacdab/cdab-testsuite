@@ -8,7 +8,7 @@ Name:           cdab-remote-client
 Url:            https://github.com/Terradue/cdab-testsuite
 License:        AGPLv3
 Group:          Productivity/Networking/Web/Servers
-Version:        1.69
+Version:        1.70
 Release:        %{_release}
 Summary:        Copernicus Sentinels Data Access Worldwide Benchmark Test Remote Client
 BuildArch:      noarch
@@ -39,8 +39,9 @@ SUCCESS=0
 /opt/rh/rh-python36/root/usr/bin/pip install --upgrade pip
 /opt/rh/rh-python36/root/usr/bin/pip install pyyaml lxml netifaces
 /opt/rh/rh-python36/root/usr/bin/pip install python-openstackclient==5.1.0
-/opt/rh/rh-python36/root/usr/bin/pip install google-api-python-client boto3
 /opt/rh/rh-python36/root/usr/bin/pip install python-cinderclient==2.2.0
+/opt/rh/rh-python36/root/usr/bin/pip install openstacksdk==1.0.1
+/opt/rh/rh-python36/root/usr/bin/pip install google-api-python-client boto3
 /opt/rh/rh-python36/root/usr/bin/pip install setuptools-rust
 /opt/rh/rh-python36/root/usr/bin/pip install azure-identity azure-mgmt-resource azure-mgmt-authorization azure-mgmt-compute azure-mgmt-network urllib3==1.26.6
 
