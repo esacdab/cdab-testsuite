@@ -1,3 +1,4 @@
-#!/bin/bash
 export PYTHONIOENCODING='utf8'
-/usr/local/bin/python3.7 /usr/lib/cdab-remote-client/cdab-remote-client.py3 $@
+command="python /usr/lib/cdab-remote-client/cdab-remote-client.py3"; for a in "$@"; do command="${command} \"${a/"/\\\\"/}\""; done
+echo "$command" | scl enable rh-python36 -
+

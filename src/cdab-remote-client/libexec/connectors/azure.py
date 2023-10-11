@@ -18,6 +18,7 @@ class AzureConnector:
         self.client = client
         self.compute_config = self.client.compute_config
         self.service_provider_config = self.client.service_provider_config
+        self.available_ip_configurations = []
 
 
 
@@ -97,7 +98,7 @@ class AzureConnector:
 
 
     def prepare(self):
-        pass
+        self.find_floating_ips(self.client.total_vm_count)
 
 
     def copy_additional_files(self, run):
@@ -111,14 +112,12 @@ class AzureConnector:
         
     def create_vm(self, run):
 
-        Logger.log(LogLevel.INFO, "Finding available public IP addresses ...", run=run)
-        available_ip_configurations = self.get_available_ip_configurations()
-        if not available_ip_configurations:
-            raise Exception("No public IP address available")
-        
-        ip_configuration = available_ip_configurations[0]
-
         Logger.log(LogLevel.INFO, "Creating virtual machine ...", run=run)
+
+        if run.index >= len(self.available_ip_configurations):
+            Logger.log(LogLevel.ERROR, "No IP address available", run=run)
+
+        ip_configuration = self.available_ip_configurations[run.index]
 
         # If flavour is shorthand, make it fully qualified
         vm_config = {
@@ -234,8 +233,10 @@ class AzureConnector:
 
 
 
-    def get_available_ip_configurations(self):
-        available_ip_configurations = []
+    def find_floating_ips(self, number_needed):
+        Logger.log(LogLevel.INFO, "Obtaining list of available public IP addresses ...")
+
+        self.available_ip_configurations = []
 
         vm_list = self.compute_client.virtual_machines.list(self.compute_config['resource_group_name'])
         used_network_interfaces = [ni.id for vm in vm_list for ni in vm.network_profile.network_interfaces]
@@ -250,7 +251,13 @@ class AzureConnector:
                     used = True
                     break
             if not used:
-                available_ip_configurations.append({'id': ip_id, 'ip_address': ip.ip_address})
+                self.available_ip_configurations.append({'id': ip_id, 'ip_address': ip.ip_address})
 
-            return available_ip_configurations
+        if self.available_ip_configurations == []:
+            exit_client(ERR_CREATE, "No public IP address available")
+
+        Logger.log(LogLevel.INFO, "Available public IP addresses: {0}".format(", ".join([c['ip_address'] for c in self.available_ip_configurations])))
+
+        if len(self.available_ip_configurations) < number_needed:
+            exit_client(ERR_CREATE, "Only {0} public IP address available".format(len(self.ip_addresses)))
 
