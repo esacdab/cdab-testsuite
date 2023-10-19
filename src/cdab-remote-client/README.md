@@ -190,12 +190,7 @@ Most of the values for the various keys can be obtained from the OpenStack dashb
 * **client_secret**: The client secrete (created/obtained from the administrator web console).
 * **resource_group_name**: The resource group name (created/obtained from the administrator web console).
 * **region_name**: The reginon, e.g. *northeurope*.
-* **image**: An YAML object with the sub-keys **publisher**, **offer**, **sky**, **version**, e.g.
-        publisher: "RedHat"
-        offer: "RHEL"
-        sku: "87-gen2"
-        version: "latest"
-
+* **image**: An YAML object with the sub-keys **publisher**, **offer**, **sky**, **version**, e.g. "RedHat", "RHEL", "87-gen2", "latest"
 * **flavor_name**: Instance type of the machine (e.g. *Standard_D8s_v3*).
 * **public_key_file**: The public key file corresponding to **private_key_file**.
 
