@@ -23,6 +23,7 @@ Note: The Openstack terminology is inconsistent and might be confusing; **server
 * OpenStack client (a Python module that provides a command-line tool for OpenStack access)
 * The Amazon AWS SDK for Python
 * The Google API Client Library for Python
+* The Microsoft Azure libraries for Python
 * Root or proper _sudo_ permissions
 
 ### Installation
@@ -116,6 +117,7 @@ Currently the following APIs are supported and each have slightly different sett
 * OpenStack (default)
 * Google Cloud Platform
 * Amazon AWS EC2
+* Microsoft Azure
 
 
 ##### Common settings
@@ -177,6 +179,21 @@ Most of the values for the various keys can be obtained from the OpenStack dashb
 * **image_name**: Image ID of the to be used (usually starts with *ami-*).
 * **flavor_name**: Instance type of the machine (e.g. *t2.micro*).
 * **security_group**: Name of security group for new virtual machine. There must be a security group defined to permit inbound SSH traffic.
+
+
+##### Specific settings for Microsoft Azure
+
+* **connector**: The value has to be set to *azure*.
+* **subscription_id**: The Azure subscription ID (created/obtained from the administrator web console).
+* **tenant_id**: The tenant ID (created/obtained from the administrator web console).
+* **client_id**: The client ID (created/obtained from the administrator web console).
+* **client_secret**: The client secrete (created/obtained from the administrator web console).
+* **resource_group_name**: The resource group name (created/obtained from the administrator web console).
+* **region_name**: The reginon, e.g. *northeurope*.
+* **image**: An YAML object with the sub-keys **publisher**, **offer**, **sky**, **version**, e.g. "RedHat", "RHEL", "87-gen2", "latest"
+* **flavor_name**: Instance type of the machine (e.g. *Standard_D8s_v3*).
+* **public_key_file**: The public key file corresponding to **private_key_file**.
+
 
 
 #### Target site settings

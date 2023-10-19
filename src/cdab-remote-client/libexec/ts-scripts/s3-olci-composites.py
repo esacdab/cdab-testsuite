@@ -18,8 +18,7 @@ from shapely.wkt import loads
 from shapely.geometry import box
 import shutil
 import math
-import re
-import xml.etree.ElementTree as etree
+import json
 
 
 def get_mask(idepix, classif_flags):
@@ -200,36 +199,29 @@ def s3_rgb_composite(red, green, blue, classif_flags, geo_transform, projection_
     return rgb_r, rgb_g, rgb_b, alpha
 
 
-def extract_info(atom_file):
-    namespaces = {
-        'atom': 'http://www.w3.org/2005/Atom',
-        'dc': 'http://purl.org/dc/elements/1.1/',
-        'dct': 'http://purl.org/dc/terms/',
-    }
-
-    feed = etree.fromstring(open(atom_file, 'r').read())
-    entry = feed.find('./atom:entry', namespaces)
-
+def extract_info(search_result_file):
     result = {}
-    date = entry.find('./dc:date', namespaces).text
-    date_match = re.match('(.*)/(.*)', date)
-    if date_match:
-        result['startdate'] = date_match.group(1)
-        result['enddate'] = date_match.group(2)
-    result['wkt'] = entry.find('./dct:spatial', namespaces).text
+    with open(search_result_file) as f:
+        search_result = json.loads(f.read())
+        result['startdate'] = search_result['value'][0]['ContentDate']['Start']
+        result['enddate'] = search_result['value'][0]['ContentDate']['End']
+        footprint = search_result['value'][0]['Footprint']
+        #footprint = "ssss"
+        footprint = footprint[footprint.find(';') + 1:]
+        result['wkt'] = footprint
 
     return [ result ]
 
 
 # Get parameters
 
-atom_file = sys.argv[1]
+search_result_file = sys.argv[1]
 sen_folder = sys.argv[2]
 
 s3_file = "{0}/xfdumanifest.xml".format(sen_folder)
 
 input_metadata = gp.GeoDataFrame(
-    extract_info(atom_file)
+    extract_info(search_result_file)
 )
 
 input_metadata['geometry'] = input_metadata['wkt'].apply(loads)

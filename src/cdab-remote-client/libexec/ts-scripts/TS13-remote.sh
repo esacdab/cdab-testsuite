@@ -13,16 +13,39 @@ function select_input() {
     # If no inputs are given, select random files from less than a week ago
     if [ ! -s "input" ]
     then
-        echo "Selecting input from catalogue" >> cdab.stderr
+        echo "Selecting input from catalogue.datasspace.copernicus.eu" >> cdab.stderr
         now=$(date +%s)
-        start=$(date -d@$((now - 6 * 24 * 60 * 60)) +%Y-"%m-%dT00:00:00Z")
-        end=$(date -d@$((now - 5 * 24 * 60 * 60)) +%Y-"%m-%dT00:00:00Z")
-        curl "https://catalog.terradue.com/sentinel3/search/?pt=OL_1_EFR___&start=${start}&stop=${end}&count=1&do=terradue" | \
-            xmllint --format - > result.atom.xml
-        grep "<eop:identifier>" result.atom.xml | sed -E "s#.*<.*?>(.*)<.*>.*#\1#g" > input
+        starttime=$(date -d@$((now - 6 * 24 * 60 * 60)) +%Y-"%m-%dT00:00:00Z")
+        endtime=$(date -d@$((now - 5 * 24 * 60 * 60)) +%Y-"%m-%dT00:00:00Z")
+
+        filter="Collection/Name%20eq%20%27SENTINEL-3%27"
+        filter="${filter}%20and%20Attributes/OData.CSC.StringAttribute/any(att:att/Name%20eq%20%27productType%27%20and%20att/OData.CSC.StringAttribute/Value%20eq%20%27OL_1_EFR___%27)"
+        filter="${filter}%20and%20ContentDate/Start%20ge%20${starttime}"
+        filter="${filter}%20and%20ContentDate/Start%20lt%20${endtime}"
+
+        curl -o query-result.json "https://catalogue.dataspace.copernicus.eu/odata/v1/Products?\$filter=${filter}&\$top=1"
+
+        uid=$(cat query-result.json | sed -E 's#.*"Id":"([^"]+)".*#\1#g')
+        id=$(cat query-result.json | sed -E 's#.*"Name":"([^"]+)\.SEN3".*#\1#g')
+        mv query-result.json $id.json
+        url="https://catalogue.dataspace.copernicus.eu/odata/v1/Products(${uid})/\$value"
+        echo "$id,$url" > download-urls
 
     else
         echo "Using provided input file" >> cdab.stderr
+
+        for id in $(cat input)
+        do
+            echo "Querying catalogue.datasspace.copernicus.eu for $id" >> cdab.stderr
+            filter="Name%20eq%20%27${id}.SEN3%27"
+
+            curl  -o query-result.json "https://catalogue.dataspace.copernicus.eu/odata/v1/Products?\$filter=${filter}"
+            uid=$(cat query-result.json | sed -E 's#.*"Id":"([^"]+)".*#\1#g')
+            mv query-result.json $id.json
+            url="https://catalogue.dataspace.copernicus.eu/odata/v1/Products(${uid})/\$value"
+            echo "$id,$url" >> download-urls
+
+        done
     fi
 
     if [ ! -s input ]
@@ -32,35 +55,28 @@ function select_input() {
     fi
 
     echo "Done" >> cdab.stderr
+    return 0
 }
 
 
 
 function stage_in() {
     id=$1
-    curl "https://catalog.terradue.com/sentinel3/search/?uid=${id}&do=terradue" | \
-        xmllint --format - > current.atom.xml
+    url=$2
+    token=$3
 
-    download_url=$(grep "<link rel=\"enclosure" current.atom.xml | grep "copernicus.eu" | sed -E "s#.*href=\"(.*?)\".*#\1#g")
-    echo "DOWNLOAD URL = $download_url" >> cdab.stderr >> cdab.stderr
-
-    if [ -z "$download_url" ]
-    then
-        echo "No download URL found" >> cdab.stderr
-        return 1
-    fi
-    
-    curl -L -v -u "${apihub_credentials}" -o "${id}.zip" ${download_url}
+    echo "Download from dataspace.copernicus.eu" >> cdab.stderr
+    curl -L -v -H "Authorization: Bearer ${token}" --location-trusted -o "${id}.zip" "${url}"
     unzip -o -d input_data "${id}.zip"
     if [ $? -ne 0 ]
     then
-	echo "Error while unzipping file" >> cdab.stderr
+	    echo "Error while unzipping file" >> cdab.stderr
         return 1
     fi
 
     sen_folder=$(find input_data -type d -name "*.SEN3")/
 
-    return $res
+    return 0
 }
 
 
@@ -71,7 +87,9 @@ docker_image="$2"   # docker-co.terradue.com/geohazards-tep/ewf-s3-olci-composit
 test_site="$3"   # e.g. CREO
 provider="$4"
 target_credentials=$5   # not used
-apihub_credentials="$6"   # API Hub credentials
+cds_credentials="$6"   # API Hub credentials
+cds_username=$(echo $cds_credentials | sed -E 's#([^:]*):.*#\1#g')
+cds_password=$(echo $cds_credentials | sed -E 's#[^:]*:(.*)#\1#g')
 
 cd "$working_dir"
 
@@ -86,23 +104,37 @@ then
     res=$?
 fi
 
+
 # Process input
 total_processings=0
 wrong_processings=0
 total_process_duration=0
 
-for id in $(cat input)
+for line in $(cat download-urls)
 do
     ((total_processings++))
 
+    id=$(echo $line | sed -E 's#(.*),.*#\1#g')
+    url=$(echo $line | sed -E 's#.*,(.*)#\1#g')
+
+    echo "Get download token from identity.dataspace.copernicus.eu" >> cdab.stderr
+    curl -o token-response.json \
+        --data-urlencode "grant_type=password" \
+        --data-urlencode "username=${cds_username}" \
+        --data-urlencode "password=${cds_password}" \
+        --data-urlencode "client_id=cdse-public" \
+        "https://identity.dataspace.copernicus.eu/auth/realms/CDSE/protocol/openid-connect/token"
+
+    token=$(cat token-response.json | sed -E 's#.*"access_token":"([^"]+)".*#\1#g')
+
     echo "Stage in $id" >> cdab.stderr
     # Stage in input product
-    stage_in $id
+    stage_in $id $url $token
     res=$?
     echo "EXIT CODE = $res" >> cdab.stderr
     if [ $res -eq 0 ]
     then
-        input_reference="https://catalog.terradue.com/sentinel3/search?uid=${id}"
+        input_reference="${id}"
     else
         ((wrong_processings++))
         echo "Stage in of $id FAILED" >> cdab.stderr
@@ -112,8 +144,8 @@ do
     start_time=$(date +%s%N)
     if [ $res -eq 0 ]
     then
-        echo "DOCKER COMMAND: docker run --memory=15g --rm --workdir /res -u root -v ${PWD}:/res \"${docker_image}\" /opt/anaconda/envs/env_ewf_s3_olci_composites/bin/python s3-olci-composites.py /res/current.atom.xml /res/${sen_folder}" >> cdab.stderr
-        docker run --memory=15g --rm --workdir /res -u root -v ${PWD}:/res "${docker_image}" /opt/anaconda/envs/env_ewf_s3_olci_composites/bin/python s3-olci-composites.py /res/current.atom.xml /res/${sen_folder} > cdab.stdout 2>> cdab.stderr
+        echo "DOCKER COMMAND: docker run --memory=15g --rm --workdir /res -u root -v ${PWD}:/res \"${docker_image}\" /opt/anaconda/envs/env_ewf_s3_olci_composites/bin/python s3-olci-composites.py /res/$id.json /res/${sen_folder}" >> cdab.stderr
+        docker run --memory=15g --rm --workdir /res -u root -v ${PWD}:/res "${docker_image}" /opt/anaconda/envs/env_ewf_s3_olci_composites/bin/python s3-olci-composites.py /res/$id.json /res/${sen_folder} > cdab.stdout 2>> cdab.stderr
         res=$?
         echo "EXIT CODE = $res" >> cdab.stderr
     fi
