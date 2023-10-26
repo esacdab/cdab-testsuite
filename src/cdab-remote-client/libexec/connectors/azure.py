@@ -172,6 +172,13 @@ class AzureConnector:
 
             vm_result = poller.result()
             run.vm_id = vm_result.id
+
+            try:
+                full_disk_id = vm_result.storage_profile.os_disk.managed_disk.id
+                run.volume_id = full_disk_id.split('/')[-1]
+            except:
+                Logger.log(LogLevel.WARN, "Disk ID not retrieved (disk has to be deleted manually)", run=run)
+
             Logger.log(LogLevel.INFO, "Virtual machine '{0}{1}' created (ID = {2})".format(self.compute_config['vm_name'], run.suffix, run.vm_id), run=run)
     
             run.public_ip = ip_configuration['ip_address']
@@ -213,6 +220,13 @@ class AzureConnector:
                 vm_result = poller.result()
 
                 Logger.log(LogLevel.INFO, "Virtual machine deleted", run=run)
+
+                Logger.log(LogLevel.INFO, "Deleting attached disk '{0}' ...".format(run.volume_id), run=run)
+                poller = self.compute_client.disks.begin_delete(self.compute_config['resource_group_name'], run.volume_id)
+                disk_result = poller.result()
+
+                Logger.log(LogLevel.INFO, "Disk deleted", run=run)
+
                 run.delete_end_time = datetime.datetime.utcnow()
                 deleted = True
 
