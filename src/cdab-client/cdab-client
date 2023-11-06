@@ -36,7 +36,7 @@ if [[ $@ == *"TS1"* ]]; then
     newargs=${newargs/--testsite_name/-n}
     newargs=${newargs/--load_factor/-lf}
 
-    newargs=`echo ${newargs} | sed -e 's/\(-\w*\)\ /\1=/g'`
+    newargs=`echo ${newargs} | sed -e 's/\( -\w*\)\ /\1=/g'`
 
     exec /usr/bin/cdab-remote-client $newargs
 fi
