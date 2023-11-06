@@ -49,7 +49,7 @@ cdab-remote-client -h
 And the output is the following:
 
 ```
-cdab-remote-client version 1.72 (c) 2023 Terradue Srl.
+cdab-remote-client version 1.73 (c) 2023 Terradue Srl.
 
 USAGE: cdab-remote-client [OPTIONS] <test-scenario>
 
