@@ -1,19 +1,14 @@
 from cdab_shared import *
+import os
 import datetime
 from enum import Enum
-import io
-import json
-import os
-from os import path
+import requests
 import re
-import socket
-import subprocess
-import sys
-import threading
 import time
-import xml.etree.ElementTree as ET
-import yaml
-
+try:
+    import oathtool
+except:
+    pass
 
 
 class OpenStackConnector:
@@ -49,6 +44,10 @@ class OpenStackConnector:
             exit_client(ERR_CONFIG, "Values missing for one or more configuration keys")
 
         # OpenStack options that have to be used at every call
+        self.set_cloud_based_options()
+
+
+    def set_cloud_based_options(self):
         self.cloud_base_options = [
             '--os-auth-url', self.compute_config['auth_url'],
             '--os-username', self.compute_config['username'],
@@ -60,8 +59,6 @@ class OpenStackConnector:
 
         if self.compute_config['identity_provider']:
             self.cloud_base_options.extend(['--os-identity-provider', self.compute_config['identity_provider']])
-        if self.compute_config['identity_provider_url']:
-            self.cloud_base_options.extend(['--os-identity-provider-url', self.compute_config['identity_provider_url']])
         if self.compute_config['protocol']:
             self.cloud_base_options.extend(['--os-protocol', self.compute_config['protocol']])
         if self.compute_config['auth_type']:
@@ -90,13 +87,28 @@ class OpenStackConnector:
             self.cloud_base_options.extend(['--os-client-id', self.compute_config['client_id']])
         if self.compute_config['client_secret']:
             self.cloud_base_options.extend(['--os-client-secret', self.compute_config['client_secret']])
-        
+
+        if self.compute_config['identity_provider_url']:
+            if 'two_factor_authentication_key' in self.compute_config and self.compute_config['two_factor_authentication_key']:
+                self.get_token()
+                if 'access_token' in self.compute_config:
+                    # self.cloud_base_options.extend(['--os-access-token', compute_config['access_token']])
+                    os.environ['OS_ACCESS_TOKEN'] = self.compute_config['access_token']
+                if 'token' in self.compute_config:
+                    # self.cloud_base_options.extend(['--os-token', compute_config['token']])
+                    # os.environ['OS_TOKEN'] = compute_config['token']
+                    pass
+            else:
+                self.cloud_base_options.extend(['--os-identity-provider-url', self.compute_config['identity_provider_url']])
+
+            
 
     def delete_old_resources(self, max_retention_hours):
         
         now = datetime.datetime.utcnow()
 
         # Find and delete old VMs
+        
         options = ['openstack', 'server', 'list', '-f', 'json']
         options.extend(self.cloud_base_options)
         response = execute_local_command(None, options, True)
@@ -224,14 +236,27 @@ class OpenStackConnector:
         if self.compute_config['floating_ip']:
             self.assign_floating_ip(run)
         elif 'addresses' in response:
-            ip_match = re.match(r".*(, |=)((\d{1,3}\.\d{1,3})\.\d{1,3}\.\d{1,3}).*", response['addresses'])
-            if ip_match:
-                run.public_ip = ip_match[2]
-                Logger.log(LogLevel.INFO, "IP address {0} assigned automatically at creation".format(run.public_ip), run=run)
+            addresses = response['addresses']
+            if isinstance(addresses, dict):
+                if self.compute_config['floating_ip_network'] and self.compute_config['floating_ip_network'] in addresses and len(self.compute_config['floating_ip_network']) != 0:
+                    run.public_ip = self.compute_config['floating_ip_network'][0]
+                else:
+                    all_ips = [v for k in addresses for v in addresses[k]]
+                    ip = next((v for v in all_ips if not v.startswith("10.") and not v.startswith("192.")), None)
+                    if ip:
+                        run.public_ip = ip
+                    else:
+                        raise Exception("No IP address found among: {0}".format(', '.join(all_ips)))
 
-            if run.public_ip is None:
-                raise Exception("No IP address found: {0}".format(response['addresses']))
-                return False
+            else:
+                ip_match = re.match(r".*(, |=)((\d{1,3}\.\d{1,3})\.\d{1,3}\.\d{1,3}).*", addresses)
+                if ip_match:
+                    run.public_ip = ip_match[2]
+                    Logger.log(LogLevel.INFO, "IP address {0} assigned automatically at creation".format(run.public_ip), run=run)
+
+                if run.public_ip is None:
+                    raise Exception("No IP address found: {0}".format(response['addresses']))
+                    return False
 
 
         # Wait for actual availability (SSH):
@@ -380,6 +405,8 @@ class OpenStackConnector:
     def delete_vm(self, run):
         if run.vm_id is None:
             return True
+
+        self.set_cloud_based_options()
 
         max_retries = 3
         if self.compute_config['use_volume'] and run.volume_id and run.volume_attached:
@@ -539,6 +566,46 @@ class OpenStackConnector:
         if len(self.ip_addresses) < number_needed:
             exit_client(ERR_CREATE, "Only {0} floating IP address available".format(len(self.ip_addresses)))
 
+    
+    def get_token(self):
+        # "https://identity.cloudferro.com/auth/realms/Creodias-new/protocol/openid-connect/token"
+        #KEYCLOAK_RESPONSE=$(curl -s -w '\n%{http_code}' -X POST "$KEYCLOAK_TOKEN_ENDPOINT" 
+        # -H "Content-Type: application/x-www-form-urlencoded" 
+        # --data-urlencode "password=$OS_PASSWORD" 
+        # --data-urlencode "username=$OS_USERNAME" 
+        # -d "grant_type=password&totp=$OS_TOTP_INPUT&client_id=$OS_CLIENT_ID&client_secret=$OS_CLIENT_SECRET")
+        
+        totp = oathtool.generate_otp(self.compute_config['two_factor_authentication_key'])
+
+        response = requests.post(self.compute_config['identity_provider_url'],
+            data={
+                'username': self.compute_config['username'],
+                'password': self.compute_config['password'],
+                'grant_type': 'password',
+                'client_id': self.compute_config['client_id'],
+                'client_secret': self.compute_config['client_secret'],
+                'totp': totp
+            }
+        )
+
+        content = response.json()
+
+        if 'access_token' in content:
+            self.compute_config['access_token'] = content['access_token']
+        else:
+            Logger.log(LogLevel.ERROR, "Cannot obtain Keycloak token (OS_ACCESS_TOKEN)")
+            return
+
+        options = ['openstack', 'token', 'issue', '-f', 'json', '-c', 'id']
+        options.extend(self.cloud_base_options)
+        options.extend(['--os-access-token', self.compute_config['access_token']])
+        response = execute_local_command(None, options, True)
+
+        if 'id' in response:
+            self.compute_config['token'] = response['id']
+        else:
+            Logger.log(LogLevel.ERROR, "Cannot obtain Keystone token (OS_TOKEN)")
+            return
 
 
 

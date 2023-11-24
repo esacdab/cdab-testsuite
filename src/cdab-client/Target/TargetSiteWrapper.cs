@@ -103,67 +103,70 @@ namespace cdabtesttools.Target
             // Uncomment the following line for testing the sample target sites.
             // return TargetType.DIAS;
 
-            if (Wrapper.Settings.ServiceUrl.Host == "catalogue.onda-dias.eu")
+            string host = Wrapper.Settings.ServiceUrl.Host;
+
+            if (host == "catalogue.onda-dias.eu")
             {
                 log.DebugFormat("TARGET TYPE: DIAS");
                 return TargetType.DIAS;
             }
 
-            if (Wrapper.Settings.ServiceUrl.Host == "finder.creodias.eu" || Wrapper.Settings.ServiceUrl.Host == "datahub.creodias.eu" || Wrapper.Settings.ServiceUrl.Host == "catalogue.dataspace.copernicus.eu" || Wrapper.Settings.ServiceUrl.Host == "finder.code-de.org")
+            if (host == "finder.creodias.eu" || host == "datahub.creodias.eu" || host == "datahub.code-de.org" ||
+                host == "catalogue.dataspace.copernicus.eu" || host == "finder.code-de.org" || host == "datahub.code-de.org")
             {
                 log.DebugFormat("TARGET TYPE: DIAS");
                 return TargetType.DIAS;
             }
 
-            if (Wrapper.Settings.ServiceUrl.Host.Contains("mundiwebservices.com"))
+            if (host.Contains("mundiwebservices.com"))
             {
                 log.DebugFormat("TARGET TYPE: DIAS");
                 return TargetType.DIAS;
             }
 
-            if (Wrapper.Settings.ServiceUrl.Host.Contains("sobloo.eu"))
+            if (host.Contains("sobloo.eu"))
             {
                 log.DebugFormat("TARGET TYPE: DIAS");
                 return TargetType.DIAS;
             }
 
-            if (Wrapper.Settings.ServiceUrl.Host.Contains("wekeo.eu"))
+            if (host.Contains("wekeo.eu"))
             {
                 log.DebugFormat("TARGET TYPE: DIAS");
                 return TargetType.DIAS;
             }
 
-            if (Wrapper.Settings.ServiceUrl.Host == "api.daac.asf.alaska.edu")
+            if (host == "api.daac.asf.alaska.edu")
             {
                 log.DebugFormat("TARGET TYPE: ASF");
                 return TargetType.ASF;
             }
 
-            if (Wrapper.Settings.ServiceUrl.Host == "m2m.cr.usgs.gov")
+            if (host == "m2m.cr.usgs.gov")
             {
                 log.DebugFormat("TARGET TYPE: USGS");
                 return TargetType.USGS;
             }
 
-            if (Wrapper.Settings.ServiceUrl.Host.EndsWith("copernicus.eu") || Wrapper.Settings.ServiceUrl.AbsolutePath.Contains("/dhus"))
+            if (host.EndsWith("copernicus.eu") || Wrapper.Settings.ServiceUrl.AbsolutePath.Contains("/dhus"))
             {
                 log.DebugFormat("TARGET TYPE: DATAHUB");
                 return TargetType.DATAHUB;
             }
 
-            if (Wrapper.Settings.ServiceUrl.Host.EndsWith("amazon.com") || Wrapper.Settings.ServiceUrl.Host.EndsWith("sentinel-hub.com"))
+            if (host.EndsWith("amazon.com") || host.EndsWith("sentinel-hub.com"))
             {
                 log.DebugFormat("TARGET TYPE: AMAZON");
                 return TargetType.THIRDPARTY;
             }
 
-            if (Wrapper.Settings.ServiceUrl.Host.EndsWith("googleapis.com") || Wrapper.Settings.ServiceUrl.Host.EndsWith("google.com"))
+            if (host.EndsWith("googleapis.com") || host.EndsWith("google.com"))
             {
                 log.DebugFormat("TARGET TYPE: GOOGLE");
                 return TargetType.THIRDPARTY;
             }
 
-            if (Wrapper.Settings.ServiceUrl.Host.EndsWith("microsoft.com"))
+            if (host.EndsWith("microsoft.com"))
             {
                 log.DebugFormat("TARGET TYPE: MICROSOFT");
                 return TargetType.THIRDPARTY;
@@ -185,7 +188,7 @@ namespace cdabtesttools.Target
                 log.WarnFormat("Credentials are not set, target sites' services requiring credentials for data access will fail!");
 
 
-            if ((target_uri.Host == "catalogue.dataspace.copernicus.eu" || target_uri.Host == "datahub.creodias.eu") && target_uri.AbsolutePath.Contains("odata"))
+            if ((target_uri.Host == "catalogue.dataspace.copernicus.eu" || target_uri.Host == "datahub.creodias.eu" || target_uri.Host == "datahub.code-de.org") && target_uri.AbsolutePath.Contains("odata"))
             {
                 CopernicusOdataWrapper copernicusOdataWrapper = new CopernicusOdataWrapper((NetworkCredential)target_creds, targetSiteConfig.Data.Url);
                 return copernicusOdataWrapper;

@@ -25,7 +25,11 @@
 # the resulting work.
 
 from cdab_shared import *
-from connectors import openstack, google, amazon, azure
+from connectors import openstack
+try:
+    from connectors import google, amazon, azure
+except:
+    pass
 import datetime
 from enum import Enum
 import io
@@ -46,7 +50,7 @@ class TestClient:
     """Main class for remote execution of the test scenarios TS11, TS12, TS13 and TS15.
     """
 
-    VERSION = "1.73"
+    VERSION = "1.76"
 
     errors = {
         ERR_CONFIG: 'Missing or invalid configuration',
@@ -1045,14 +1049,14 @@ class TestClient:
         run.install_start_time = datetime.datetime.utcnow()
 
         # Software installation
-        execute_remote_command(self.compute_config, run, "sudo yum install -y yum-utils device-mapper-persistent-data lvm2")
+        execute_remote_command(self.compute_config, run, "sudo yum install -y yum-utils device-mapper-persistent-data lvm2 wget")
         execute_remote_command(self.compute_config, run, "sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo")
         # Fails since November 2023 because of broken dependency
         # execute_remote_command(self.compute_config, run, "sudo yum install docker-ce docker-ce-cli containerd.io -y")
         execute_remote_command(self.compute_config, run, "sudo yum install -y http://mirror.centos.org/centos/7/extras/x86_64/Packages/container-selinux-2.107-1.el7_6.noarch.rpm")
         execute_remote_command(self.compute_config, run, "sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo")
         execute_remote_command(self.compute_config, run,
-            "wget http://mirror.centos.org/centos/7/extras/x86_64/Packages/slirp4netns-0.4.3-4.el7_8.x86_64.rpm "
+            "wget -q http://mirror.centos.org/centos/7/extras/x86_64/Packages/slirp4netns-0.4.3-4.el7_8.x86_64.rpm "
             "http://mirror.centos.org/centos/7/extras/x86_64/Packages/fuse3-devel-3.6.1-4.el7.x86_64.rpm "
             "http://mirror.centos.org/centos/7/extras/x86_64/Packages/fuse3-libs-3.6.1-4.el7.x86_64.rpm "
             "http://mirror.centos.org/centos/7/extras/x86_64/Packages/fuse-overlayfs-0.7.2-6.el7_8.x86_64.rpm"
@@ -1061,7 +1065,7 @@ class TestClient:
         execute_remote_command(self.compute_config, run, "sudo yum install -y slirp4netns-0.4.3-4.el7_8.x86_64.rpm fuse3-libs-3.6.1-4.el7.x86_64.rpm fuse-overlayfs-0.7.2-6.el7_8.x86_64.rpm fuse3-devel-3.6.1-4.el7.x86_64.rpm")
 
         execute_remote_command(self.compute_config, run,
-            "wget https://download.docker.com/linux/centos/7/x86_64/stable/Packages/docker-ce-cli-24.0.6-1.el7.x86_64.rpm "
+            "wget -q https://download.docker.com/linux/centos/7/x86_64/stable/Packages/docker-ce-cli-24.0.6-1.el7.x86_64.rpm "
             "https://download.docker.com/linux/centos/7/x86_64/stable/Packages/containerd.io-1.6.18-3.1.el7.x86_64.rpm "
             "https://download.docker.com/linux/centos/7/x86_64/stable/Packages/docker-ce-24.0.6-1.el7.x86_64.rpm"
         )

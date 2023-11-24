@@ -412,7 +412,7 @@ namespace cdabtesttools.Data
             return (IOpenSearchResultItem item)
                     =>
             {
-                return item.PublishDate > date;   // ??? publish date corresponds to CreationDate (>= IngestionDate)
+                return item.PublishDate == DateTime.MinValue || item.PublishDate > date;   // ??? publish date corresponds to CreationDate (>= IngestionDate)
             };
         }
 
