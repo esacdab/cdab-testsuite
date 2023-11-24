@@ -38,6 +38,8 @@ if [[ $@ == *"TS1"* ]]; then
 
     newargs=`echo ${newargs} | sed -e 's/\( -\w*\)\ /\1=/g'`
 
+    echo "Command: /usr/bin/cdab-remote-client $newargs" >&2
+
     exec /usr/bin/cdab-remote-client $newargs
 fi
 

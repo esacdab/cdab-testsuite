@@ -133,6 +133,7 @@ def execute_local_command(run, options, json_output=False, exit_code=None, quiet
             response = json.loads(cp.stdout)
             return response
         except:
+            Logger.log(LogLevel.ERROR, "Invalid response (not JSON): {0}".format(cp.stdout))
             raise Exception("Invalid response (not JSON)")
 
     return cp.stdout
