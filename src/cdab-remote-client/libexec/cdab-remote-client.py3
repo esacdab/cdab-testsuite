@@ -1306,8 +1306,8 @@ class TestClient:
         stdout_file = "cdab{0}.stdout".format(run.suffix)
         stderr_file = "cdab{0}.stderr".format(run.suffix)
 
-        output = execute_remote_command(self.compute_config, run, "for d in $(find {0} -type d; do ls -l $d; done".format(working_dir))
-        Logger.log(LogLevel.DEBUG, "Content of working directory: {0}".format(output))
+        output = execute_remote_command(self.compute_config, run, """for d in $(find {0} -type d); do echo "DIRECTORY: $d"; ls -l $d; done""".format(working_dir))
+        Logger.log(LogLevel.DEBUG, "Content of working directory:\n{0}".format(output))
 
         copy_file(self.compute_config, run, run.cdab_json_file, "{0}/{1}".format(working_dir, self.remote_cdab_json_file), False, ignore_error=True)
         copy_file(self.compute_config, run, run.junit_file, "{0}/junit.xml".format(working_dir), False, ignore_error=True)
