@@ -310,7 +310,11 @@ namespace cdabtesttools.Measurement
 
                 double pct = -1;
 
-                if (totalResultsRef > 0 && totalResults >= 0)
+                if (totalResultsRef == 0)
+                {
+                    pct = 100;
+                }
+                else if (totalResultsRef > 0 && totalResults >= 0)
                 {
                     pct = Math.Round((totalResults / (double)totalResultsRef) * 100, 2);
                 }
@@ -383,7 +387,11 @@ namespace cdabtesttools.Measurement
 
                 double pct = -1;
 
-                if (refTotalResults > 0 && targetTotalResults >= 0)
+                if (refTotalResults == 0)
+                {
+                    pct = 100;
+                }
+                else if (refTotalResults > 0 && targetTotalResults >= 0)
                 {
                     pct = Math.Round((targetTotalResults / (double)refTotalResults) * 100, 2);
                 }
@@ -454,7 +462,11 @@ namespace cdabtesttools.Measurement
 
                 double pct = -1;
 
-                if (refTotalResults > 0 && targetTotalResults >= 0)
+                if (refTotalResults == 0)
+                {
+                    pct = 100;
+                }
+                else if (refTotalResults > 0 && targetTotalResults >= 0)
                 {
                     pct = Math.Round((targetTotalResults / (double)refTotalResults) * 100, 2);
                 }

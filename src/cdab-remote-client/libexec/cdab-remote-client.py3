@@ -1306,6 +1306,9 @@ class TestClient:
         stdout_file = "cdab{0}.stdout".format(run.suffix)
         stderr_file = "cdab{0}.stderr".format(run.suffix)
 
+        output = execute_remote_command(self.compute_config, run, "for d in $(find {0} -type d; do ls -l $d; done".format(working_dir))
+        Logger.log(LogLevel.DEBUG, "Content of working directory: {0}".format(output))
+
         copy_file(self.compute_config, run, run.cdab_json_file, "{0}/{1}".format(working_dir, self.remote_cdab_json_file), False, ignore_error=True)
         copy_file(self.compute_config, run, run.junit_file, "{0}/junit.xml".format(working_dir), False, ignore_error=True)
         copy_file(self.compute_config, run, stdout_file, "{0}/cdab.stdout".format(working_dir), False, ignore_error=True)
@@ -1360,7 +1363,13 @@ class TestClient:
             if not run.test_end_time:
                 continue   # if there is no end time for a run, there are no output files
             with open(run.cdab_json_file, 'r') as file:
-                result_file = json.loads(file.read())
+                try:
+                    result_file = json.loads(file.read())
+                except:
+                    Logger.log(LogLevel.ERROR, "Error in results JSON file; content below:", run=run)
+                    print(file.read(), file=sys.stderr)
+                    file.close()
+                    raise
                 if test_target_url is None and 'testTargetUrl' in result_file and result_file['testTargetUrl']:
                     test_target_url = result_file['testTargetUrl']
                 
