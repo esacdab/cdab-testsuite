@@ -79,12 +79,36 @@ namespace cdabtesttools.Config
         {
             if (string.IsNullOrEmpty(Data.Credentials))
                 return null;
+            if (Data.Credentials.Contains(" "))   // multiple credentials are configured
+                return null;
             if (Data.Credentials.Contains(":"))
             {
-                var _credstrings = Data.Credentials.Split(':');
-                return new NetworkCredential(_credstrings[0], _credstrings[1]);
+                var pair = Data.Credentials.Split(':');
+                return new NetworkCredential(pair[0], pair[1]);
             }
             throw new NotImplementedException("Credentials format not supported");
         }
+
+        internal NetworkCredential[] GetMultipleDataAccessNetworkCredentials()
+        {
+            if (string.IsNullOrEmpty(Data.Credentials))
+                return null;
+            string[] credList = Data.Credentials.Split(' ');
+            List<NetworkCredential> credentialsList = new List<NetworkCredential>();
+            foreach (string credStr in credList)
+            {
+                if (credStr.Contains(":"))
+                {
+                    var pair = credStr.Split(':');
+                    credentialsList.Add(new NetworkCredential(pair[0], pair[1]));
+                }
+                else
+                {
+                    throw new NotImplementedException("Credentials format not supported");
+                }
+            }
+            return credentialsList.ToArray();
+        }
+
     }
 }
