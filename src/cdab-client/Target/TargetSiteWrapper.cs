@@ -178,76 +178,87 @@ namespace cdabtesttools.Target
 
         public static IDataHubSourceWrapper CreateDataAccessWrapper(TargetSiteConfiguration targetSiteConfig, FiltersDefinition filters = null, bool enableDirectDataAccess = false)
         {
-            var target_uri = targetSiteConfig.GetDataAccessUri();
-            var target_creds = targetSiteConfig.GetDataAccessNetworkCredentials();
+            Uri targetUri = targetSiteConfig.GetDataAccessUri();
+            NetworkCredential targetCredentials = targetSiteConfig.GetDataAccessNetworkCredentials();
+            NetworkCredential[] targetCredentialsList = null;
+            if (targetCredentials == null)
+            {
+                targetCredentialsList = targetSiteConfig.GetMultipleDataAccessNetworkCredentials();
+                // Set single targetCredentials to first element of list
+                // (in case list is configured for target that does not support lists)
+                if (targetCredentialsList != null && targetCredentialsList.Length != 0)
+                {
+                    targetCredentials = targetCredentialsList[0];
+                }
+            }
 
             // Uncomment the following line for testing the sample target sites.
-            // return new SampleWrapper(target_uri, target_creds);
+            // return new SampleWrapper(targetUri, targetCredentials);
 
-            if (target_creds == null)
+            if (targetCredentials == null)
                 log.WarnFormat("Credentials are not set, target sites' services requiring credentials for data access will fail!");
 
 
-            if ((target_uri.Host == "catalogue.dataspace.copernicus.eu" || target_uri.Host == "datahub.creodias.eu" || target_uri.Host == "datahub.code-de.org") && target_uri.AbsolutePath.Contains("odata"))
+            if ((targetUri.Host == "catalogue.dataspace.copernicus.eu" || targetUri.Host == "datahub.creodias.eu" || targetUri.Host == "datahub.code-de.org") && targetUri.AbsolutePath.Contains("odata"))
             {
-                CopernicusOdataWrapper copernicusOdataWrapper = new CopernicusOdataWrapper((NetworkCredential)target_creds, targetSiteConfig.Data.Url);
+                CopernicusOdataWrapper copernicusOdataWrapper = new CopernicusOdataWrapper(targetCredentials, targetCredentialsList, targetSiteConfig.Data.Url);
                 return copernicusOdataWrapper;
             }
 
-            if (target_uri.Host == "catalogue.onda-dias.eu")
+            if (targetUri.Host == "catalogue.onda-dias.eu")
             {
-                OndaDiasWrapper ondaDiasWrapper = new OndaDiasWrapper(new Uri(string.Format("https://catalogue.onda-dias.eu/dias-catalogue")), (NetworkCredential)target_creds, targetSiteConfig.Storage.ToOpenStackStorageSettings());
+                OndaDiasWrapper ondaDiasWrapper = new OndaDiasWrapper(new Uri(string.Format("https://catalogue.onda-dias.eu/dias-catalogue")), (NetworkCredential)targetCredentials, targetSiteConfig.Storage.ToOpenStackStorageSettings());
                 return ondaDiasWrapper;
             }
 
-            if (target_uri.Host == "finder.creodias.eu" || target_uri.Host == "datahub.creodias.eu" || target_uri.Host == "catalogue.dataspace.copernicus.eu")
+            if (targetUri.Host == "finder.creodias.eu" || targetUri.Host == "datahub.creodias.eu" || targetUri.Host == "catalogue.dataspace.copernicus.eu")
             {
                 CreoDiasWrapper creoDiasWrapper;
                 if (targetSiteConfig.Data.Url != null)
                 {
-                    creoDiasWrapper = new CreoDiasWrapper(target_creds, osUrl: targetSiteConfig.Data.Url, openStackStorageSettings: targetSiteConfig.Storage.ToOpenStackStorageSettings() );
+                    creoDiasWrapper = new CreoDiasWrapper(targetCredentials, osUrl: targetSiteConfig.Data.Url, openStackStorageSettings: targetSiteConfig.Storage.ToOpenStackStorageSettings() );
                 }
                 else
                 {
-                    creoDiasWrapper = new CreoDiasWrapper(target_creds, openStackStorageSettings: targetSiteConfig.Storage.ToOpenStackStorageSettings() );
+                    creoDiasWrapper = new CreoDiasWrapper(targetCredentials, openStackStorageSettings: targetSiteConfig.Storage.ToOpenStackStorageSettings() );
                 }
                 creoDiasWrapper.EnableDirectDataAccess = enableDirectDataAccess;
                 return creoDiasWrapper;
             }
 
-            if (target_uri.Host == "finder.code-de.org")
+            if (targetUri.Host == "finder.code-de.org")
             {
                 CodeDeDiasWrapper codeDeDiasWrapper;
                 if (targetSiteConfig.Data.Url != null)
                 {
-                    codeDeDiasWrapper = new CodeDeDiasWrapper(target_creds, osUrl: targetSiteConfig.Data.Url, openStackStorageSettings: targetSiteConfig.Storage.ToOpenStackStorageSettings() );
+                    codeDeDiasWrapper = new CodeDeDiasWrapper(targetCredentials, osUrl: targetSiteConfig.Data.Url, openStackStorageSettings: targetSiteConfig.Storage.ToOpenStackStorageSettings() );
                 }
                 else
                 {
-                    codeDeDiasWrapper = new CodeDeDiasWrapper(target_creds, openStackStorageSettings: targetSiteConfig.Storage.ToOpenStackStorageSettings() );
+                    codeDeDiasWrapper = new CodeDeDiasWrapper(targetCredentials, openStackStorageSettings: targetSiteConfig.Storage.ToOpenStackStorageSettings() );
                 }
                 codeDeDiasWrapper.EnableDirectDataAccess = enableDirectDataAccess;
                 return codeDeDiasWrapper;
             }
 
-            if (target_uri.Host.Contains("mundiwebservices.com"))
+            if (targetUri.Host.Contains("mundiwebservices.com"))
             {
-                var mundiDiasWrapper = new MundiDiasWrapper(target_creds, openStackStorageSettings: targetSiteConfig.Storage.ToOpenStackStorageSettings() );
+                var mundiDiasWrapper = new MundiDiasWrapper(targetCredentials, openStackStorageSettings: targetSiteConfig.Storage.ToOpenStackStorageSettings() );
                 mundiDiasWrapper.S3KeyId = targetSiteConfig.Data.S3KeyId;
                 mundiDiasWrapper.S3SecretKey = targetSiteConfig.Data.S3SecretKey;
                 return mundiDiasWrapper;
             }
 
-            if (target_uri.Host.Contains("sobloo.eu"))
+            if (targetUri.Host.Contains("sobloo.eu"))
             {
-                var soblooDiasWrapper = new SoblooDiasWrapper(target_creds);
+                var soblooDiasWrapper = new SoblooDiasWrapper(targetCredentials);
                 soblooDiasWrapper.S3StorageSettings = targetSiteConfig.Storage.ToS3StorageSettings();
                 return soblooDiasWrapper;
             }
 
-            if (target_uri.Host.Contains("wekeo.eu"))
+            if (targetUri.Host.Contains("wekeo.eu"))
             {
-                var wekeoDiasWrapper = new WekeoDiasWrapper(target_creds, targetSiteConfig.Data.Url, "application/json", targetSiteConfig.Storage.ToOpenStackStorageSettings());
+                var wekeoDiasWrapper = new WekeoDiasWrapper(targetCredentials, targetSiteConfig.Data.Url, "application/json", targetSiteConfig.Storage.ToOpenStackStorageSettings());
                 wekeoDiasWrapper.EnableDirectDataAccess = enableDirectDataAccess;
                 if (targetSiteConfig.Data.Catalogue.LimitQuery != null && targetSiteConfig.Data.Catalogue.LimitQuery.Value)
                 {
@@ -307,48 +318,48 @@ namespace cdabtesttools.Target
                 return wekeoDiasWrapper;
             }
 
-            if (target_uri.Host == "api.daac.asf.alaska.edu")
+            if (targetUri.Host == "api.daac.asf.alaska.edu")
             {
-                return new AsfApiWrapper(target_uri, (NetworkCredential)target_creds);
+                return new AsfApiWrapper(targetUri, (NetworkCredential)targetCredentials);
             }
 
-            if (target_uri.Host == "m2m.cr.usgs.gov")
+            if (targetUri.Host == "m2m.cr.usgs.gov")
             {
-                return new UsgsDataWrapper(new Uri(string.Format("https://m2m.cr.usgs.gov/api/api")), (NetworkCredential)target_creds);
+                return new UsgsDataWrapper(new Uri(string.Format("https://m2m.cr.usgs.gov/api/api")), (NetworkCredential)targetCredentials);
             }
 
-            if (target_uri.Host.EndsWith("copernicus.eu") || target_uri.AbsolutePath.EndsWith("/dhus"))
+            if (targetUri.Host.EndsWith("copernicus.eu") || targetUri.AbsolutePath.EndsWith("/dhus"))
             {
                 // OData API only for copernicus.eu, not other similar providers
-                if (target_uri.Host.EndsWith("copernicus.eu") && filters != null && filters.GetFilters().Any(f => f.Key == "archiveStatus"))
+                if (targetUri.Host.EndsWith("copernicus.eu") && filters != null && filters.GetFilters().Any(f => f.Key == "archiveStatus"))
                 {
-                    UriBuilder urib = new UriBuilder(target_uri);
-                    urib.Path += target_uri.AbsolutePath.Replace("/search", "").TrimEnd('/').EndsWith("odata/v1") ? "" : "/odata/v1";
-                    return new DHuSWrapper(urib.Uri, (NetworkCredential)target_creds);
+                    UriBuilder urib = new UriBuilder(targetUri);
+                    urib.Path += targetUri.AbsolutePath.Replace("/search", "").TrimEnd('/').EndsWith("odata/v1") ? "" : "/odata/v1";
+                    return new DHuSWrapper(urib.Uri, (NetworkCredential)targetCredentials);
                 }
-                return new DHuSWrapper(target_uri, (NetworkCredential)target_creds);
+                return new DHuSWrapper(targetUri, (NetworkCredential)targetCredentials);
             }
 
-            if (target_uri.Host.EndsWith("amazon.com"))
+            if (targetUri.Host.EndsWith("amazon.com"))
             {
-                //var searchWrapper = new DHuSWrapper(new Uri("https://scihub.copernicus.eu/apihub"), (NetworkCredential)target_creds);
+                //var searchWrapper = new DHuSWrapper(new Uri("https://scihub.copernicus.eu/apihub"), (NetworkCredential)targetCredentials);
                 //var amazonWrapper = new AmazonOldWrapper(targetSiteConfig.Data.S3SecretKey, targetSiteConfig.Data.S3KeyId, searchWrapper);
-                var amazonWrapper = new AmazonStacWrapper(targetSiteConfig.Data.S3SecretKey, targetSiteConfig.Data.S3KeyId, (NetworkCredential)target_creds);
+                var amazonWrapper = new AmazonStacWrapper(targetSiteConfig.Data.S3SecretKey, targetSiteConfig.Data.S3KeyId, (NetworkCredential)targetCredentials);
                 amazonWrapper.AllowOpenSearch = targetSiteConfig.Data.Catalogue.AllowOpenSearch;
                 return amazonWrapper;
             }
 
-            if (target_uri.Host.EndsWith("googleapis.com") || target_uri.Host.EndsWith("google.com"))
+            if (targetUri.Host.EndsWith("googleapis.com") || targetUri.Host.EndsWith("google.com"))
             {
-                //var searchWrapper = new DHuSWrapper(new Uri("https://scihub.copernicus.eu/apihub"), (NetworkCredential)target_creds);
+                //var searchWrapper = new DHuSWrapper(new Uri("https://scihub.copernicus.eu/apihub"), (NetworkCredential)targetCredentials);
                 //var googleWrapper = new GoogleWrapper(targetSiteConfig.AccountFile, targetSiteConfig.ProjectId, searchWrapper);
-                var googleWrapper = new GoogleWrapper(targetSiteConfig.AccountFile, targetSiteConfig.ProjectId, (NetworkCredential)target_creds, "https://cloud.google.com");
+                var googleWrapper = new GoogleWrapper(targetSiteConfig.AccountFile, targetSiteConfig.ProjectId, (NetworkCredential)targetCredentials, "https://cloud.google.com");
                 return googleWrapper;
             }
 
-            if (target_uri.Host.EndsWith("microsoft.com"))
+            if (targetUri.Host.EndsWith("microsoft.com"))
             {
-                var googleWrapper = new MicrosoftWrapper((NetworkCredential)target_creds, "https://planetarycomputer.microsoft.com");
+                var googleWrapper = new MicrosoftWrapper((NetworkCredential)targetCredentials, "https://planetarycomputer.microsoft.com");
                 return googleWrapper;
             }
 
