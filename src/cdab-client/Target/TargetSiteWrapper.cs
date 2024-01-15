@@ -53,6 +53,7 @@ namespace cdabtesttools.Target
         private IDataHubSourceWrapper wrapper;
         private Terradue.OpenSearch.Engine.OpenSearchEngine ose;
         private readonly TargetSiteConfiguration targetSiteConfig;
+        private readonly bool enableDirectDataAccess = false;
 
         /// <summary>
         /// Gets the type of this target site wrapper.
@@ -91,6 +92,7 @@ namespace cdabtesttools.Target
         {
             Name = name;
             this.targetSiteConfig = targetSiteConfig;
+            this.enableDirectDataAccess = enableDirectDataAccess;
             ose = new Terradue.OpenSearch.Engine.OpenSearchEngine();
             ose.RegisterExtension(new Terradue.OpenSearch.Engine.Extensions.AtomOpenSearchEngineExtension());
             ose.RegisterExtension(new Terradue.OpenSearch.GeoJson.Extensions.FeatureCollectionOpenSearchEngineExtension());
@@ -372,7 +374,7 @@ namespace cdabtesttools.Target
 
         internal IOpenSearchable CreateOpenSearchableEntity(FiltersDefinition filters = null, int maxRetries = 3, bool forceTotalResults = false, bool optimizeForCounting = false)
         {
-            IDataHubSourceWrapper wrapper = CreateDataAccessWrapper(TargetSiteConfig, filters, false);
+            IDataHubSourceWrapper wrapper = CreateDataAccessWrapper(TargetSiteConfig, filters, enableDirectDataAccess);
             wrapper.Settings.MaxRetries = 3;
 
             OpenSearchableFactorySettings ossettings = new OpenSearchableFactorySettings(ose)
