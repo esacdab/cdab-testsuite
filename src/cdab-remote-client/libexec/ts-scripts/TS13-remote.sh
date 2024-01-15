@@ -70,7 +70,7 @@ function stage_in() {
     unzip -o -d input_data "${id}.zip"
     if [ $? -ne 0 ]
     then
-	    echo "Error while unzipping file" >> cdab.stderr
+        echo "Error while unzipping file" >> cdab.stderr
         return 1
     fi
 
@@ -89,7 +89,7 @@ provider="$4"
 target_credentials=$5   # not used
 cds_credentials="$6"   # API Hub credentials
 cds_username=$(echo $cds_credentials | sed -E 's#([^:]*):.*#\1#g')
-cds_password=$(echo $cds_credentials | sed -E 's#[^:]*:(.*)#\1#g')
+cds_password=$(echo $cds_credentials | sed -E 's#[^:]*:([^ ]*).*#\1#g')
 
 cd "$working_dir"
 
@@ -108,6 +108,7 @@ fi
 # Process input
 total_processings=0
 wrong_processings=0
+process_duration=0
 total_process_duration=0
 
 for line in $(cat download-urls)
