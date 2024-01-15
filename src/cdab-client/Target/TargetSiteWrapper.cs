@@ -202,6 +202,10 @@ namespace cdabtesttools.Target
             if ((targetUri.Host == "catalogue.dataspace.copernicus.eu" || targetUri.Host == "datahub.creodias.eu" || targetUri.Host == "datahub.code-de.org") && targetUri.AbsolutePath.Contains("odata"))
             {
                 CopernicusOdataWrapper copernicusOdataWrapper = new CopernicusOdataWrapper(targetCredentials, targetCredentialsList, targetSiteConfig.Data.Url);
+                copernicusOdataWrapper.S3AccessKey = targetSiteConfig.Data.S3KeyId;
+                copernicusOdataWrapper.S3SecretKey = targetSiteConfig.Data.S3SecretKey;
+                copernicusOdataWrapper.S3Endpoint = targetSiteConfig.Data.S3Endpoint;
+                copernicusOdataWrapper.EnableDirectDataAccess = enableDirectDataAccess;
                 return copernicusOdataWrapper;
             }
 

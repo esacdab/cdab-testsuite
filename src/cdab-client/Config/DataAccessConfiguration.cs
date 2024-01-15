@@ -34,6 +34,8 @@ namespace cdabtesttools.Config
 
         public string S3KeyId { get; set; }
 
+        public string S3Endpoint { get; set; }
+
         public DataAccessConfiguration() : this("https://scihub.copernicus.eu/dhus", null) { }
 
         public DataAccessConfiguration(string url, string credentials)
