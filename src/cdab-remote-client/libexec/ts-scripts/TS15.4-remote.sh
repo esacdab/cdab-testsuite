@@ -210,8 +210,8 @@ working_dir="$1"
 # 2nd argument is docker image ID, not used
 test_site="$3" # e.g. CREO
 provider="$4"
-credentials="$5"
-backup_credentials="$6"
+credentials=$(echo $5 | sed -E 's# .*##g')
+backup_credentials=$(echo $6 | sed -E 's# .*##g')
 cat_creds=""
 
 stage_in_docker_image=terradue/stars:1.3.6

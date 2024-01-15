@@ -1368,7 +1368,6 @@ class TestClient:
                 except:
                     Logger.log(LogLevel.ERROR, "Error in results JSON file; content below:", run=run)
                     print(file.read(), file=sys.stderr)
-                    file.close()
                     raise
                 if test_target_url is None and 'testTargetUrl' in result_file and result_file['testTargetUrl']:
                     test_target_url = result_file['testTargetUrl']
@@ -1392,8 +1391,6 @@ class TestClient:
 
                     all_test_case_nodes.append(test_case_result_node)
             
-                file.close()
-
         if test_target_url is None:
             test_target_url = self.test_target_url
 
