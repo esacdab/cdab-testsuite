@@ -21,6 +21,7 @@ using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Terradue.Metadata.EarthObservation.OpenSearch.Extensions;
@@ -64,19 +65,14 @@ namespace cdabtesttools.SampleTarget
             //return new SampleVirtualOpenSearchable(this, settings);
         }
 
-
-        public HttpWebRequest CreateAvailabilityTestRequest()
+        public HttpRequestMessage CreateAvailabilityTestRequest()
         {
-            HttpWebRequest request = WebRequest.CreateHttp(new Uri("https://www.terradue.com"));
-            request.Method = "HEAD";
-            request.Timeout = 60000;
-            request.KeepAlive = false;
-            request.Proxy = null;
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Head, Settings.ServiceUrl);
             return request;
         }
 
 
-        public void AuthenticateRequest(HttpWebRequest request)
+        public void AuthenticateRequest(HttpRequestMessage request)
         {
             // Add authentication header or similar for download request, e.g.
 
@@ -100,12 +96,7 @@ namespace cdabtesttools.SampleTarget
 
             // The enclosue URI is replaced with a fixed resource here for testing purposes,
             // replace the following line with the commented line below to download the actual resource
-            HttpWebRequest request = WebRequest.CreateHttp(new Uri("https://www.terradue.com/wp-content/uploads/2017/03/home2-2.jpg"));
-            //HttpWebRequest request = WebRequest.CreateHttp(enclosure.Uri);
-            request.Timeout = 30000;
-            request.ReadWriteTimeout = 900000;
-            request.KeepAlive = false;
-            request.Proxy = null;
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, new Uri("https://www.terradue.com/wp-content/uploads/2017/03/home2-2.jpg"));
             AuthenticateRequest(request);
 
             // Possible classes that implement IAssetAccess:

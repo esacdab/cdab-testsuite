@@ -52,4 +52,4 @@ The CDAB Test Suite is free software: it can be redistributed and/or modified un
 
 <hr/>
 <p align="center">Funded by EU</p>
-<p align="center"><img src="copernicus-logo.png" alt="Copernicus" height="125"/><img src="esa-logo.png" alt="ESA" height="125"/></p>
+<p align="center"><img src="doc/images/copernicus-logo.png" alt="Copernicus" height="125"/><img src="doc/images/esa-logo.png" alt="ESA" height="125"/></p>

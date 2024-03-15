@@ -43,6 +43,7 @@ using Terradue.OpenSearch.Result;
 using Terradue.OpenSearch.DataHub.Dias;
 using Terradue.ServiceModel.Ogc.Eop21;
 using Terradue.ServiceModel.Syndication;
+using System.Net.Security;
 
 namespace cdabtesttools.TestCases
 {
@@ -60,7 +61,8 @@ namespace cdabtesttools.TestCases
         protected int max_try_for_finding_download = 3;
 
         public TestCase301(ILog log, TargetSiteWrapper target, List<IOpenSearchResultItem> foundItems) :
-            this(log, target, 1, foundItems) {}
+            this(log, target, 1, foundItems)
+        { }
 
         public TestCase301(ILog log, TargetSiteWrapper target, int load_factor, List<IOpenSearchResultItem> foundItems) :
             base("TC301", "Single Remote Download")
@@ -113,6 +115,13 @@ namespace cdabtesttools.TestCases
 
         protected virtual void CreateDownloadRequestAndEnqueue(IOpenSearchResultItem item)
         {
+            ServicePointManager.ServerCertificateValidationCallback +=
+                (sender, cert, chain, error) =>
+                {
+                    // error = SslPolicyErrors.None;
+                    return true;
+                };
+
             log.DebugFormat("Creating download request for {0}...", item.Identifier);
             try
             {
@@ -128,6 +137,8 @@ namespace cdabtesttools.TestCases
             catch (Exception e)
             {
                 log.WarnFormat("NOT OK: {0}", e.Message);
+                if (e.InnerException != null)
+                    log.Debug(e.Message);
                 log.Debug(e.StackTrace);
             }
         }
@@ -231,7 +242,8 @@ namespace cdabtesttools.TestCases
             long totalByteCounter = 0;
 
             TestUnitResultStatus tcrStatus = TestUnitResultStatus.Complete;
-            if ( requests == null || requests.Count() == 0){
+            if (requests == null || requests.Count() == 0)
+            {
                 log.DebugFormat("[{1}] No download request for {0}. Skipping test unit.", enclosureAccess.Uri, taskId);
                 tcrStatus = TestUnitResultStatus.NotStarted;
             }
@@ -261,12 +273,13 @@ namespace cdabtesttools.TestCases
 
                     using (ITransferResponse response = resp.Result)
                     {
-
                         log.InfoFormat("[{1}] > {3} Status Code {0} ({2}ms)", response.StatusCode, taskId, respTime[i], enclosureAccess.AccessMethod);
                         metrics.Add(new StringMetric(MetricName.httpStatusCode, string.Format("{0}:{1}", (int)response.StatusCode, response.StatusDescription), ""));
                         if (!(response.StatusCode == TransferStatusCode.OK || response.StatusCode == TransferStatusCode.Accepted))
                         {
                             log.DebugFormat("[{0}] < Not OK. Exception: {1}", taskId, response.StatusDescription);
+                            var stream = response.GetResponseStream();
+                            log.DebugFormat("[{0}] < Response: {1}", taskId, stream != null ? new StreamReader(stream).ReadToEnd() : "No response");
                             metrics.Add(new ExceptionMetric(new Exception(
                                 string.Format("[{0}] < Not OK. Exception: {1}", taskId, response.StatusDescription))));
                         }
@@ -379,7 +392,7 @@ namespace cdabtesttools.TestCases
                 FiltersDefinition fd = DataHelper.GenerateFiltersDefinitionFromItem("Download", enclosureAccess.SourceItem);
                 metrics.Add(new StringMetric(MetricName.dataCollectionDivision, fd.Label, "string"));
                 tcr.FiltersDefinition = fd;
-                
+
                 metrics.Add(new StringMetric(MetricName.dataAccess, GetDataAccessStr(enclosureAccess.AccessMethod, target), "string"));
             }
             tcr.State = enclosureAccess;

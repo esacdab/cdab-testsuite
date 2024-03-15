@@ -134,7 +134,7 @@ namespace cdabtesttools.TestCases
 
             if (uploadRequest is HttpTransferRequest) {
                 var httpUploadRequest = uploadRequest as HttpTransferRequest;
-                httpUploadRequest.HttpWebRequest.AllowWriteStreamBuffering = false;
+                // httpUploadRequest.HttpWebRequest.AllowWriteStreamBuffering = false;
             }
 
             uploadRequests.Enqueue(uploadRequest);

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # cdab-client is part of the software suite used to run Test Scenarios 
 # for bechmarking various Copernicus Data Provider targets.
@@ -26,7 +26,7 @@
 
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/cdab-client
 
-if [[ $@ == *"TS1"* ]]; then
+if [[ -n "$@" && $@ == *"TS1"* ]]; then
     newargs="$@"
     newargs=${newargs/-tn/-ts}
     newargs=${newargs/--target_name/-ts}
@@ -43,4 +43,4 @@ if [[ $@ == *"TS1"* ]]; then
     exec /usr/bin/cdab-remote-client $newargs
 fi
 
-exec mono $MONO_OPTIONS /usr/lib/cdab-client/bin/cdab-testtools.exe "$@"
+exec /usr/lib/cdab-client/cdab-testtools "$@"

@@ -5,10 +5,11 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Apihub TS01",
-            "type": "mono",
+            "name": "Launch blank",
+            "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/bin/Debug/net7.0/cdab-testtools",
             "cwd": "${workspaceRoot}",
             "args": [
                 "-v",
@@ -18,38 +19,41 @@
             ]
         },
         {
-            "name": "Scihub TS01",
-            "type": "mono",
+            "name": "CDSE OData TS01",
+            "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/bin/Debug/net7.0/cdab-testtools",
             "cwd": "${workspaceRoot}",
             "args": [
                 "-v",
                 "-tsn=Local",
                 "-lf=1",
-                "-tn=SciHub",
+                "-tn=das-od-cf",
                 "TS01"
             ]
         },
         {
-            "name": "Scihub TS02",
-            "type": "mono",
+            "name": "CDSE OData TS02",
+            "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/bin/Debug/net7.0/cdab-testtools",
             "cwd": "${workspaceRoot}",
             "args": [
                 "-v",
                 "-tsn=Local",
                 "-lf=1",
-                "-tn=SciHub",
+                "-tn=das-od-cf",
                 "TS02"
             ]
         },
         {
             "name": "Scihub TS04",
-            "type": "mono",
+            "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/bin/Debug/net7.0/cdab-testtools",
             "cwd": "${workspaceRoot}",
             "args": [
                 "-v",
@@ -61,22 +65,24 @@
         },
         {
             "name": "HellenicHub TS01",
-            "type": "mono",
+            "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/bin/Debug/net7.0/cdab-testtools",
             "cwd": "${workspaceRoot}",
             "args": [
                 "-v",
                 "-tsn=Local",
-                "-tn=HellenicHub",
+                "-tn=hellenic",
                 "TS01"
             ]
         },
         {
             "name": "Cophub TS02",
-            "type": "mono",
+            "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/bin/Debug/net7.0/cdab-testtools",
             "cwd": "${workspaceRoot}",
             "args": [
                 "-v",
@@ -88,9 +94,10 @@
         },
         {
             "name": "Cophub TS04",
-            "type": "mono",
+            "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/bin/Debug/net7.0/cdab-testtools",
             "cwd": "${workspaceRoot}",
             "args": [
                 "-v",
@@ -102,9 +109,10 @@
         },
         {
             "name": "Cophub TS05",
-            "type": "mono",
+            "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/bin/Debug/net7.0/cdab-testtools",
             "cwd": "${workspaceRoot}",
             "args": [
                 "-v",
@@ -116,23 +124,25 @@
         },
         {
             "name": "HellenicHub TS05",
-            "type": "mono",
+            "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/bin/Debug/net7.0/cdab-testtools",
             "cwd": "${workspaceRoot}",
             "args": [
                 "-v",
                 "-tsn=Local",
                 "-lf=1",
-                "-tn=HellenicHub",
+                "-tn=hellenic",
                 "TS05"
             ]
         },
         {
             "name": "Cophub TS06",
-            "type": "mono",
+            "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/bin/Debug/net7.0/cdab-testtools",
             "cwd": "${workspaceRoot}",
             "args": [
                 "-v",
@@ -144,9 +154,10 @@
         },
         {
             "name": "Colhub TS01",
-            "type": "mono",
+            "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/bin/Debug/net7.0/cdab-testtools",
             "cwd": "${workspaceRoot}",
             "args": [
                 "-v",
@@ -157,9 +168,10 @@
         },
         {
             "name": "Colhub TS03",
-            "type": "mono",
+            "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/bin/Debug/net7.0/cdab-testtools",
             "cwd": "${workspaceRoot}",
             "args": [
                 "-v",
@@ -170,9 +182,10 @@
         },
         {
             "name": "Colhub TS05",
-            "type": "mono",
+            "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/bin/Debug/net7.0/cdab-testtools",
             "cwd": "${workspaceRoot}",
             "args": [
                 "-v",
@@ -182,232 +195,249 @@
             ]
         },
         {
-            "name": "CreoDias TS01",
-            "type": "mono",
+            "name": "creodias TS01",
+            "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/bin/Debug/net7.0/cdab-testtools",
             "cwd": "${workspaceRoot}",
             "args": [
                 "-v",
                 "-tsn=Local",
                 "-lf=1",
-                "-tn=CREO",
+                "-tn=creodias",
                 "TS01"
             ]
         },
         {
-            "name": "CreoDias TS02",
-            "type": "mono",
+            "name": "creodias TS02",
+            "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/bin/Debug/net7.0/cdab-testtools",
             "cwd": "${workspaceRoot}",
             "args": [
                 "-v",
                 "-tsn=Local",
                 "-lf=2",
-                "-tn=CREO",
+                "-tn=creodias",
                 "TS02"
             ]
         },
         {
-            "name": "CreoDias TS03",
-            "type": "mono",
+            "name": "creodias TS03",
+            "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/bin/Debug/net7.0/cdab-testtools",
             "cwd": "${workspaceRoot}",
             "args": [
                 "-v",
                 "-tsn=Local",
                 "-lf=1",
-                "-tn=CREO",
+                "-tn=creodias",
                 "TS03"
             ]
         },
         {
-            "name": "CreoDias TS04",
-            "type": "mono",
+            "name": "creodias TS04",
+            "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/bin/Debug/net7.0/cdab-testtools",
             "cwd": "${workspaceRoot}",
             "args": [
                 "-v",
                 "-tsn=Local",
                 "-lf=1",
-                "-tn=CREO",
+                "-tn=creodias",
                 "TS04"
             ]
         },
         {
-            "name": "CreoDias TS05",
-            "type": "mono",
+            "name": "creodias TS05",
+            "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/bin/Debug/net7.0/cdab-testtools",
             "cwd": "${workspaceRoot}",
             "args": [
                 "-v",
                 "-tsn=Local",
-                "-tn=CREO",
+                "-tn=creodias",
                 "TS05"
             ]
         },
         {
-            "name": "CreoDias TS06",
-            "type": "mono",
+            "name": "creodias TS06",
+            "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/bin/Debug/net7.0/cdab-testtools",
             "cwd": "${workspaceRoot}",
             "args": [
                 "-v",
                 "-tsn=Local",
-                "-tn=CREO",
+                "-tn=creodias",
                 "TS06"
             ]
         },
         {
-            "name": "CreoDias TS07",
-            "type": "mono",
+            "name": "creodias TS07",
+            "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/bin/Debug/net7.0/cdab-testtools",
             "cwd": "${workspaceRoot}",
             "args": [
                 "-v",
                 "-tsn=Local",
                 "-lf=1",
-                "-tn=CREO",
+                "-tn=creodias",
                 "TS07"
             ]
         },
         {
-            "name": "CreoDias TS01",
-            "type": "mono",
+            "name": "creodias TS01",
+            "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/bin/Debug/net7.0/cdab-testtools",
             "cwd": "${workspaceRoot}",
             "args": [
                 "-v",
                 "-tsn=Local",
                 "-lf=1",
-                "-tn=CREO",
+                "-tn=creodias",
                 "TS01"
             ]
         },
         {
             "name": "CODE-DE TS01",
-            "type": "mono",
+            "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/bin/Debug/net7.0/cdab-testtools",
             "cwd": "${workspaceRoot}",
             "args": [
                 "-v",
                 "-tsn=Local",
                 "-lf=1",
-                "-tn=CODE_DE",
+                "-tn=codede",
                 "TS01"
             ]
         },
         {
             "name": "ONDA TS01",
-            "type": "mono",
+            "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/bin/Debug/net7.0/cdab-testtools",
             "cwd": "${workspaceRoot}",
             "args": [
                 "-v",
                 "-tsn=Local",
                 "-lf=1",
-                "-tn=ONDA",
+                "-tn=onda",
                 "TS01"
             ]
         },
         {
             "name": "ONDA TS02",
-            "type": "mono",
+            "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/bin/Debug/net7.0/cdab-testtools",
             "cwd": "${workspaceRoot}",
             "args": [
                 "-v",
                 "-tsn=Local",
                 "-lf=2",
-                "-tn=ONDA",
+                "-tn=onda",
                 "TS02"
             ]
         },
         {
             "name": "ONDA TS03",
-            "type": "mono",
+            "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/bin/Debug/net7.0/cdab-testtools",
             "cwd": "${workspaceRoot}",
             "args": [
                 "-v",
                 "-tsn=Local",
                 "-lf=2",
-                "-tn=ONDA",
+                "-tn=onda",
                 "TS03"
             ]
         },
         {
             "name": "ONDA TS04",
-            "type": "mono",
+            "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/bin/Debug/net7.0/cdab-testtools",
             "cwd": "${workspaceRoot}",
             "args": [
                 "-v",
                 "-tsn=Local",
                 "-lf=3",
-                "-tn=ONDA",
+                "-tn=onda",
                 "TS04"
             ]
         },
         {
             "name": "ONDA TS05",
-            "type": "mono",
+            "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/bin/Debug/net7.0/cdab-testtools",
             "cwd": "${workspaceRoot}",
             "args": [
                 "-v",
                 "-tsn=Local",
                 "-lf=2",
-                "-tn=ONDA",
+                "-tn=onda",
                 "TS05"
             ]
         },
         {
             "name": "ONDA TS06",
-            "type": "mono",
+            "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/bin/Debug/net7.0/cdab-testtools",
             "cwd": "${workspaceRoot}",
             "args": [
                 "-v",
                 "-tsn=Local",
                 "-lf=2",
-                "-tn=ONDA",
+                "-tn=onda",
                 "TS06"
             ]
         },
         {
             "name": "ONDA TS07",
-            "type": "mono",
+            "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/bin/Debug/net7.0/cdab-testtools",
             "cwd": "${workspaceRoot}",
             "args": [
                 "-v",
                 "-tsn=Local",
                 "-lf=1",
-                "-tn=ONDA",
+                "-tn=onda",
                 "TS07"
             ]
         },
         {
             "name": "Mundi TS01",
-            "type": "mono",
+            "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/bin/Debug/net7.0/cdab-testtools",
             "cwd": "${workspaceRoot}",
             "args": [
                 "-v",
@@ -419,9 +449,10 @@
         },
         {
             "name": "Mundi TS02",
-            "type": "mono",
+            "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/bin/Debug/net7.0/cdab-testtools",
             "cwd": "${workspaceRoot}",
             "args": [
                 "-v",
@@ -433,9 +464,10 @@
         },
         {
             "name": "Mundi TS03",
-            "type": "mono",
+            "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/bin/Debug/net7.0/cdab-testtools",
             "cwd": "${workspaceRoot}",
             "args": [
                 "-v",
@@ -447,9 +479,10 @@
         },
         {
             "name": "Mundi TS05",
-            "type": "mono",
+            "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/bin/Debug/net7.0/cdab-testtools",
             "cwd": "${workspaceRoot}",
             "args": [
                 "-v",
@@ -461,9 +494,10 @@
         },
         {
             "name": "Mundi TS06",
-            "type": "mono",
+            "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/bin/Debug/net7.0/cdab-testtools",
             "cwd": "${workspaceRoot}",
             "args": [
                 "-v",
@@ -475,9 +509,10 @@
         },
         {
             "name": "Mundi TS07",
-            "type": "mono",
+            "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/bin/Debug/net7.0/cdab-testtools",
             "cwd": "${workspaceRoot}",
             "args": [
                 "-v",
@@ -489,9 +524,10 @@
         },
         {
             "name": "Mundi TS07 (lf=2)",
-            "type": "mono",
+            "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/bin/Debug/net7.0/cdab-testtools",
             "cwd": "${workspaceRoot}",
             "args": [
                 "-v",
@@ -503,9 +539,10 @@
         },
         {
             "name": "Sobloo TS01",
-            "type": "mono",
+            "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/bin/Debug/net7.0/cdab-testtools",
             "cwd": "${workspaceRoot}",
             "args": [
                 "-v",
@@ -516,9 +553,10 @@
         },
         {
             "name": "Sobloo TS02",
-            "type": "mono",
+            "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/bin/Debug/net7.0/cdab-testtools",
             "cwd": "${workspaceRoot}",
             "args": [
                 "-v",
@@ -529,9 +567,10 @@
         },
         {
             "name": "Sobloo TS03",
-            "type": "mono",
+            "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/bin/Debug/net7.0/cdab-testtools",
             "cwd": "${workspaceRoot}",
             "args": [
                 "-v",
@@ -542,9 +581,10 @@
         },
         {
             "name": "Sobloo TS04",
-            "type": "mono",
+            "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/bin/Debug/net7.0/cdab-testtools",
             "cwd": "${workspaceRoot}",
             "args": [
                 "-v",
@@ -555,9 +595,10 @@
         },
         {
             "name": "Sobloo TS05",
-            "type": "mono",
+            "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/bin/Debug/net7.0/cdab-testtools",
             "cwd": "${workspaceRoot}",
             "args": [
                 "-v",
@@ -568,9 +609,10 @@
         },
         {
             "name": "Sobloo TS07",
-            "type": "mono",
+            "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/bin/Debug/net7.0/cdab-testtools",
             "cwd": "${workspaceRoot}",
             "args": [
                 "-v",
@@ -582,134 +624,174 @@
         },
         {
             "name": "ASF TS01",
-            "type": "mono",
+            "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/bin/Debug/net7.0/cdab-testtools",
             "cwd": "${workspaceRoot}",
             "args": [
                 "-v",
                 "-tsn=Local",
-                "-tn=ASF",
+                "-tn=asf",
                 "TS01"
             ]
         },
         {
             "name": "ASF TS02",
-            "type": "mono",
+            "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/bin/Debug/net7.0/cdab-testtools",
             "cwd": "${workspaceRoot}",
             "args": [
                 "-v",
                 "-tsn=Local",
                 "-lf=2",
-                "-tn=ASF",
+                "-tn=asf",
                 "TS02"
             ]
         },
         {
-            "name": "Amazon TS01",
-            "type": "mono",
+            "name": "Wekeo TS01",
+            "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/bin/Debug/net7.0/cdab-testtools",
             "cwd": "${workspaceRoot}",
             "args": [
                 "-v",
                 "-tsn=Local",
                 "-lf=2",
-                "-tn=AMAZON",
+                "-tn=wekeo",
+                "TS01"
+            ]
+        },
+        {
+            "name": "Microsoft Planetary TS01",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/bin/Debug/net7.0/cdab-testtools",
+            "cwd": "${workspaceRoot}",
+            "args": [
+                "-v",
+                "-tsn=Local",
+                "-lf=2",
+                "-tn=planetary",
+                "TS01"
+            ]
+        },
+        {
+            "name": "Amazon TS01",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/bin/Debug/net7.0/cdab-testtools",
+            "cwd": "${workspaceRoot}",
+            "args": [
+                "-v",
+                "-tsn=Local",
+                "-lf=2",
+                "-tn=amazon",
                 "TS01"
             ]
         },
         {
             "name": "Amazon TS02",
-            "type": "mono",
+            "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/bin/Debug/net7.0/cdab-testtools",
             "cwd": "${workspaceRoot}",
             "args": [
                 "-v",
                 "-tsn=Local",
                 "-lf=2",
-                "-tn=AMAZON",
+                "-tn=amazon",
                 "TS02"
             ]
         },
         {
             "name": "Amazon TS03",
-            "type": "mono",
+            "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/bin/Debug/net7.0/cdab-testtools",
             "cwd": "${workspaceRoot}",
             "args": [
                 "-v",
                 "-tsn=Local",
                 "-lf=2",
-                "-tn=AMAZON",
+                "-tn=amazon",
                 "TS03"
             ]
         },
         {
             "name": "Amazon TS07",
-            "type": "mono",
+            "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/bin/Debug/net7.0/cdab-testtools",
             "cwd": "${workspaceRoot}",
             "args": [
                 "-v",
                 "-tsn=Local",
                 "-lf=1",
-                "-tn=AMAZON",
+                "-tn=amazon",
                 "TS07"
             ]
         },
         {
             "name": "Google TS01",
-            "type": "mono",
+            "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/bin/Debug/net7.0/cdab-testtools",
             "cwd": "${workspaceRoot}",
             "args": [
                 "-v",
                 "-tsn=Local",
                 "-lf=2",
-                "-tn=GOOGLE",
+                "-tn=google",
                 "TS01"
             ]
         },
         {
             "name": "Google TS02",
-            "type": "mono",
+            "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/bin/Debug/net7.0/cdab-testtools",
             "cwd": "${workspaceRoot}",
             "args": [
                 "-v",
                 "-tsn=Local",
                 "-lf=2",
-                "-tn=GOOGLE",
+                "-tn=google",
                 "TS02"
             ]
         },
         {
             "name": "Google TS07",
-            "type": "mono",
+            "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/bin/Debug/net7.0/cdab-testtools",
             "cwd": "${workspaceRoot}",
             "args": [
                 "-v",
                 "-tsn=Local",
                 "-lf=2",
-                "-tn=GOOGLE",
+                "-tn=google",
                 "TS07"
             ]
         },
         {
             "name": "TEST TS01",
-            "type": "mono",
+            "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/bin/Debug/net472/cdab-testtools.exe",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/bin/Debug/net7.0/cdab-testtools",
             "cwd": "${workspaceRoot}",
             "args": [
                 "-v",

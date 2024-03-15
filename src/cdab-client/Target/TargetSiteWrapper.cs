@@ -29,7 +29,7 @@ using cdabtesttools.Config;
 using cdabtesttools.Data;
 // using cdabtesttools.SampleTarget;
 using Terradue.OpenSearch;
-using Terradue.OpenSearch.Asf;
+// using Terradue.OpenSearch.Asf;
 using Terradue.OpenSearch.DataHub;
 using Terradue.OpenSearch.DataHub.DHuS;
 using Terradue.OpenSearch.DataHub.Dias;
@@ -37,7 +37,8 @@ using Terradue.OpenSearch.Engine;
 using Terradue.OpenSearch.DataHub.Aws;
 using Terradue.OpenSearch.DataHub.GoogleCloud;
 using Terradue.OpenSearch.DataHub.MicrosoftPlanetaryComputer;
-using Terradue.OpenSearch.Usgs;
+// using Terradue.OpenSearch.Usgs;
+using System.Net.Http;
 
 namespace cdabtesttools.Target
 {
@@ -324,15 +325,15 @@ namespace cdabtesttools.Target
                 return wekeoDiasWrapper;
             }
 
-            if (targetUri.Host == "api.daac.asf.alaska.edu")
-            {
-                return new AsfApiWrapper(targetUri, (NetworkCredential)targetCredentials);
-            }
+            // if (targetUri.Host == "api.daac.asf.alaska.edu")
+            // {
+            //     return new AsfApiWrapper(targetUri, (NetworkCredential)targetCredentials);
+            // }
 
-            if (targetUri.Host == "m2m.cr.usgs.gov")
-            {
-                return new UsgsDataWrapper(new Uri(string.Format("https://m2m.cr.usgs.gov/api/api")), (NetworkCredential)targetCredentials);
-            }
+            // if (targetUri.Host == "m2m.cr.usgs.gov")
+            // {
+            //     return new UsgsDataWrapper(new Uri(string.Format("https://m2m.cr.usgs.gov/api/api")), (NetworkCredential)targetCredentials);
+            // }
 
             if (targetUri.Host.EndsWith("copernicus.eu") || targetUri.AbsolutePath.EndsWith("/dhus"))
             {
@@ -402,7 +403,7 @@ namespace cdabtesttools.Target
             return wrapper.CreateOpenSearchable(ossettings);
         }
 
-        internal void AuthenticateRequest(HttpWebRequest request)
+        internal void AuthenticateRequest(HttpRequestMessage request)
         {
             Wrapper.AuthenticateRequest(request);
         }

@@ -21,6 +21,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using cdabtesttools.Measurement;
@@ -34,7 +35,6 @@ namespace cdabtesttools.TestCases
         private TargetSiteWrapper target;
         private int load_factor;
         private ILog log;
-        private ServicePoint sp;
 
         public TestCase101(ILog log, TargetSiteWrapper target, int load_factor) :
             base("TC101", "Service Reachability")
@@ -42,7 +42,6 @@ namespace cdabtesttools.TestCases
             this.log = log;
             this.load_factor = load_factor;
             this.target = target;
-            this.sp = ServicePointManager.FindServicePoint(target.Wrapper.Settings.ServiceUrl);
         }
 
         public override void PrepareTest()
@@ -60,7 +59,7 @@ namespace cdabtesttools.TestCases
             {
                 for (int j = 0; j < target.TargetSiteConfig.MaxCatalogueThread && i > 0; j++)
                 {
-                    var _testUnit = previousTask[j].ContinueWith<HttpWebRequest>((task) => CreateRequest(), TaskContinuationOptions.AttachedToParent).
+                    var _testUnit = previousTask[j].ContinueWith<HttpRequestMessage>((task) => CreateRequest(), TaskContinuationOptions.AttachedToParent).
                         ContinueWith((request) => ReadResponse(request.Result));
                     _testUnits.Add(_testUnit);
                     previousTask[j] = _testUnit;
@@ -101,7 +100,7 @@ namespace cdabtesttools.TestCases
             }, tasks.Result.Count());
         }
 
-        private HttpWebRequest CreateRequest()
+        private HttpRequestMessage CreateRequest()
         {
             if (StartTime.Ticks == 0)
                 StartTime = DateTimeOffset.UtcNow;
@@ -116,7 +115,7 @@ namespace cdabtesttools.TestCases
             // return request;
         }
 
-        private TestUnitResult ReadResponse(HttpWebRequest request)
+        private TestUnitResult ReadResponse(HttpRequestMessage request)
         {
             List<IMetric> metrics = new List<IMetric>();
 
@@ -126,36 +125,32 @@ namespace cdabtesttools.TestCases
 
             DateTimeOffset timeStart = DateTimeOffset.UtcNow;
 
-            return Task.Factory.FromAsync((asyncCallback, state) =>
+            HttpClient client = new HttpClient();
+
+            sw.Start();
+            metrics.Add(new LongMetric(MetricName.beginGetResponseTime, DateTime.UtcNow.Ticks, "ticks"));
+            HttpResponseMessage response = client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead).Result;
+            sw.Stop();
+            log.DebugFormat("Connected to {0}", request.RequestUri.Host);
+            metrics.Add(new LongMetric(MetricName.endGetResponseTime, DateTime.UtcNow.Ticks, "ticks"));
+            log.DebugFormat("Reply from {0}", request.RequestUri.Host);
+            using (var responseStream = response.Content.ReadAsStreamAsync().Result)
             {
-                var asyncResult = request.BeginGetResponse(asyncCallback, state);
-                sw.Start();
-                metrics.Add(new LongMetric(MetricName.beginGetResponseTime, DateTime.UtcNow.Ticks, "ticks"));
-                log.DebugFormat("Connected to {0}", request.RequestUri.Host);
-                return asyncResult;
-            }, request.EndGetResponse, null).ContinueWith(resp =>
-            {
+                log.DebugFormat("SP CC {0}/{1}", ServicePointManager.FindServicePoint(request.RequestUri).CurrentConnections, ServicePointManager.FindServicePoint(request.RequestUri).ConnectionLimit);
+                MemoryStream memoryStream = new MemoryStream();
+                responseStream.CopyTo(memoryStream);
+                DateTimeOffset timeStop = DateTimeOffset.UtcNow;
                 sw.Stop();
-                metrics.Add(new LongMetric(MetricName.endGetResponseTime, DateTime.UtcNow.Ticks, "ticks"));
-                log.DebugFormat("Reply from {0}", request.RequestUri.Host);
-                using (HttpWebResponse response = (HttpWebResponse)resp.Result)
-                {
-                    using (var responseStream = response.GetResponseStream())
-                    {
-                        log.DebugFormat("SP CC {0}/{1}", sp.CurrentConnections, sp.ConnectionLimit);
-                        MemoryStream memoryStream = new MemoryStream();
-                        responseStream.CopyTo(memoryStream);
-                        DateTimeOffset timeStop = DateTimeOffset.UtcNow;
-                        sw.Stop();
-                        log.DebugFormat("< HTTP/{0} {1} {2} {3}ms", response.ProtocolVersion, response.StatusCode.ToString("D"), response.StatusDescription, sw.ElapsedMilliseconds);
-                        metrics.Add(new LongMetric(MetricName.responseTime, sw.ElapsedMilliseconds, "ms"));
-                        metrics.Add(new LongMetric(MetricName.size, response.ContentLength, "bytes"));
-                        metrics.Add(new DateTimeMetric(MetricName.startTime, timeStart, "dateTime"));
-                        metrics.Add(new DateTimeMetric(MetricName.endTime, timeStop, "dateTime"));
-                    }
-                }
-                return new TestUnitResult(metrics);
-            }).Result;
+                log.DebugFormat("< HTTP/{0} {1} {2} {3}ms", response.Version, response.StatusCode, response.ReasonPhrase, sw.ElapsedMilliseconds);
+                metrics.Add(new LongMetric(MetricName.responseTime, sw.ElapsedMilliseconds, "ms"));
+                long size = response.Content.Headers.ContentLength != null ? response.Content.Headers.ContentLength.Value : memoryStream.Length;
+                metrics.Add(new LongMetric(MetricName.size, size, "bytes"));
+                metrics.Add(new DateTimeMetric(MetricName.startTime, timeStart, "dateTime"));
+                metrics.Add(new DateTimeMetric(MetricName.endTime, timeStop, "dateTime"));
+            }
+            return new TestUnitResult(metrics);
+          
         }
     }
+
 }
