@@ -6,23 +6,22 @@ Copernicus Sentinels Data Access Worldwide Benchmark Test Suite is the software 
 
 The current supported Target Sites are
 
-* Data Access Hubs using [DHuS Data Hub](https://sentineldatahub.github.io/DataHubSystem/):
-  * [Copernicus Open Access Hub (aka SciHub)](https://scihub.copernicus.eu/)
-  * [Copernicus Open Access Hub API (aka APIHub)](https://scihub.copernicus.eu/twiki/do/view/SciHubWebPortal/APIHubDescription)
-  * [Copernicus Collaborative Data Hub (aka ColHub)](https://colhub.copernicus.eu/)
-  * [Copernicus Sentinels International Access Hub (aka IntHub)](https://inthub.copernicus.eu/)
-  * Any Data Access Hubs using [DHuS Data Hub](https://sentineldatahub.github.io/DataHubSystem/) software
-* DIASes
-  * [CREODIAS](https://creodias.eu/)
-  * [Mundi Web Services](https://mundiwebservices.com/)
-  * [ONDA](https://www.onda-dias.eu/)
-  * [Sobloo](https://sobloo.eu/)
+* [Copernicus Data Space Ecosystem (CDSE)](https://dataspace.copernicus.eu/)
+* [CREODIAS](https://creodias.eu/)
+* [Mundi Web Services](https://mundiwebservices.com/)
+* [ONDA](https://www.onda-dias.eu/)
+* [Alaska Satellite Facility](https://www.asf.alaska.edu/)
+* [Google Cloud Storage](https://cloud.google.com/storage/docs/public-datasets?)
+* [Amazon Web Services](https://registry.opendata.aws/)
+* [Hellenic National Sentinel Data Mirror Site](https://sentinels.space.noa.gr/)
+* [Wekeo](https://www.wekeo.eu/)
+* [Microsoft Planetary Computer](https://planetarycomputer.microsoft.com/)
 
 # Repository Content
 
 This repository is a public repository with all the source code used for building the CDAB Test Suite
 
-The CDAB Test Suite is built automatically providing a docker image available publicly at [esacdab/testsuite](https://hub.docker.com/repository/docker/esacdab/testsuite) that can be used as Test Site.
+The CDAB Test Suite is built automatically providing a docker image available publicly at [ghcr.io/esacdab/cdab-testsuite](https://github.com/esacdab/cdab-testsuite/pkgs/container/cdab-testsuite) that can be used as Test Site.
 
 # Getting Started
 

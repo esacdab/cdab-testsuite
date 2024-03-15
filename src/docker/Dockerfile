@@ -14,6 +14,13 @@ RUN ls -l /app
 # final stage/image
 FROM mcr.microsoft.com/dotnet/runtime-deps:7.0-bullseye-slim-amd64
 
+LABEL org.opencontainers.image.description DESCRIPTION="CDAB Test Suite" \
+      org.opencontainers.image.title="CDAB client and remote client" \
+      org.opencontainers.image.authors="CDAB Team" \
+      org.opencontainers.image.vendor="CDAB Team" \
+      org.opencontainers.image.version="$(date -u)" \
+      org.opencontainers.image.url="https://github.com/esacdab/cdab-testsuite/pkgs/container/cdab-testsuite"
+
 RUN apt-get update \
   && apt-get upgrade -y \
   && apt-get install -y python3 python3-pip shunit2 traceroute libssl1.1 libgssapi-krb5-2 sysstat sed ca-certificates jq curl \
@@ -100,8 +107,6 @@ ENV SSL_CERT_DIR=/dev/null
 
 # make the terminal prettier
 RUN echo 'export PS1="[\u@docker] \W # "' >> /root/.bash_profile
-
-RUN echo "Docker image built on $(date -u) - CDAB Release v${CDAB_RELEASE}" >/etc/cdabbuild
 
 # launch the supervisor
 CMD ["sudo", "/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
