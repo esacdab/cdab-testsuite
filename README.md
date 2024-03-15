@@ -1,6 +1,3 @@
-[![Build Status](https://build.terradue.com/buildStatus/icon?job=Terradue%2Fcdab-testsuite%2Fmaster)](https://build.terradue.com/job/Terradue/job/cdab-testsuite/job/master/display/redirect)
-
-
 ![CDAB logo](doc/images/cdab-logo.jpg)
 
 # CDAB Software Test Suite
