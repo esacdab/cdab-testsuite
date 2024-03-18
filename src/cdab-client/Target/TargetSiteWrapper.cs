@@ -39,6 +39,7 @@ using Terradue.OpenSearch.DataHub.GoogleCloud;
 using Terradue.OpenSearch.DataHub.MicrosoftPlanetaryComputer;
 // using Terradue.OpenSearch.Usgs;
 using System.Net.Http;
+using Terradue.OpenSearch.Asf;
 
 namespace cdabtesttools.Target
 {
@@ -325,10 +326,10 @@ namespace cdabtesttools.Target
                 return wekeoDiasWrapper;
             }
 
-            // if (targetUri.Host == "api.daac.asf.alaska.edu")
-            // {
-            //     return new AsfApiWrapper(targetUri, (NetworkCredential)targetCredentials);
-            // }
+            if (targetUri.Host == "api.daac.asf.alaska.edu")
+            {
+                return new AsfApiWrapper(targetUri, (NetworkCredential)targetCredentials);
+            }
 
             // if (targetUri.Host == "m2m.cr.usgs.gov")
             // {

@@ -23,7 +23,7 @@ LABEL org.opencontainers.image.description DESCRIPTION="CDAB Test Suite" \
 
 RUN apt-get update \
   && apt-get upgrade -y \
-  && apt-get install -y python3 python3-pip shunit2 traceroute libssl1.1 libgssapi-krb5-2 sysstat sed ca-certificates jq curl \
+  && apt-get install -y python3 python3-pip shunit2 traceroute libssl1.1 libgssapi-krb5-2 sysstat sed ca-certificates jq curl xmllint \
   openssh-server ssh sudo cron supervisor \
   && rm -rf /var/lib/apt/lists/* /tmp/*
 
