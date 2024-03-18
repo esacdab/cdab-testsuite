@@ -25,7 +25,7 @@ The CDAB Test Suite is built automatically providing a docker image available pu
 
 # Getting Started
 
-You can start now using the Test Suite following the [Getting Started guide](https://github.com/Terradue/cdab-testsuite/wiki)
+You can start now using the Test Suite following the [Getting Started guide](https://github.com/esacdab/cdab-testsuite/wiki)
 
 # Software licenses
 
