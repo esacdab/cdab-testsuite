@@ -23,8 +23,8 @@ LABEL org.opencontainers.image.description DESCRIPTION="CDAB Test Suite" \
 
 RUN apt-get update \
   && apt-get upgrade -y \
-  && apt-get install -y python3 python3-pip shunit2 traceroute libssl1.1 libgssapi-krb5-2 sysstat sed ca-certificates jq curl xmllint \
-  openssh-server ssh sudo cron supervisor \
+  && apt-get install -y python3 python3-pip shunit2 traceroute libssl1.1 libgssapi-krb5-2 sysstat sed ca-certificates jq curl \
+  openssh-server ssh sudo cron supervisor libxml2-utils \
   && rm -rf /var/lib/apt/lists/* /tmp/*
 
 # Install OpenStack client, Google Cloud Platform Python API, Amazon AWS EC2 Python API and Microsoft Azure Python API
