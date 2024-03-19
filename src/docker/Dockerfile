@@ -38,7 +38,6 @@ COPY src/cdab-client/App_Data /usr/lib/cdab-client/App_Data
 COPY --chmod=755 src/cdab-client/cdab-client /usr/bin/cdab-client
 COPY src/cdab-remote-client/bin/cdab-remote-client /usr/bin/cdab-remote-client
 COPY src/cdab-remote-client/libexec /usr/lib/cdab-remote-client
-COPY src/cdab-remote-client/etc /usr/lib/cdab-remote-client/etc
 
 ENV PATH="/usr/bin:${PATH}"
 
