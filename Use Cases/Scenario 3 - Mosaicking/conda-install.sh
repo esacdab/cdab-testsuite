@@ -12,7 +12,7 @@ URL="https://github.com/conda-forge/miniforge/releases/download/${MINIFORGE_VERS
 INSTALLER_PATH=/tmp/miniforge-installer.sh
 # Make sure user's $HOME is not tampered with since this is run as root
 unset HOME
-yum install -y wget
+sudo apt-get install -y wget
 wget --quiet $URL -O ${INSTALLER_PATH}
 chmod +x ${INSTALLER_PATH}
 # Check sha256 checksum

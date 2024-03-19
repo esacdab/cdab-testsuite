@@ -1,6 +1,6 @@
 function prepare() {
     echo "Installing basic packages"
-    sudo yum install -y bc wget unzip libgfortran-4.8.5-39.el7.x86_64
+    sudo apt-get install -y bc wget unzip libgfortran5-amd64-cross
     echo "Done (basic packages)"
 
     echo "Installing conda"

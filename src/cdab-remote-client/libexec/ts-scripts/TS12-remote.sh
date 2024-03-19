@@ -17,8 +17,13 @@ fi
 
 cd "$working_dir"
 
-echo "DOCKER COMMAND: docker run --workdir /res -v ${PWD}:/res${eodata_volume_option} --env DOWNLOAD_ORIGIN=${download_origin} \"${docker_image}\" mono $MONO_OPTIONS /usr/lib/cdab-client/bin/cdab-testtools.exe --target_name \"${target_name}\" --target_url \"${target_url}\" --target_credentials \"${target_credentials_display}\" --testsite_name \"${test_site}\" -lf \"${load_factor}\" --conf /res/config.yaml -v TS12" > cdab.stderr
-docker run --workdir /res -v ${PWD}:/res${eodata_volume_option} --env DOWNLOAD_ORIGIN=${download_origin} "${docker_image}" mono $MONO_OPTIONS /usr/lib/cdab-client/bin/cdab-testtools.exe --target_name "${target_name}" --target_url "${target_url}" --target_credentials "${target_credentials}" --testsite_name "${test_site}" -lf "${load_factor}" --conf /res/config.yaml -v TS12 > cdab.stdout 2>> cdab.stderr
+# run the docker detached
+docker run --detach --name ${test_site} ${eodata_volume_option} --env DOWNLOAD_ORIGIN=${download_origin} "${docker_image}"
+# copy the config file to the docker
+docker cp ${PWD}/config.yaml ${test_site}:/home/jenkins/config.yaml
+# run the test
+echo "DOCKER COMMAND: docker exec --workdir /home/jenkins -it ${test_site} /usr/lib/cdab-client/cdab-testtools --target_name \"${target_name}\" --target_url \"${target_url}\" --target_credentials \"${target_credentials_display}\" --testsite_name \"${test_site}\" -lf \"${load_factor}\" --conf /home/jenkins/config.yaml -v TS12" > cdab.stderr
+docker exec --workdir /home/jenkins -t ${test_site} /usr/lib/cdab-client/cdab-testtools --target_name "${target_name}" --target_url "${target_url}" --target_credentials "${target_credentials}" --testsite_name "${test_site}" -lf "${load_factor}" --conf /home/jenkins/config.yaml -v TS12 > cdab.stdout 2>> cdab.stderr
 res=$?
 if [ $res -ne 0 ]
 then
@@ -26,3 +31,8 @@ then
     cat cdab.stderr >&2
     exit 1
 fi
+# Copy the results back to the working directory
+docker cp ${test_site}:/home/jenkins/TS12Results.json ${PWD}/TS12Results.json
+docker cp ${test_site}:/home/jenkins/junit.xml ${PWD}/junit.xml
+# Delete the container
+docker rm -f ${test_site}

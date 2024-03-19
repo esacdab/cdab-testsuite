@@ -685,7 +685,7 @@ service_providers:
       two_factor_authentication_key: "KEY"
       vm_name: "cdab-test"
       key_name: "cdab-cdse-vmkey"
-      image_name: "CentOS 7"
+      image_name: "Debian 12"
       flavor_name: "hm.medium"
       cost_monthly: 70.04
       cost_hourly: 0.114
@@ -1352,7 +1352,7 @@ service_providers:
       identity_api_version: 3
       vm_name: "cdab-test"
       key_name: "cdab-cdse-vmkey"
-      image_name: "Standard_CentOS_7_latest"
+      image_name: "Standard_Debian_12_latest"
       # From T-Systems Elastic Cloud Server creation wizard
       # https://open-telekom-cloud.com/en/prices/price-calculator
       flavor_name: "s3.large.8"
@@ -1728,7 +1728,7 @@ service_providers:
       key_name: "cdab-key-onda"
       # Name of image to be used for new virtual machine 
       # (choose from Compute > Images on the OpenStack dashboard).
-      image_name: "Centos 7"
+      image_name: "Debian 12"
       # Name of flavour for new virtual machine 
       # (check under Compute > Instances > Launch Instance > Flavours/Flavors on the OpenStack dashboard).
       # From https://www.onda-dias.eu/cms/services/catalogues/virtual-servers
@@ -1767,7 +1767,7 @@ service_providers:
       # (must correspond to public key in key_name).
       private_key_file: "/home/jenkins/cdab-key-onda.pem"
       # User on virtual machine for SSH connections.
-      remote_user: "centos"
+      remote_user: "debian"
       #Create an external volume for docker image and test execution; this is useful for flavours that have very limited main disk. 
       # The size of the additional disk is 20 GB.
       #use_volume: True
@@ -2169,7 +2169,7 @@ service_providers:
       identity_api_version: 3
       vm_name: "cdab-test"
       key_name: "cdab-key-creodias"
-      image_name: "CentOS 7"
+      image_name: "Debian 12"
       # From https://creodias.eu/price-list
       # eo2.large = 2 vCPU, 8GB RAM, 32GB HD, 51.57 EUR per month, 0.084 EUR per hour
       # eo2.xlarge = 4 vCPU, 16GB RAM, 64GB HD, 103.15 EUR per month, 0.169 EUR per hour
@@ -2366,7 +2366,7 @@ service_providers:
     compute:
       connector: google
       region_name: "europe-west1-b"
-      image_name: "projects/centos-cloud/global/images/centos-7-v20220303"
+      image_name: "product/google/debian12"
       #flavor_name: "projects/modular-buffer-235216/zones/europe-west1-b/machineTypes/n1-highmem-2"
       # n1-highmem-2 = 2 vCPU, 13GB RAM
       # n2-highmem-2 = 2 vCPU, 16GB RAM
@@ -2492,7 +2492,7 @@ service_providers:
       flavor_name: "r5a.large"
       security_group: "sg-0cc75812b649925ce"
       private_key_file: "/home/jenkins/cdab-key-aws.pem"
-      remote_user: "centos"
+      remote_user: "debian"
       # https://calculator.aws -> EC2
       cost_monthly: 94.27
       cost_hourly: 0.1291
@@ -3208,7 +3208,7 @@ service_providers:
       vm_name: "cdab-test"
       key_name: "cdab-key-wekeo"
       private_key_file: "/home/jenkins/cdab-key-wekeo.pem"
-      image_name: "CentOS 7"
+      image_name: "Debian 12"
       # hm.medium = 2 vCPU, 16GB RAM, 64GB HD
       flavor_name: "hm.medium"
       cost_monthly: 70.04
@@ -3285,8 +3285,8 @@ service_providers:
       vm_name: "cdab-test"
       image:
         publisher: "OpenLogic"
-        offer: "CentOS"
-        sku: "7_8-gen2"
+        offer: "Debian"
+        sku: "12"
         version: "latest"
       # Memory optimized E2s v3 = 2 vCPU, 16GB RAM, 32GB HD
       flavor_name: "Standard_E2s_v3"

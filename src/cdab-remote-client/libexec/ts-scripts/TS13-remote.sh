@@ -1,6 +1,6 @@
 function prepare() {
     echo "Installing tools" >> cdab.stderr
-    sudo yum install -y bc unzip
+    sudo apt-get install -y bc unzip
     echo "Done" >> cdab.stderr
 
     mkdir -p input_data
