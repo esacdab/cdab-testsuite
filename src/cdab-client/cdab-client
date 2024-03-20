@@ -27,20 +27,8 @@
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/cdab-client
 
 if [[ -n "$@" && $@ == *"TS1"* ]]; then
-    newargs="$@"
-    newargs=${newargs/-tn/-ts}
-    newargs=${newargs/--target_name/-ts}
-    newargs=${newargs/--target_credentials/-tc}
-    newargs=${newargs/-tu/-te}
-    newargs=${newargs/-tsn/-n}
-    newargs=${newargs/--testsite_name/-n}
-    newargs=${newargs/--load_factor/-lf}
-
-    newargs=`echo ${newargs} | sed -e 's/\( -\w*\)\ /\1=/g'`
-
-    echo "Command: /usr/bin/cdab-remote-client $newargs" >&2
-
-    exec /usr/bin/cdab-remote-client $newargs
+    echo "Use cdab-remote-client for this test" >&2
+    exit 1
 fi
 
 exec /usr/lib/cdab-client/cdab-testtools "$@"

@@ -1,6 +1,6 @@
 function prepare() {
     echo "Installing tools" >> cdab.stderr
-    sudo yum install -y bc unzip gcc python3-devel
+    sudo apt-get install -y bc unzip gcc python3-dev python3-pip
     sudo pip3 install requests
     echo "Done" >> cdab.stderr
 

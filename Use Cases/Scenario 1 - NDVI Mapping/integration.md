@@ -21,7 +21,7 @@
   If Python is not available, install it with the package manager and do point 3 again.
 
   ```console
-  $ sudo yum install python3 python3-pip
+  $ sudo apt-get install -y python3 python3-pip
   ```
 
 4. Check that GDAL is available.

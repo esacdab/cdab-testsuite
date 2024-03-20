@@ -16,26 +16,6 @@ The **cdab-remote-client** is a command line utility that performs a local CDAB 
 
 Note: The Openstack terminology is inconsistent and might be confusing; **servers** (as in the command-line client) and **instances** (as on the dashboard) refer to the same thing, **virtual machines**, as they are called below.
 
-### Prerequisites
-
-* CentOS 7
-* Python 3
-* OpenStack client (a Python module that provides a command-line tool for OpenStack access)
-* The Amazon AWS SDK for Python
-* The Google API Client Library for Python
-* The Microsoft Azure libraries for Python
-* Root or proper _sudo_ permissions
-
-### Installation
-
-* Add the terradue-stable-el7 repository configuration on YUM,
-* Install the tool with:
-
-```
-$ sudo yum install cdab-remote-client -y
-```
-
-
 ## Usage
 
 The main parameters are shown on the help page.
@@ -166,7 +146,7 @@ Most of the values for the various keys can be obtained from the OpenStack dashb
 * **project_id**: Name of the project on the Google Cloud Platform.
 * **region_name**: Zone, e.g. *europe-west2-c*.
 * **key_name**: This setting is not applicable, as Google creates all accounts for which there are keys defined and authorises all keys. Key pairs are defined under https://console.cloud.google.com/compute/metadata/sshKeys.
-* **image_name**: Fully qualified name of boot disk image to be used for new virtual machine, e.g. *projects/centos-cloud/global/images/centos-7-v20200309*.
+* **image_name**: Fully qualified name of boot disk image to be used for new virtual machine, e.g. *projects/debian-cloud/global/images/debian-12*.
 * **flavor_name**: The machine type name name, e.g. *e2-standard-2*. Can also be specified, as in previous version, as fully qualified name of machine type for new virtual machine, e.g *projects/<project-name>/zones/europe-west2-c/machineTypes/e2-standard-2*.
 
 ##### Specific settings for Amazon AWS EC2

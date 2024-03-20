@@ -5,7 +5,7 @@
 1. Provision a virtual machine on the target site. Preferably with the following specification
 
     - 2 CPUs, 8 GB RAM, 100 GB disk
-    - CentOS 7
+    - debian 7
     - Python 3
     - With data offer access if available
   
@@ -191,12 +191,12 @@
 
    ```console
    $ ls -l output_data/
-   -rw-rw-r--. 1 centos centos     1702 May 31 16:40 graph_S3A_SL_2_LST____20210425T110535_20210425T110835_20210426T211759_0179_071_094_2160_LN2_O_NT_004.xml
-   -rw-rw-r--. 1 centos centos     1702 May 31 16:37 graph_S3B_SL_2_LST____20210425T102904_20210425T103204_20210426T210428_0179_051_336_2340_LN2_O_NT_004.xml
-   -rw-rw-r--. 1 centos centos   294126 May 31 16:42 lst_S3A_SL_2_LST____20210425T110535_20210425T110835_20210426T211759_0179_071_094_2160_LN2_O_NT_004.tif
-   -rw-rw-r--. 1 centos centos   925298 May 31 16:40 lst_S3B_SL_2_LST____20210425T102904_20210425T103204_20210426T210428_0179_051_336_2340_LN2_O_NT_004.tif
-   -rw-rw-r--. 1 centos centos 12339468 May 31 16:42 rgba_S3A_SL_2_LST____20210425T110535_20210425T110835_20210426T211759_0179_071_094_2160_LN2_O_NT_004.tif
-   -rw-rw-r--. 1 centos centos 10451496 May 31 16:40 rgba_S3B_SL_2_LST____20210425T102904_20210425T103204_20210426T210428_0179_051_336_2340_LN2_O_NT_004.tif
+   -rw-rw-r--. 1 debian debian     1702 May 31 16:40 graph_S3A_SL_2_LST____20210425T110535_20210425T110835_20210426T211759_0179_071_094_2160_LN2_O_NT_004.xml
+   -rw-rw-r--. 1 debian debian     1702 May 31 16:37 graph_S3B_SL_2_LST____20210425T102904_20210425T103204_20210426T210428_0179_051_336_2340_LN2_O_NT_004.xml
+   -rw-rw-r--. 1 debian debian   294126 May 31 16:42 lst_S3A_SL_2_LST____20210425T110535_20210425T110835_20210426T211759_0179_071_094_2160_LN2_O_NT_004.tif
+   -rw-rw-r--. 1 debian debian   925298 May 31 16:40 lst_S3B_SL_2_LST____20210425T102904_20210425T103204_20210426T210428_0179_051_336_2340_LN2_O_NT_004.tif
+   -rw-rw-r--. 1 debian debian 12339468 May 31 16:42 rgba_S3A_SL_2_LST____20210425T110535_20210425T110835_20210426T211759_0179_071_094_2160_LN2_O_NT_004.tif
+   -rw-rw-r--. 1 debian debian 10451496 May 31 16:40 rgba_S3B_SL_2_LST____20210425T102904_20210425T103204_20210426T210428_0179_051_336_2340_LN2_O_NT_004.tif
    ```
 
 7. Download the files `rgba_*.tif` onto your computer and open it with a tool such as QGIS. Verify that it shows the desired information (land surface temperature) of the area of interest. [100%]

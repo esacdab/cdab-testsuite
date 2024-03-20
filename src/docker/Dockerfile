@@ -24,7 +24,7 @@ LABEL org.opencontainers.image.description DESCRIPTION="CDAB Test Suite" \
 RUN apt-get update \
   && apt-get upgrade -y \
   && apt-get install -y python3 python3-pip shunit2 traceroute libssl1.1 libgssapi-krb5-2 sysstat sed ca-certificates jq curl \
-  openssh-server ssh sudo cron supervisor \
+  openssh-server ssh sudo cron supervisor libxml2-utils \
   && rm -rf /var/lib/apt/lists/* /tmp/*
 
 # Install OpenStack client, Google Cloud Platform Python API, Amazon AWS EC2 Python API and Microsoft Azure Python API
@@ -38,8 +38,6 @@ COPY src/cdab-client/App_Data /usr/lib/cdab-client/App_Data
 COPY --chmod=755 src/cdab-client/cdab-client /usr/bin/cdab-client
 COPY src/cdab-remote-client/bin/cdab-remote-client /usr/bin/cdab-remote-client
 COPY src/cdab-remote-client/libexec /usr/lib/cdab-remote-client
-COPY src/cdab-remote-client/etc /usr/lib/cdab-remote-client/etc
-COPY src/cdab-remote-client/etc/config.yaml.sample /usr/lib/cdab-remote-client/etc/config.yaml
 
 ENV PATH="/usr/bin:${PATH}"
 
@@ -94,16 +92,6 @@ RUN chmod 755 /home/jenkins/cdab-tools/sadf*
 RUN chown -R jenkins:jenkins /home/jenkins/cdab-tools
 
 ####
-
-# Add new root certificate ISRG Root X1
-RUN curl -O https://letsencrypt.org/certs/isrgrootx1.pem && \
-    sudo mv isrgrootx1.pem /usr/local/share/ca-certificates/isrgrootx1.crt
-RUN curl -O https://curl.se/ca/cacert.pem && \
-    sudo mv cacert.pem /usr/local/share/ca-certificates/cacert.crt 
-RUN sudo update-ca-certificates
-
-ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
-ENV SSL_CERT_DIR=/dev/null
 
 # make the terminal prettier
 RUN echo 'export PS1="[\u@docker] \W # "' >> /root/.bash_profile

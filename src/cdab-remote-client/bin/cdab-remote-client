@@ -3,4 +3,4 @@
 export PYTHONIOENCODING='utf8'
 command="python3 /usr/lib/cdab-remote-client/cdab-remote-client.py3"; 
 for a in "$@"; do command="${command} \"${a/"/\\\\"/}\""; done
-
+python3 /usr/lib/cdab-remote-client/cdab-remote-client.py3 "$@"

@@ -4,7 +4,7 @@
 
 1. Provision a virtual machine on the target site. Preferably with the following specification
     - 2 CPUs, 8GB RAM, 30GB disk
-    - CentOS 7
+    - Debian 11+
     - Jupyter Lab (with Python 3 support), it can also be installed if not present.
     - With data offer access if required
   
@@ -227,8 +227,8 @@
 
    ```console
    $ ls -l ~
-   -rw-rw-r--. 1 centos centos  16212154 Jun 24 17:37 burned_area_20210305_20210424.rgb.tif
-   -rw-rw-r--. 1 centos centos 130225905 Jun 24 17:38 burned_area_20210305_20210424.tif
+   -rw-rw-r--. 1 debian debian  16212154 Jun 24 17:37 burned_area_20210305_20210424.rgb.tif
+   -rw-rw-r--. 1 debian debian 130225905 Jun 24 17:38 burned_area_20210305_20210424.tif
    ```
 
 7. Download them to your computer and open it with any tool that can visualise TIFF files. Verify that the band/layer `NBR` shows an RGB image of the burn severity of the area of interest. [100%]

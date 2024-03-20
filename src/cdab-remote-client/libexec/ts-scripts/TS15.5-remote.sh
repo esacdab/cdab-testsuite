@@ -1,6 +1,6 @@
 function prepare() {
     echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Installing basic packages" >> cdab.stderr
-    sudo yum install -y bc tree wget unzip libgfortran-4.8.5 >> cdab.stderr 2>&1
+    sudo apt-get install -y bc wget unzip libgfortran5-amd64-cross >> cdab.stderr 2>&1
     echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Done (basic packages)" >> cdab.stderr
 
     echo "$(date +%Y-"%m-%dT%H:%M:%SZ") - Creating conda environment with snap and cwltool" >> cdab.stderr

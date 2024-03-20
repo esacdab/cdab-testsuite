@@ -39,6 +39,8 @@ using Terradue.OpenSearch.DataHub.GoogleCloud;
 using Terradue.OpenSearch.DataHub.MicrosoftPlanetaryComputer;
 // using Terradue.OpenSearch.Usgs;
 using System.Net.Http;
+using Terradue.OpenSearch.Asf;
+using Terradue.OpenSearch.Usgs;
 
 namespace cdabtesttools.Target
 {
@@ -325,15 +327,15 @@ namespace cdabtesttools.Target
                 return wekeoDiasWrapper;
             }
 
-            // if (targetUri.Host == "api.daac.asf.alaska.edu")
-            // {
-            //     return new AsfApiWrapper(targetUri, (NetworkCredential)targetCredentials);
-            // }
+            if (targetUri.Host == "api.daac.asf.alaska.edu")
+            {
+                return new AsfApiWrapper(targetUri, (NetworkCredential)targetCredentials);
+            }
 
-            // if (targetUri.Host == "m2m.cr.usgs.gov")
-            // {
-            //     return new UsgsDataWrapper(new Uri(string.Format("https://m2m.cr.usgs.gov/api/api")), (NetworkCredential)targetCredentials);
-            // }
+            if (targetUri.Host == "m2m.cr.usgs.gov")
+            {
+                return new UsgsDataWrapper(new Uri(string.Format("https://m2m.cr.usgs.gov")), (NetworkCredential)targetCredentials);
+            }
 
             if (targetUri.Host.EndsWith("copernicus.eu") || targetUri.AbsolutePath.EndsWith("/dhus"))
             {
@@ -349,8 +351,6 @@ namespace cdabtesttools.Target
 
             if (targetUri.Host.EndsWith("amazon.com"))
             {
-                //var searchWrapper = new DHuSWrapper(new Uri("https://scihub.copernicus.eu/apihub"), (NetworkCredential)targetCredentials);
-                //var amazonWrapper = new AmazonOldWrapper(targetSiteConfig.Data.S3SecretKey, targetSiteConfig.Data.S3KeyId, searchWrapper);
                 var amazonWrapper = new AmazonStacWrapper(targetSiteConfig.Data.S3SecretKey, targetSiteConfig.Data.S3KeyId, (NetworkCredential)targetCredentials);
                 amazonWrapper.AllowOpenSearch = targetSiteConfig.Data.Catalogue.AllowOpenSearch;
                 return amazonWrapper;
@@ -358,8 +358,6 @@ namespace cdabtesttools.Target
 
             if (targetUri.Host.EndsWith("googleapis.com") || targetUri.Host.EndsWith("google.com"))
             {
-                //var searchWrapper = new DHuSWrapper(new Uri("https://scihub.copernicus.eu/apihub"), (NetworkCredential)targetCredentials);
-                //var googleWrapper = new GoogleWrapper(targetSiteConfig.AccountFile, targetSiteConfig.ProjectId, searchWrapper);
                 var googleWrapper = new GoogleWrapper(targetSiteConfig.AccountFile, targetSiteConfig.ProjectId, (NetworkCredential)targetCredentials, "https://cloud.google.com");
                 return googleWrapper;
             }

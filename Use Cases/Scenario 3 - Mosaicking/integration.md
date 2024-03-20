@@ -5,7 +5,7 @@
 1. Provision a virtual machine on the target site. Preferably with the following specification
 
     - 2 CPUs, 8 GB RAM, 100 GB disk
-    - CentOS 7
+    - Debian 11+
     - Python 3
     - With data offer access if available
   

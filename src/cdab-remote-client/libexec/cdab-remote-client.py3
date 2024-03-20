@@ -63,7 +63,7 @@ class TestClient:
         'TS11': {
             'test_scenario_description': 'Remote execution of catalogue access and download test on VM (single)',
             'test_case_name': 'TC411',
-            'docker_image_id': 'esacdab/testsuite:latest',
+            'docker_image_id': 'ghcr.io/esacdab/cdab-testsuite:main',
             'docker_run_command': 'CDAB_CLIENT_DEFAULT',
             'cdab_client_test_scenario_id': 'TS11',
             'timeout': 1 * 60 * 60,
@@ -71,7 +71,7 @@ class TestClient:
         'TS12': {
             'test_scenario_description': 'Remote execution of catalogue access and download test on VM (multiple)',
             'test_case_name': 'TC412',
-            'docker_image_id': 'esacdab/testsuite:latest',
+            'docker_image_id': 'ghcr.io/esacdab/cdab-testsuite:main',
             'docker_run_command': 'CDAB_CLIENT_DEFAULT',
             'cdab_client_test_scenario_id': 'TS12',
             'timeout': 1 * 60 * 60,
@@ -79,7 +79,7 @@ class TestClient:
         'TS13': {
             'test_scenario_description': 'Remote execution of processing test (multiple)',
             'test_case_name': 'TC413',
-            'docker_image_id': 'esacdab/ewf-s3-olci-composites:0.41',
+            'docker_image_id': 'docker-co.terradue.com/geohazards-tep/ewf-s3-olci-composites:0.41',
             'docker_run_command': 'PROCESSING',
             'test_target_url': 'https://catalog.terradue.com/sentinel3/search?uid=S3A_OL_1_EFR____20191110T230850_20191110T231150_20191112T030831_0179_051_215_3600_LN1_O_NT_002',
             'files': [ 's3-olci-composites.py' ],
@@ -1049,38 +1049,25 @@ class TestClient:
         run.install_start_time = datetime.datetime.utcnow()
 
         # Software installation
-        execute_remote_command(self.compute_config, run, "sudo yum install -y yum-utils device-mapper-persistent-data lvm2 wget")
-        execute_remote_command(self.compute_config, run, "sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo")
-        # Fails since November 2023 because of broken dependency
-        # execute_remote_command(self.compute_config, run, "sudo yum install docker-ce docker-ce-cli containerd.io -y")
-        execute_remote_command(self.compute_config, run, "sudo yum install -y http://mirror.centos.org/centos/7/extras/x86_64/Packages/container-selinux-2.107-1.el7_6.noarch.rpm")
-        execute_remote_command(self.compute_config, run, "sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo")
+        execute_remote_command(self.compute_config, run, "sudo apt-get update")
+        execute_remote_command(self.compute_config, run, "sudo apt-get install ca-certificates curl")
+        execute_remote_command(self.compute_config, run, "sudo install -m 0755 -d /etc/apt/keyrings")
+        execute_remote_command(self.compute_config, run, "sudo curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc")
+        execute_remote_command(self.compute_config, run, "sudo chmod a+r /etc/apt/keyrings/docker.asc" )
         execute_remote_command(self.compute_config, run,
-            "wget -q http://mirror.centos.org/centos/7/extras/x86_64/Packages/slirp4netns-0.4.3-4.el7_8.x86_64.rpm "
-            "http://mirror.centos.org/centos/7/extras/x86_64/Packages/fuse3-devel-3.6.1-4.el7.x86_64.rpm "
-            "http://mirror.centos.org/centos/7/extras/x86_64/Packages/fuse3-libs-3.6.1-4.el7.x86_64.rpm "
-            "http://mirror.centos.org/centos/7/extras/x86_64/Packages/fuse-overlayfs-0.7.2-6.el7_8.x86_64.rpm"
+            "echo "
+            "\"deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian "
+            "$(. /etc/os-release && echo \"$VERSION_CODENAME\") stable\" | "
+            "sudo tee /etc/apt/sources.list.d/docker.list > /dev/null"
         )
-
-        execute_remote_command(self.compute_config, run, "sudo yum install -y slirp4netns-0.4.3-4.el7_8.x86_64.rpm fuse3-libs-3.6.1-4.el7.x86_64.rpm fuse-overlayfs-0.7.2-6.el7_8.x86_64.rpm fuse3-devel-3.6.1-4.el7.x86_64.rpm")
-
-        execute_remote_command(self.compute_config, run,
-            "wget -q https://download.docker.com/linux/centos/7/x86_64/stable/Packages/docker-ce-cli-24.0.6-1.el7.x86_64.rpm "
-            "https://download.docker.com/linux/centos/7/x86_64/stable/Packages/containerd.io-1.6.18-3.1.el7.x86_64.rpm "
-            "https://download.docker.com/linux/centos/7/x86_64/stable/Packages/docker-ce-24.0.6-1.el7.x86_64.rpm"
-        )
-
-        execute_remote_command(self.compute_config, run, "sudo yum install -y containerd.io-1.6.18-3.1.el7.x86_64.rpm docker-ce-24.0.6-1.el7.x86_64.rpm docker-ce-cli-24.0.6-1.el7.x86_64.rpm")
+        execute_remote_command(self.compute_config, run, "sudo apt-get update")
+        execute_remote_command(self.compute_config, run, "sudo apt-get install -y wget docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin")
 
         # Preparation for volume use (in case main disk is too small)
         if self.compute_config['use_volume']:
-            execute_remote_command(self.compute_config, run, "sudo systemctl start docker") # to create /var/lib/docker directory
-            execute_remote_command(self.compute_config, run, "sudo systemctl stop docker")
+            execute_remote_command(self.compute_config, run, "sudo service docker stop")
             execute_remote_command(self.compute_config, run, "sudo mv /var/lib/docker /mnt/cdab-volume/docker")
-            # fails since 2020-07 (or earlier):
-            # execute_remote_command(self.compute_config, run, "sudo mv /var/lib/docker-engine /mnt/cdab-volume/docker-engine")
             execute_remote_command(self.compute_config, run, "sudo ln -s /mnt/cdab-volume/docker /var/lib/docker")
-            execute_remote_command(self.compute_config, run, "sudo ln -s /mnt/cdab-volume/docker-engine /var/lib/docker-engine")
 
         # Copy CA certificates if needed
         if self.ca_certificates:
@@ -1088,13 +1075,13 @@ class TestClient:
             for cert in self.ca_certificates:
                 cert_basename = os.path.basename(cert)
                 copy_file(self.compute_config, run, cert, cert_basename)
-                execute_remote_command(self.compute_config, run, "sudo mv {0} /etc/pki/ca-trust/source/anchors/{0}".format(cert_basename))
-                execute_remote_command(self.compute_config, run, "sudo chown root:root /etc/pki/ca-trust/source/anchors/{0}".format(cert_basename))
-            execute_remote_command(self.compute_config, run, "sudo update-ca-trust")
+                execute_remote_command(self.compute_config, run, "sudo mv {0}  /usr/local/share/ca-certificates/{0}".format(cert_basename))
+                execute_remote_command(self.compute_config, run, "sudo chown root:root  /usr/local/share/ca-certificates/{0}".format(cert_basename))
+            execute_remote_command(self.compute_config, run, "sudo update-ca-certificates")
             Logger.log(LogLevel.INFO, "CA certificate(s) copied", run=run)
 
         # Start Docker service
-        execute_remote_command(self.compute_config, run, "sudo systemctl start docker")
+        execute_remote_command(self.compute_config, run, "sudo service docker start")
         execute_remote_command(self.compute_config, run, "sudo usermod -a -G docker $USER")
         Logger.log(LogLevel.INFO, "Docker service started", run=run)
 
@@ -1190,13 +1177,6 @@ class TestClient:
 
             if 'opensearch-client' in tools:
                 execute_remote_command(self.compute_config, run, "docker pull terradue/opensearch-client:2.1.2")
-                # Previously used:
-                execute_remote_command(self.compute_config, run, "sudo yum install -y unzip yum-utils")
-                execute_remote_command(self.compute_config, run, "sudo yum-config-manager --add-repo http://download.mono-project.com/repo/centos/")
-                execute_remote_command(self.compute_config, run, "sudo yum install -y mono-devel --nogpgcheck > /dev/null 2> /dev/null")
-                copy_file(self.compute_config, run, "{0}/ts-scripts/opensearch-client.zip".format(os.path.dirname(sys.argv[0])), "opensearch-client.zip")
-                execute_remote_command(self.compute_config, run, "sudo unzip -d /usr/lib/ opensearch-client.zip")
-                execute_remote_command(self.compute_config, run, "sudo mv /usr/lib/opensearch-client/bin/opensearch-client /usr/bin/")
 
             if 'Stars' in tools and 'uri_prefix' in self.target_site_class:
                 execute_remote_command(self.compute_config, run, "docker pull terradue/stars:1.3.5")

@@ -4,13 +4,13 @@
 
 1.  Provision a virtual machine on the target site. Preferably with the following specification:
     - 4 CPU, 32GB RAM, 100GB disk
-    - CentOS 7
+    - Debian 11+ or similar (Ubuntu)
     - With data offer access if required
   
 2.  Open a terminal on the provisioned machine and install some prequisites, in case they are not yet present on the machine.
 
     ```
-    sudo yum install -y vim tree wget unzip libgfortran-4.8.5
+    sudo apt-get install -y bc wget unzip libgfortran5-amd64-cross
     ```
 
 3.  Install, if necessary, **conda** on the virtual machine and create the conda environment. Conda is needed as the vehicle to install the SNAP toolbox.
