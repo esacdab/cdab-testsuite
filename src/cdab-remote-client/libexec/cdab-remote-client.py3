@@ -1050,7 +1050,7 @@ class TestClient:
 
         # Software installation
         execute_remote_command(self.compute_config, run, "sudo apt-get update")
-        execute_remote_command(self.compute_config, run, "sudo apt-get install ca-certificates curl")
+        execute_remote_command(self.compute_config, run, "sudo apt-get install -y ca-certificates curl")
         execute_remote_command(self.compute_config, run, "sudo install -m 0755 -d /etc/apt/keyrings")
         execute_remote_command(self.compute_config, run, "sudo curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc")
         execute_remote_command(self.compute_config, run, "sudo chmod a+r /etc/apt/keyrings/docker.asc" )
@@ -1086,8 +1086,9 @@ class TestClient:
         Logger.log(LogLevel.INFO, "Docker service started", run=run)
 
         # Copy Docker authentication file
-        execute_remote_command(self.compute_config, run, "mkdir .docker")
-        copy_file(self.compute_config, run, self.docker_config, ".docker/config.json")
+        if ( io.FileIO.exists(self.docker_config) and io.FileIO.isfile(self.docker_config) ):
+            execute_remote_command(self.compute_config, run, "mkdir .docker")
+            copy_file(self.compute_config, run, self.docker_config, ".docker/config.json")
 
         # Install Docker image
         if self.docker_image_id:
