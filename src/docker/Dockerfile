@@ -30,7 +30,7 @@ RUN apt-get update \
 # Install OpenStack client, Google Cloud Platform Python API, Amazon AWS EC2 Python API and Microsoft Azure Python API
 RUN pip3 install --upgrade --no-cache-dir pip \
   && pip3 install --no-cache-dir pyyaml lxml netifaces python-openstackclient==5.1.0 python-cinderclient openstacksdk==1.0.1 \
-  google-api-python-client boto3 setuptools-rust azure-identity azure-mgmt-resource azure-mgmt-authorization \
+  google-api-python-client boto3 setuptools-rust azure-identity azure-mgmt-resource azure-mgmt-authorization pytz \
   azure-mgmt-compute azure-mgmt-network urllib3==1.26.6
   
 COPY --from=build /app /usr/lib/cdab-client

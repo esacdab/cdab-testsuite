@@ -26,10 +26,10 @@
 
 from cdab_shared import *
 from connectors import openstack
-try:
-    from connectors import google, amazon, azure
-except:
-    pass
+# try:
+from connectors import google, amazon, azure
+# except:
+#     pass
 import datetime
 from enum import Enum
 import io
