@@ -12,8 +12,8 @@ while read LOGLINE
         fi
     done
 
-snap --nosplash --nogui --modules --install org.esa.snap.idepix.core > /var/log/olci-conf.log 2>&1 &
-tail -f /var/log/olci-conf.log|
+snap --nosplash --nogui --modules --install org.esa.snap.idepix.core > /var/log/idepix-conf.log 2>&1 &
+tail -f /var/log/idepix-conf.log|
 while read LOGLINE
     do 
         echo $LOGLINE; 
