@@ -1,0 +1,44 @@
+FROM docker.io/orfeotoolbox/otb:8.1.2
+
+ENV DEBIAN_FRONTEND=noninteractive 
+RUN apt-get update \
+  && apt-get upgrade -y \
+  && apt-get install -yqq python3-pip python3-gdal curl libxml2-utils bc unzip gcc-9 libstdc++6 \
+  && rm -rf /var/lib/apt/lists/* /tmp/*
+
+# Install python packages
+RUN pip3 install --upgrade --no-cache-dir pip \
+  && pip3 install -U --no-cache-dir geopandas shapely pyproj numpy pandas
+
+# Install ESA SNAP
+RUN curl -sSL https://download.esa.int/step/snap/9.0/installers/esa-snap_sentinel_unix_9_0_0.sh -o /tmp/snap.sh \
+  && chmod +x /tmp/snap.sh \
+  && /tmp/snap.sh -q -dir /opt/snap \
+  && rm /tmp/snap.sh
+ENV PATH="/opt/snap/bin:${PATH}"
+
+ENV JAVA_HOME=/opt/snap/jre/
+
+# build jpy and install it
+RUN apt-get update \
+  && apt-get upgrade -y \
+  && apt-get install -yqq git maven \
+  && git clone https://github.com/bcdev/jpy.git \
+  && cd jpy \
+  && python3 setup.py install bdist_wheel \
+  && mkdir -p /root/.snap/snap-python/snappy \
+  && mkdir -p /usr/local/lib/python3.8/dist-packages/snappy \
+  && cp dist/*.whl /usr/local/lib/python3.8/dist-packages/snappy \
+  && cp dist/*.whl /usr/lib/python3/dist-packages/snappy \
+  && cd .. \
+  && rm -rf jpy \
+  && apt-get remove -yqq git maven \
+  && apt-get autoremove -yqq \
+  && rm -rf /var/lib/apt/lists/* /tmp/*
+
+# install snappy/opt/snap/bin/snappy-conf /usr/bin/python3 /usr/local/lib/python3.8/dist-packages/
+COPY --chmod=755 src/docker/snappy.sh ./snappy.sh
+RUN bash ./snappy.sh \
+  && rm ./snappy.sh
+COPY src/cdab-remote-client/libexec/ts-scripts/s3-olci-composites-test.py ./s3-olci-composites-test.py
+# RUN /opt/snap/bin/snappy-conf /usr/bin/python3

@@ -145,8 +145,8 @@ do
     start_time=$(date +%s%N)
     if [ $res -eq 0 ]
     then
-        echo "DOCKER COMMAND: docker run --memory=15g --rm --workdir /res -u root -v ${PWD}:/res \"${docker_image}\" /opt/anaconda/envs/env_ewf_s3_olci_composites/bin/python s3-olci-composites.py /res/$id.json /res/${sen_folder}" >> cdab.stderr
-        docker run --memory=15g --rm --workdir /res -u root -v ${PWD}:/res "${docker_image}" /opt/anaconda/envs/env_ewf_s3_olci_composites/bin/python s3-olci-composites.py /res/$id.json /res/${sen_folder} > cdab.stdout 2>> cdab.stderr
+        echo "DOCKER COMMAND: docker run --memory=15g --rm --workdir /res -u root -v ${PWD}:/res \"${docker_image}\" python3 s3-olci-composites.py /res/$id.json /res/${sen_folder}" >> cdab.stderr
+        docker run --memory=15g --rm --workdir /res -u root -v ${PWD}:/res "${docker_image}" python3 s3-olci-composites.py /res/$id.json /res/${sen_folder} > cdab.stdout 2>> cdab.stderr
         res=$?
         echo "EXIT CODE = $res" >> cdab.stderr
     fi

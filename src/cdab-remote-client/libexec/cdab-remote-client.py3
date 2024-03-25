@@ -32,7 +32,6 @@ from connectors import google, amazon, azure
 #     pass
 import datetime
 from enum import Enum
-import io
 import json
 import netifaces as ni
 import os
@@ -79,7 +78,7 @@ class TestClient:
         'TS13': {
             'test_scenario_description': 'Remote execution of processing test (multiple)',
             'test_case_name': 'TC413',
-            'docker_image_id': 'docker-co.terradue.com/geohazards-tep/ewf-s3-olci-composites:0.41',
+            'docker_image_id': 'ghcr.io/esacdab/cdab-testsuite:otb',
             'docker_run_command': 'PROCESSING',
             'test_target_url': 'https://catalog.terradue.com/sentinel3/search?uid=S3A_OL_1_EFR____20191110T230850_20191110T231150_20191112T030831_0179_051_215_3600_LN1_O_NT_002',
             'files': [ 's3-olci-composites.py' ],
@@ -1047,16 +1046,21 @@ class TestClient:
         Logger.log(LogLevel.INFO, "Installing and starting docker ...", run=run)
 
         run.install_start_time = datetime.datetime.utcnow()
+        
+        dist = self.compute_config.get('distribution')
+        if dist == None:
+            dist = "debian"
 
         # Software installation
+        execute_remote_command(self.compute_config, run, "sleep 60")
         execute_remote_command(self.compute_config, run, "sudo apt-get update")
         execute_remote_command(self.compute_config, run, "sudo apt-get install -y ca-certificates curl")
         execute_remote_command(self.compute_config, run, "sudo install -m 0755 -d /etc/apt/keyrings")
-        execute_remote_command(self.compute_config, run, "sudo curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc")
+        execute_remote_command(self.compute_config, run, "sudo curl -fsSL https://download.docker.com/linux/{0}/gpg -o /etc/apt/keyrings/docker.asc".format(dist))
         execute_remote_command(self.compute_config, run, "sudo chmod a+r /etc/apt/keyrings/docker.asc" )
         execute_remote_command(self.compute_config, run,
             "echo "
-            "\"deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian "
+            "\"deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/{0} ".format(dist) +
             "$(. /etc/os-release && echo \"$VERSION_CODENAME\") stable\" | "
             "sudo tee /etc/apt/sources.list.d/docker.list > /dev/null"
         )
@@ -1086,7 +1090,7 @@ class TestClient:
         Logger.log(LogLevel.INFO, "Docker service started", run=run)
 
         # Copy Docker authentication file
-        if ( io.FileIO.exists(self.docker_config) and io.FileIO.isfile(self.docker_config) ):
+        if ( os.path.exists(self.docker_config) and os.path.isfile(self.docker_config) ):
             execute_remote_command(self.compute_config, run, "mkdir .docker")
             copy_file(self.compute_config, run, self.docker_config, ".docker/config.json")
 
@@ -1121,10 +1125,10 @@ class TestClient:
         if self.docker_run_command == 'CDAB_CLIENT_DEFAULT':
 
             if 'codede-eodata' in tools:
-                copy_file(self.compute_config, run, "{0}/ts-scripts/link-codede-eodata.sh".format(os.path.dirname(sys.argv[0])), "link-codede-eodata.sh")
+                copy_file(self.compute_config, run, "{0}/ts-scripts/link-codede-eodata.sh".format(os.path.dirname(sys.argv[0])), "{0}/link-codede-eodata.sh".format(working_dir))
                 execute_remote_command(self.compute_config, run, "sudo sh link-codede-eodata.sh")
 
-            script_name = "{0}-remote.sh".format(self.test_scenario_id)
+            script_name = "{0}/{1}-remote.sh".format(working_dir, self.test_scenario_id)
             copy_file(self.compute_config, run, "{0}/ts-scripts/{1}".format(os.path.dirname(sys.argv[0]), script_name), script_name)
 
             Logger.log(LogLevel.INFO, "Running test scenario {0} (using cdab-client) ...".format(self.cdab_client_test_scenario_id), run=run)
@@ -1132,7 +1136,7 @@ class TestClient:
             execute_remote_command(
                 self.compute_config,
                 run,
-                "nohup sh {0} {1} {2} {3} {4} '{5}' {6} {7} {8} > /dev/null 2>&1 &".format(
+                "nohup bash {0} {1} {2} {3} {4} '{5}' {6} {7} {8} > /dev/null 2>&1 &".format(
                     script_name,
                     working_dir,
                     self.docker_image_id if self.docker_image_id else '""',
@@ -1143,7 +1147,7 @@ class TestClient:
                     self.load_factor,
                     self.compute_config['download_origin'],
                 ),
-                display_command="nohup sh {0} {1} {2} {3} {4} '{5}' {6} {7} {8} > /dev/null 2>&1 &".format(
+                display_command="nohup bash {0} {1} {2} {3} {4} '{5}' {6} {7} {8} > /dev/null 2>&1 &".format(
                     script_name,
                     working_dir,
                     self.docker_image_id if self.docker_image_id else '""',
@@ -1164,7 +1168,7 @@ class TestClient:
                 if self.processing_input_file:
                     copy_file(self.compute_config, run, self.processing_input_file, "{0}/input".format(working_dir))
             else:
-                script_name = "{0}-remote.sh".format(self.test_scenario_id)
+                script_name = "{0}/{1}-remote.sh".format(working_dir, self.test_scenario_id)
 
             # Install tools specific for test scenarios and provider
             if 'conda' in tools:
@@ -1241,7 +1245,7 @@ class TestClient:
             execute_remote_command(
                 self.compute_config,
                 run,
-                "nohup sh {0} {1} {2} {3} {4} '{5}' '{6}' > /dev/null 2>&1 &".format(
+                "nohup bash {0} {1} {2} {3} {4} '{5}' '{6}' > /dev/null 2>&1 &".format(
                     script_name,
                     working_dir,
                     self.docker_image_id if self.docker_image_id else '""',
@@ -1250,7 +1254,7 @@ class TestClient:
                     self.target_credentials,
                     self.backup_download_credentials,
                 ),
-                display_command="nohup sh {0} {1} {2} {3} {4} '{5}' '{6}' > /dev/null 2>&1 &".format(
+                display_command="nohup bash {0} {1} {2} {3} {4} '{5}' '{6}' > /dev/null 2>&1 &".format(
                     script_name,
                     working_dir,
                     self.docker_image_id if self.docker_image_id else '""',

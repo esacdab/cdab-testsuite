@@ -400,3 +400,4 @@ src/cdab-remote-client/.vscode/settings.json
 src/cdab-client/.vscode/settings.json
 .vscode/settings.json
 src/cdab-client/config.old.yaml
+src/cdab-remote-client/libexec/ts-scripts/s3-olci-composites-test.py
