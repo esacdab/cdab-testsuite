@@ -8,7 +8,7 @@ RUN apt-get update \
 
 # Install python packages
 RUN pip3 install --upgrade --no-cache-dir pip \
-  && pip3 install -U --no-cache-dir geopandas shapely pyproj numpy pandas
+  && pip3 install -U --no-cache-dir geopandas shapely pyproj numpy pandas lxml \
 
 # Install ESA SNAP
 RUN curl -sSL https://download.esa.int/step/snap/9.0/installers/esa-snap_sentinel_unix_9_0_0.sh -o /tmp/snap.sh \
@@ -32,6 +32,8 @@ RUN apt-get update \
   && cp dist/*.whl /usr/lib/python3/dist-packages/snappy \
   && cd .. \
   && rm -rf jpy \
+  && rm -rf /root/.cache \
+  && rm -rf /root/.m2 \
   && apt-get remove -yqq git maven \
   && apt-get autoremove -yqq \
   && rm -rf /var/lib/apt/lists/* /tmp/*
