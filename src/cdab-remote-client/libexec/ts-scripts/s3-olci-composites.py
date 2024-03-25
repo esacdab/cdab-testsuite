@@ -385,6 +385,7 @@ natural_colors = {
 }
 
 gdal.UseExceptions()
+GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis()
 
 
 # Check the bands to ingest

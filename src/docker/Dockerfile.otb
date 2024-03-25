@@ -36,8 +36,6 @@ RUN apt-get update \
   && apt-get autoremove -yqq \
   && rm -rf /var/lib/apt/lists/* /tmp/*
 
-# install snappy/opt/snap/bin/snappy-conf /usr/bin/python3 /usr/local/lib/python3.8/dist-packages/
-COPY --chmod=755 src/docker/snappy.sh ./snappy.sh
-RUN bash ./snappy.sh \
-  && rm ./snappy.sh
-# RUN /opt/snap/bin/snappy-conf /usr/bin/python3
+COPY --chmod=755 src/docker/snap-configure.sh ./snap-configure.sh
+RUN bash ./snap-configure.sh \
+  && rm ./snap-configure.sh

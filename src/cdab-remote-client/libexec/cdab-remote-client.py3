@@ -78,7 +78,7 @@ class TestClient:
         'TS13': {
             'test_scenario_description': 'Remote execution of processing test (multiple)',
             'test_case_name': 'TC413',
-            'docker_image_id': 'ghcr.io/esacdab/cdab-testsuite:otb',
+            'docker_image_id': 'ghcr.io/esacdab/cdab-testsuite:otb-main',
             'docker_run_command': 'PROCESSING',
             'test_target_url': 'https://catalog.terradue.com/sentinel3/search?uid=S3A_OL_1_EFR____20191110T230850_20191110T231150_20191112T030831_0179_051_215_3600_LN1_O_NT_002',
             'files': [ 's3-olci-composites.py' ],
