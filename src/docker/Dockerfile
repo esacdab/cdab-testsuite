@@ -24,14 +24,14 @@ LABEL org.opencontainers.image.description DESCRIPTION="CDAB Test Suite" \
 RUN apt-get update \
   && apt-get upgrade -y \
   && apt-get install -y python3 python3-pip shunit2 traceroute libssl1.1 libgssapi-krb5-2 sysstat sed ca-certificates jq curl \
-  openssh-server ssh sudo cron supervisor libxml2-utils \
+  openssh-server ssh sudo cron supervisor libxml2-utils bc unzip \
   && rm -rf /var/lib/apt/lists/* /tmp/*
 
 # Install OpenStack client, Google Cloud Platform Python API, Amazon AWS EC2 Python API and Microsoft Azure Python API
 RUN pip3 install --upgrade --no-cache-dir pip \
   && pip3 install --no-cache-dir pyyaml lxml netifaces python-openstackclient==5.1.0 python-cinderclient openstacksdk==1.0.1 \
   google-api-python-client boto3 setuptools-rust azure-identity azure-mgmt-resource azure-mgmt-authorization pytz \
-  azure-mgmt-compute azure-mgmt-network urllib3==1.26.6
+  azure-mgmt-compute azure-mgmt-network urllib3==1.26.6 oathtool
   
 COPY --from=build /app /usr/lib/cdab-client
 COPY src/cdab-client/App_Data /usr/lib/cdab-client/App_Data
