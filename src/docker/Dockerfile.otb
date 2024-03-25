@@ -40,5 +40,4 @@ RUN apt-get update \
 COPY --chmod=755 src/docker/snappy.sh ./snappy.sh
 RUN bash ./snappy.sh \
   && rm ./snappy.sh
-COPY src/cdab-remote-client/libexec/ts-scripts/s3-olci-composites-test.py ./s3-olci-composites-test.py
 # RUN /opt/snap/bin/snappy-conf /usr/bin/python3
