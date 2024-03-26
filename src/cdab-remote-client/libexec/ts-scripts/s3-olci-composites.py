@@ -160,7 +160,7 @@ class GraphProcessor():
         """
         with open(filename, 'wb') as file:
             file.write('<?xml version="1.0" encoding="UTF-8"?>\n'.encode())
-            file.write(etree.tostring(self.root, pretty_print=True).encode())
+            file.write(etree.tostring(self.root, pretty_print=True))
      
     #def plot_graph(self):
         
