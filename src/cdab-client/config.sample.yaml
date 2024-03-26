@@ -685,7 +685,7 @@ service_providers:
       two_factor_authentication_key: "KEY"
       vm_name: "cdab-test"
       key_name: "cdab-cdse-vmkey"
-      image_name: "Debian 12"
+      image_name: "ab254a3a-c084-45f7-9b30-cae557ffe026"
       flavor_name: "hm.medium"
       cost_monthly: 70.04
       cost_hourly: 0.114

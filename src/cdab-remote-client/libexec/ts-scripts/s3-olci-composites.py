@@ -159,8 +159,8 @@ class GraphProcessor():
             None.
         """
         with open(filename, 'wb') as file:
-            file.write('<?xml version="1.0" encoding="UTF-8"?>\n')
-            file.write(etree.tostring(self.root, pretty_print=True))
+            file.write('<?xml version="1.0" encoding="UTF-8"?>\n'.encode())
+            file.write(etree.tostring(self.root, pretty_print=True).encode())
      
     #def plot_graph(self):
         
@@ -697,9 +697,9 @@ for k, v in list(composites.items()):
     date_format = '%Y-%m-%dT%H:%m:%S'
     
     with open(output_name + '.tif.properties', 'wb') as file:
-        file.write('title={} ({}/{})\n'.format(k, output_startdate.strftime(date_format), output_stopdate.strftime(date_format)))
-        file.write('date={}Z/{}Z\n'.format(output_startdate.strftime(date_format), output_stopdate.strftime(date_format)))   
-        file.write('geometry={}'.format(input_metadata.iloc[0].wkt))
+        file.write('title={} ({}/{})\n'.format(k, output_startdate.strftime(date_format), output_stopdate.strftime(date_format)).encode())
+        file.write('date={}Z/{}Z\n'.format(output_startdate.strftime(date_format), output_stopdate.strftime(date_format)).encode())   
+        file.write('geometry={}'.format(input_metadata.iloc[0].wkt).encode())
 
     # PNG
     gdal.Translate('{}.png'.format(output_name), '{}.tif'.format(output_name), format='PNG')
@@ -707,9 +707,9 @@ for k, v in list(composites.items()):
     os.remove('{}.png.aux.xml'.format(output_name))
 
     with open(output_name + '.png.properties', 'wb') as file:
-        file.write('title={} - Quicklook ({}/{})\n'.format(k, output_startdate.strftime(date_format), output_stopdate.strftime(date_format)))
-        file.write('date={}Z/{}Z\n'.format(output_startdate.strftime(date_format), output_stopdate.strftime(date_format)))   
-        file.write('geometry={}'.format(input_metadata.iloc[0].wkt))
+        file.write('title={} - Quicklook ({}/{})\n'.format(k, output_startdate.strftime(date_format), output_stopdate.strftime(date_format)).encode())
+        file.write('date={}Z/{}Z\n'.format(output_startdate.strftime(date_format), output_stopdate.strftime(date_format)).encode())
+        file.write('geometry={}'.format(input_metadata.iloc[0].wkt).encode())
 
 
 # Clean-up
