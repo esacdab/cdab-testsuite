@@ -128,7 +128,6 @@ def main():
         client.run_test()
     except Exception as e:
         logger.error(str(e))
-        raise
         sys.exit(2)
 
         
