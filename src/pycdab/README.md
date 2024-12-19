@@ -165,7 +165,7 @@ The corresponding results file `TS01Results.json` is this:
         },
         {
           "name": "errorRate",
-          "value": 0.5,
+          "value": 50.0,
           "uom": "%"
         },
         {
@@ -236,7 +236,7 @@ The corresponding results file `TS01Results.json` is this:
         },
         {
           "name": "errorRate",
-          "value": 0.5,
+          "value": 50.0,
           "uom": "%"
         },
         {

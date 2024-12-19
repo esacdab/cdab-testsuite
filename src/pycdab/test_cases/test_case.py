@@ -67,7 +67,7 @@ class TestCase:
             },
             {
                 "name": "errorRate",
-                "value": round(1 - len(measurement_values) / self.scenario.load_factor, 3),
+                "value": round(100 * (1 - len(measurement_values) / self.scenario.load_factor), 2),
                 "uom": "%"
             },
             {
@@ -113,7 +113,7 @@ class TestCase:
             },
             {
                 "name": "resultsErrorRate",
-                "value": round(total_result_errors / total_read_results, 3) if measurement_values else -1,
+                "value": round(100 * total_result_errors / total_read_results, 2) if measurement_values else -1,
                 "uom": "%"
             },
             {
