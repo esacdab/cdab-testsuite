@@ -66,6 +66,7 @@ namespace cdabtesttools
 
         public static void Main(string[] args)
         {
+            Console.WriteLine("HELLOOOO");
             // Fix for Newtonsoft.Json vulnerability issue: https://github.com/advisories/GHSA-5crp-9r3c-p9vr
             JsonConvert.DefaultSettings = () => new JsonSerializerSettings { MaxDepth = 128 };
 
@@ -106,6 +107,7 @@ namespace cdabtesttools
                     v => {
                         if (v != null)
                             ++verbosity;
+                        Console.WriteLine("HELLO");
                     }
                 },
                 { "h|help",  "show this message and exit.",
@@ -117,7 +119,9 @@ namespace cdabtesttools
 
             try
             {
+                Console.WriteLine("P-1 {0}", args.Length);
                 var scenarios_strs = p.Parse(args);
+                Console.WriteLine("P-2");
                 if (scenarios_strs.Count() > 0)
                     scenarios = scenarios_strs;
             }

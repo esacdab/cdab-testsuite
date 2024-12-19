@@ -23,6 +23,7 @@ using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.IO;
 
+
 namespace cdabtesttools.Data
 {
     internal class ShapeFileLoader
@@ -38,6 +39,7 @@ namespace cdabtesttools.Data
 
             List<Feature> features = new List<Feature>();
             int j = 1;
+            WKTWriter wktWriter = new WKTWriter();
             while (shapeFileDataReader.Read())
             {
                 Feature feature = new Feature();
@@ -63,6 +65,8 @@ namespace cdabtesttools.Data
                 feature.Geometry = geometry;
                 feature.Attributes = attributesTable;
                 features.Add(feature);
+                Console.WriteLine("COUNTRY: {0} - {1}", feature.Attributes["NAME"], wktWriter.Write(feature.Geometry));
+
                 j++;
             }
 
