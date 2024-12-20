@@ -13,6 +13,7 @@ class TestCase:
         self.id = id
         self.title = title
         self.scenario = scenario
+        self.task_count = self.scenario.load_factor
         self.threads = []
         self.measurements = []
         for i in range(self.scenario.load_factor):
@@ -67,7 +68,7 @@ class TestCase:
             },
             {
                 "name": "errorRate",
-                "value": round(100 * (1 - len(measurement_values) / self.scenario.load_factor), 2),
+                "value": round(100 * (1 - len(measurement_values) / self.task_count), 2),
                 "uom": "%"
             },
             {
@@ -82,13 +83,32 @@ class TestCase:
             }
         ]
     
-    def generate_query_metrics(self, measurement_values):
+    def generate_query_metrics(self, measurement_values, queries):
         if measurement_values:
             total_size = sum(((m['size'] for m in measurement_values)))
             max_size = max(((m['size'] for m in measurement_values)))
             total_read_results = sum(((m['read_results'] for m in measurement_values)))
             total_result_errors = sum(((m['result_errors'] for m in measurement_values)))
             max_total_results = max(((m['total_results'] for m in measurement_values)))
+
+        query_labels = []
+        for query in queries:
+            label = query['missionName']['label']
+            for key, param in query.items():
+                if key in ['missionName', 'sensingStart', 'sensingEnd', 'geom']:
+                    continue
+                label += " {0}".format(param['label'])
+            param = query.get('sensingStart')
+            if param:
+                label += " {0}".format(param['label'])
+            param = query.get('sensingEnd')
+            if param:
+                label += " {0}".format(param['label'])
+            param = query.get('geom')
+            if param:
+                label += " over {0}".format(param['label'])
+
+            query_labels.append(label)
 
         return [
             {
@@ -123,9 +143,7 @@ class TestCase:
             },
             {
                 "name": "dataCollectionDivision",
-                "value": [
-                    "Sentinel-5P L2 NRT last 1M Online"
-                ],
+                "value": query_labels,
                 "uom": "string"
             }
         ]
@@ -250,7 +268,7 @@ class TestCase201(TestCase):
 
         result = super().generate_result()
         result['metrics'] = self.generate_basic_metrics(successful_measurements)
-        result['metrics'].extend(self.generate_query_metrics(successful_measurements))
+        result['metrics'].extend(self.generate_query_metrics(successful_measurements, self.queries))
 
         return result
 
@@ -293,7 +311,7 @@ class TestCase202(TestCase):
                         'value': start_time.strftime("%Y-%m-%dT%H:%M:%SZ"),
                     }
                     set['parameters']['sensingEnd'] = {
-                        'label': "from {0}".format(end_time.strftime("%Y-%m-%dT%H:%M:%SZ")),
+                        'label': "to {0}".format(end_time.strftime("%Y-%m-%dT%H:%M:%SZ")),
                         'value': end_time.strftime("%Y-%m-%dT%H:%M:%SZ"),
                     }
 
@@ -315,7 +333,7 @@ class TestCase202(TestCase):
 
         result = super().generate_result()
         result['metrics'] = self.generate_basic_metrics(successful_measurements)
-        result['metrics'].extend(self.generate_query_metrics(successful_measurements))
+        result['metrics'].extend(self.generate_query_metrics(successful_measurements, self.queries))
 
         return result
 
@@ -325,6 +343,7 @@ class TestCase301(TestCase):
 
     def __init__(self, scenario):
         super().__init__("TC301", "Single remote download", scenario)
+        self.task_count = 1
 
     def prepare(self):
         super().prepare()
